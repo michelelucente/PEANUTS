@@ -1,0 +1,39 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+
+\newcommand{\MeV}[0]{\text{MeV}}
+
+\begin{document}
+
+\section{Solar neutrino flux}
+	\subsection{Neutrino survival probability at Sun surface}
+	
+	The neutrino survival probability at the exit of the Sun is given, under the adiabatic approximation, by (cf. Eq. 6.14 in \cite{FiuzadeBarros:2011qna})
+	
+	\begin{equation}
+		P_{\nu_e \rightarrow \nu_e} = c_{13}^2 c_{13,M}^2 \left( c_{12}^2 c_{12,M}^2 + s_{12}^2 s_{12,M}^2 \right) + s_{13}^2 s_{13,M}^2,
+	\end{equation}
+	
+where $c_{ij} \equiv \cos \theta_{ij},\ s_{ij} \equiv \sin \theta_{ij}$ and the mixing angles in matter $\theta_{ij}^M$ are related to the vacuum ones by
+
+\begin{eqnarray}
+	\tan 2 \theta_{12}^M &=& \frac{\tan 2 \theta_{12}}{1-\frac{\cos^2 \theta_{13} A_{CC}}{\cos \theta_{12} \Delta m^2_{21}} },\\
+	\sin \theta_{13}^M &=& \sin \theta_{13} \left[1 + \frac{A_{CC}}{\Delta m^2_{31}} \cos^2\theta_{13}\right],
+\end{eqnarray}
+where
+\begin{equation}
+	A_{CC} = 2 E V_{CC} = 2 \sqrt{2} E G_F n_e(x),
+\end{equation}
+represents the matter potential, with $E$ the neutrino energy, $G_F$ the Fermi constant and $n_e(x)$ the electron density at point $x$.
+
+Numerically (cf. eq.s 4.17, 4.18 in \cite{Fantini:2018itu})
+\begin{eqnarray}
+	V &=& \sqrt{2} G_F n_e = \frac{3.868 \times 10^{-7}}{m} \times \frac{n_e}{\text{mol}/\text{cm}^3},\\
+	k &=& \frac{\Delta m^2}{2 E} = \frac{2.533}{m} \times \frac{\Delta m^2}{\text{eV}^2} \times \frac{\MeV}{E},
+\end{eqnarray}
+	
+\bibliographystyle{unsrt}
+\bibliography{bibliography.bib}
+
+\end{document}

@@ -51,16 +51,23 @@ with the normalization
 	\int_0^1 \de r f(r) = 1.
 \end{equation}
 
-To compute $f(r)$ we need a solar model. In a first implementation we use the BS05(AGS,OP) model from~\cite{Bahcall:2004pz} (data from \url{http://www.sns.ias.edu/~jnb/}), since this is the model used by the SNO collaboration. Once the code will be stable we will easily be able to update to a more recent model.
+To compute $f(r)$ we need a solar model. In a first implementation we use the BS05(AGS,OP) model from~\cite{Bahcall:2004pz} (data from \url{http://www.sns.ias.edu/~jnb/}; \emph{note that this file must be processed before importing, since both since and double whitespaces are used as separators of the tabulated data}), since this is the model used by the SNO collaboration. Once the code will be stable we will easily be able to update to a more recent model.
 
-The electron density in~\cite{Bahcall:2004pz} is give in units:
+The electron density in~\cite{Bahcall:2004pz} is given in units:
 \begin{equation}
 	\frac{1}{\cm^3 N_A} = \frac{\text{mol}}{\cm^3\ 6.022 \cdot 10^{23} }.
 \end{equation}
 	
 \begin{figure}[htb]
+\centering
 \includegraphics[width=0.8\textwidth]{sun_density.pdf}
 \caption{Solar density as a function of relative radius $r \equiv R/R_\odot$, from Solar model BS05(AGS,OP)~\cite{Bahcall:2004pz}.}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[width=0.8\textwidth]{reaction_fraction.pdf}
+	\centering
+	\caption{Fraction of solar neutrinos produced as function of distance from the center of the Sun $r\equiv R/R_\odot$, from Solar model BS05(AGS,OP)~\cite{Bahcall:2004pz}.}
 \end{figure}
 
 \bibliographystyle{unsrt}

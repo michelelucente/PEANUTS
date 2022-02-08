@@ -4,10 +4,14 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \graphicspath{ {./figs/} }
+\usepackage{bbold}
 
 \newcommand{\MeV}[0]{\text{MeV}}
 \newcommand{\cm}[0]{\text{cm}}
 \newcommand{\de}[0]{\text{d}}
+\newcommand{\ket}[1]{\left| #1 \right>}
+\newcommand{\bra}[1]{\left< #1 \right|}
+\newcommand{\braket}[2]{\left< #1 | #2 \right>}
 
 \begin{document}
 
@@ -72,6 +76,75 @@ We compare in Fig.~\ref{fig:SNO_8B_hep_comparison} the prediction from our code 
 	\caption{Survival probability at the surface of the Sun for mixing parameters $\tan^2\theta_{12} = 0.469$, $\Delta m_{21}^2 = 7.9 \times 10^{-5} \text{eV}^2$, $\sin^2 \theta_{13} = 0.01$, $\Delta m_{31}^2 = 2.46 \times 10^{-3} \text{eV}^2$. The blue lines are the prediction from our code, the orange ones are the digitised curves from 6.3 in~\cite{FiuzadeBarros:2011qna}.}
 	\label{fig:SNO_8B_hep_comparison}
 \end{figure}
+
+\section{Neutrino propagation from Sun and detection at Earth}
+
+\subsection{Probability of transition $\nu_i \rightarrow \nu_\alpha$}
+The neutrino interaction (aka flavour) eigenstates $\ket{\nu_\alpha, t}$ at time $t$ are related to the propagation (aka mass) eigenstates by the relation
+\begin{equation}
+	\ket{\nu_\alpha, t} = U_{\alpha i}^* \ket{\nu_i, t}
+\end{equation}
+where $U$ is the unitary PMNS mixing matrix. The flavour eigenstate at time $t$ is  obtained by evolving the one at $t=0$ with the evolutor operator
+\begin{equation}
+	\ket{\nu_\alpha, t} = \mathcal{U}_{\alpha \beta}(t) \ket{\nu_\beta,0}.
+\end{equation}
+From this relation the probability amplitude for a neutrino mass eigenstate produced at $t=0$ of interacting as a flavour eigenstate at time $t$ is given by
+\begin{eqnarray}
+	P_{i \rightarrow \alpha}(t) &=& \braket{\nu_\alpha, 0}{\nu_i,t} = \bra{\nu_\alpha, 0} U^T_{i \beta} \ \mathcal{U}_{\beta \gamma}(t) \ket{\nu_\alpha,0} \\ 
+	&=& U^T_{i\beta} \ \mathcal{U}_{\beta \alpha}(t) = \left( U^T \mathcal{U}(t) \right)_{i\alpha}
+\end{eqnarray}
+
+\subsection{Evolutor equation and Magnus expansion}
+
+The evolutor operator is defined by the equations
+\begin{equation}
+	\ket{\nu_\alpha, t} = \mathcal{U}_{\alpha \beta}(t) \ket{\nu_\beta, 0}, \hspace{1cm} \text{ with } \hspace{1cm} \mathcal{U}(0) = \mathbb{1}.
+\end{equation}
+
+From the Schr{\"o}dinger equation
+\begin{eqnarray}
+	\frac{\de}{\de t} \ket{\nu_a\alpha, t}  &=& - i H_{\alpha \beta} \ket{\nu_\beta, t} \\
+	\Rightarrow \hspace{0.2cm} \frac{d}{\de t} \mathcal{U}_{\alpha \beta} (t) \ket{\nu_\beta, 0} &=& -i H_{\alpha \gamma}(t)\ \mathcal{U}_{\gamma \beta}(t) \ket{\nu_\beta, 0} \\
+	\Rightarrow \hspace{0.2cm} \frac{\de}{\de t} \mathcal{U}(t) &=& - i H(t)\ \mathcal{U}(t), \label{eq:evolutor}
+\end{eqnarray}
+where $H$ is the Hamiltonian of the system.
+
+Eq.~\ref{eq:evolutor} allows to express the evolutor as a function of the Hamiltonian of the system. Its formal solution is
+\begin{equation}
+	\mathcal{U}(t) = \mathcal{T} \left[ e^{-i \int_{t_0}^t \de t' H(t')} \right].\label{eq:evolutor_formal}
+\end{equation}
+Eq.~\ref{eq:evolutor_formal} does not generally admit an analytic closed form, expect for very special cases, for instance if the Hamiltonian does not depend on time.
+
+A well known approach to the problem is the Dyson series 
+\begin{equation}
+	\mathcal{U}(t) = \mathbb{1} + \sum_{n=1}^\infty \frac{\left(-i\right)^n}{n!} \int_{t_0}^t \de t_1 \int_{t_0}^t \de t_2 \cdots \int_{t_0}^t \de t_n \mathcal{T} \left[H(t_1) H(t_2) \cdots H(t_n) \right] \label{eq:Dyson_series}
+\end{equation}
+which allows for an approximate solution obtained by truncating Eq.~\ref{eq:Dyson_series} at finite values of $n$, if the series is expected to be perturbative. However, by adopting this approach the approximate evolutor operator is not longer a unitary operator.
+
+An alternative approximate solution, that we adopt here, is the Magnus expansion~\cite{magnus1954exponential} (ME) (see also~\cite{blanes2009magnus} for a modern review).
+Given the matrix differential equation
+\begin{equation}
+	\frac{\de}{\de t} Y(t) = A(t) Y(t), \hspace{1cm} \text{with} \hspace{1cm} Y(0) = Y_0,
+\end{equation}
+the solution at time $t$ can be expressed as
+\begin{equation}
+	Y(t) = e^{\Omega(t)} Y_0, \hspace{1cm} \text{with} \hspace{1cm} \Omega(t) = \sum_{k=1}^\infty \Omega_k (t). \label{eq:magnus_formal}
+\end{equation}
+The operators $\Omega_k(t)$ are formally defined for each value of $k$. As with the Dyson series, Eq.~\ref{eq:magnus_formal} gives a formal solution, but for practical applications the series must be truncated at finite values of $k$. Nevertheless, the approximate evolutor operator is unitary in the ME.
+
+The first two terms in the ME are
+\begin{eqnarray}
+	\Omega_1(t) &=& \int_0^t \de t_1 A(t_1), \\
+	\Omega_2 (t) &=& \frac{1}{2} \int_0^t \de t_1 \int_0^{t_1}  \de t_2 \left[ A(t_1), A (t_2) \right].
+\end{eqnarray} 
+$\Omega_1$ would give the exact solution if $A$ is constant, such that its commutator at different times vanish. For the general case, the higher-order terms in the ME take into account the $A(t)$ time dependency.
+
+In the neutrino oscillation dynamics the starting point is Eq.~\ref{eq:evolutor}, with ${\mathcal{U}(0) = \mathbb{1}}$. The ME of the evolutor is thus
+\begin{equation}
+	\mathcal{U}(t) = e^{\Omega(t)},\hspace{1cm} \text{with} \hspace{1cm} \Omega(t) = \sum_{k=1}^\infty \Omega_k (t)
+\end{equation}
+
+In the adiabatic regime solar neutrinos leave the Sun as propagation eigenstates $\ket{\nu_2}$.
 
 \bibliographystyle{unsrt}
 \bibliography{bibliography.bib}

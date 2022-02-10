@@ -7,6 +7,7 @@ Created on Mon Feb  7 17:47:01 2022
 """
 import pandas as pd
 from probability_sun_energy import *
+from earth_density import *
 
 
 # Import data from solar model
@@ -18,7 +19,7 @@ solar_model = pd.read_csv("./Data/bs2005agsopflux.csv",
 solar_model['density'] = 10**solar_model['density_log_10']
 
 
-#test
+# test probability_sun_energy module
 from pathlib import Path
 project_folder = str(Path(Path.cwd()).parents[1])
 plots_folder = project_folder + "/TeX/figs/"
@@ -66,3 +67,23 @@ plt.legend()
 plt.savefig(plots_folder + "hep_SNO_comparison.pdf")
 
 plt.show()
+
+
+# test earth_density module
+from math import pi
+
+x = np.arange(0,1,0.001)
+eta = [0, pi/6, pi/4, pi/3]
+labels = ["0", "pi/6", "pi/4", "pi/3"]
+
+density = [ [EarthDensity(r, n) for r in x] for n in eta]
+
+plt.xlabel("Nadir angle $\eta$")
+plt.ylabel("Density [mol/cm${}^3$]")
+for i in range(len(density)):
+    plt.plot(x,density[i], label = "$\eta$ = %s" %labels[i])
+plt.legend()
+plt.savefig(plots_folder + "earth_density.pdf")
+    
+plt.show()
+

@@ -62,7 +62,7 @@ The electron density in~\cite{Bahcall:2004pz} is given in units:
 	\frac{1}{\cm^3 N_A} = \frac{\text{mol}}{\cm^3\ 6.022 \cdot 10^{23} }.
 \end{equation}
 	
-\begin{figure}[htb]
+\begin{figure}[ht]
 \includegraphics[width=0.5\textwidth]{sun_density.pdf}
 \includegraphics[width=0.5\textwidth]{reaction_fraction.pdf}
 \caption{Solar density (left) and fraction of solar neutrinos produced (right), as a function of relative radius $r \equiv R/R_\odot$, from Solar model BS05(AGS,OP)~\cite{Bahcall:2004pz}.}
@@ -70,7 +70,7 @@ The electron density in~\cite{Bahcall:2004pz} is given in units:
 
 We compare in Fig.~\ref{fig:SNO_8B_hep_comparison} the prediction from our code with the SNO survival probabilities at the surface of the Sun for the ${}^8$B and hep neutrino, digitised from Fig. 6.3 in~\cite{FiuzadeBarros:2011qna}. 
 
-\begin{figure}[htb]
+\begin{figure}[ht]
 	\includegraphics[width=0.5\textwidth]{8B_SNO_cmparison}
 	\includegraphics[width=0.5\textwidth]{hep_SNO_comparison}
 	\caption{Survival probability at the surface of the Sun for mixing parameters $\tan^2\theta_{12} = 0.469$, $\Delta m_{21}^2 = 7.9 \times 10^{-5} \text{eV}^2$, $\sin^2 \theta_{13} = 0.01$, $\Delta m_{31}^2 = 2.46 \times 10^{-3} \text{eV}^2$. The blue lines are the prediction from our code, the orange ones are the digitised curves from 6.3 in~\cite{FiuzadeBarros:2011qna}.}
@@ -165,7 +165,7 @@ $j$& Shell          & $[r_{j-1},\,r_j]$  &$\alpha_j$ &$\beta_j$ &$\gamma_j$\\
 \caption{\label{tab:shell_parameters}Values of the parameters for the electron density expressed as $N_j(r) = \alpha_j + \beta_j r^2 + \gamma_j r^4$ with $[N] = \text{mol}/\cm^3$, for each of the Earth internal shell. The radial distance $r$ is normalised to the radius of Earth.}
 \end{table}
 
-\begin{figure}[htb]
+\begin{figure}[ht]
 	\includegraphics[width=\textwidth]{earth_01}
 	\caption{Earth section showing the different shells and their radial density evolution. The nadir angle $\eta$, radial distance $r$ and trajectory coordinate $x$ are also schematised. Figure taken from~\cite{Lisi:1997yc}}
 	\label{fig:earth_density}	
@@ -173,15 +173,23 @@ $j$& Shell          & $[r_{j-1},\,r_j]$  &$\alpha_j$ &$\beta_j$ &$\gamma_j$\\
 
 The parametrisation in Eq.~\ref{eq:earth_density_param} is valid for radial trajectories, i.e. paths crossing the center of the Earth. For a path forming an angle $\eta$ (nadir) with radial trajectory (cf. Fig.~\ref{fig:earth_density}), the following relations hold
 \begin{eqnarray}
-	N_j(x) &=& \alpha'_j + \beta'_j r^2 + \gamma'_j r^4, \\
-	\alpha'_j &=& \alpha_j + \beta_j \sin^\eta + \gamma_j \sin^4\eta, \\
+	N_j(x) &=& \alpha'_j + \beta'_j x^2 + \gamma'_j x^4, \\
+	\alpha'_j &=& \alpha_j + \beta_j \sin^2 \eta + \gamma_j \sin^4\eta, \\
 	\beta'_j &=& \beta_j + 2 \gamma_j \sin^2\eta, \\
 	\gamma'_j &=& \gamma_j.
 \end{eqnarray}
 
+The Earth density profile for different values of the nadir angle $\eta$ is reported in Fig.~\ref{fig:earth_density}.
+
+\begin{figure}[ht]
+	\includegraphics[width=0.8\textwidth]{earth_density}
+	\caption{Earth density profile for different values of the nadir angle $\eta$, following the parametrisation in~\cite{Lisi:1997yc}.}
+	\label{fig:earth_density}
+\end{figure}
+
 If the detector is placed underground, we can define a ``detector shell'' at the detector radial distance. In our example SNO was placed $H=2$ km underground, so we can define $r_{det} = r_\text{SNO} = 1 - H /R_\text{E} \equiv 1 - h$, where $R_\text{E}$ is the (not rescaled) Earth radius, $R_E = 6.371 \cdot 10^3$ km, cf. Figure~\ref{fig:scheme_detector_shell}.
 
-\begin{figure}[htb]
+\begin{figure}[ht]
 	\includegraphics[width=0.8\textwidth]{earth_SNO_scheme}
 	\caption{Schematic representation of Earth shells and ``detector shell'' for an underground detector.}
 	\label{fig:scheme_detector_shell}
@@ -214,7 +222,7 @@ We can verify that, being $\Omega_{1,2}(t)$ anti-hermitian, the truncated evolut
 Since solar neutrinos are ultra-relativistic, we can use the distance traveled $r$ within a time $t$ as evolution variable. We split the hamiltonian as
 
 
-\bibliographystyle{unsrt}
+\bibliographystyle{JHEP}
 \bibliography{bibliography.bib}
 
 \end{document}

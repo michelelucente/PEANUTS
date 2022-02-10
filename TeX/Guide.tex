@@ -139,12 +139,71 @@ The first two terms in the ME are
 \end{eqnarray} 
 $\Omega_1$ would give the exact solution if $A$ is constant, such that its commutator at different times vanish. For the general case, the higher-order terms in the ME take into account the $A(t)$ time dependency.
 
+\subsection{Earth matter regeneration}
+In the adiabatic regime solar neutrinos leave the Sun as propagation eigenstates $\ket{\nu_2}$. They thus do not oscillate while travelling to the Earth. However, before arriving at a terrestrial detector they can cross the Earth itself, along which path the matter potential makes the propagation eigenstates different from the vacuum ones. This results in neutrino oscillations inside the Earth that, on average, result in a regeneration of $\nu_e$ with respect to the vacuum case.
+
+The electron density inside Earth can be parametrised with 5 shells, within which the electron density varies smoothly as~\cite{Lisi:1997yc}
+\begin{equation}\label{eq:earth_density_param}
+	N_j(r) = \alpha_j + \beta_j r^2 + \gamma_j r^4, \hspace{1cm} \text{with} \hspace{1cm} \left[N\right] = \text{mol}/\cm^3,
+\end{equation}
+and where $r$ is the radial distance normalised to the Earth radius. The numerical value of the parameters is reported in Table~\ref{tab:shell_parameters}.
+
+\begin{table}[ht]
+\begin{tabular}{clcccc}
+\hline
+\hline
+$j$& Shell          & $[r_{j-1},\,r_j]$  &$\alpha_j$ &$\beta_j$ &$\gamma_j$\\
+\hline
+1 & Inner core      &     $[0,\,0.192]$    &   6.099 & $-$4.119 &    0.000 \\
+2 & Outer core      &   $[0.192,\,0.546]$  &   5.803 & $-$3.653 & $-$1.086 \\
+3 & Lower mantle    &   $[0.546,\,0.895]$  &   3.156 & $-$1.459 &    0.280 \\
+4 & Transition Zone &   $[0.895,\,0.937]$  &$-$5.376 &   19.210 &$-$12.520 \\
+5 & Upper mantle    &     $[0.937,\,1]$    &  11.540 &$-$20.280 &   10.410 \\
+\hline 
+\hline
+\end{tabular}
+\caption{\label{tab:shell_parameters}Values of the parameters for the electron density expressed as $N_j(r) = \alpha_j + \beta_j r^2 + \gamma_j r^4$ with $[N] = \text{mol}/\cm^3$, for each of the Earth internal shell. The radial distance $r$ is normalised to the radius of Earth.}
+\end{table}
+
+\begin{figure}[htb]
+	\includegraphics[width=\textwidth]{earth_01}
+	\caption{Earth section showing the different shells and their radial density evolution. The nadir angle $\eta$, radial distance $r$ and trajectory coordinate $x$ are also schematised. Figure taken from~\cite{Lisi:1997yc}}
+	\label{fig:earth_density}	
+\end{figure}
+
+The parametrisation in Eq.~\ref{eq:earth_density_param} is valid for radial trajectories, i.e. paths crossing the center of the Earth. For a path forming an angle $\eta$ (nadir) with radial trajectory (cf. Fig.~\ref{fig:earth_density}), the following relations hold
+\begin{eqnarray}
+	N_j(x) &=& \alpha'_j + \beta'_j r^2 + \gamma'_j r^4, \\
+	\alpha'_j &=& \alpha_j + \beta_j \sin^\eta + \gamma_j \sin^4\eta, \\
+	\beta'_j &=& \beta_j + 2 \gamma_j \sin^2\eta, \\
+	\gamma'_j &=& \gamma_j.
+\end{eqnarray}
+
+If the detector is placed underground, we can define a ``detector shell'' at the detector radial distance. In our example SNO was placed 2 km underground, so we can define $r_\text{SNO} = 1 - 2 \text{ km} /r_\text{E}$, where $r_\text{E}$ is the Earth radius, cf. Figure~\ref{fig:scheme_detector_shell}.
+
+\begin{figure}[htb]
+	\includegraphics[width=0.8\textwidth]{earth_SNO_scheme}
+	\caption{Schematic representation of Earth shells and ``detector shell'' for an underground detector.}
+	\label{fig:scheme_detector_shell}
+\end{figure} 
+
+In general, a shell $i$ is crossed by a neutrino trajectory with nadir angle $\eta$ if $r_i > \sin \eta$. The value of the trajectory coordinate at each shell crossing is given by 
+\begin{equation}
+	x_i = \sqrt{r_i^2 - \sin \eta^2}, \hspace{1cm} \text{ for $i$ such that} \hspace{1cm} r_i > \sin \eta.
+\end{equation}
+
 In the neutrino oscillation dynamics the starting point is Eq.~\ref{eq:evolutor}, with ${\mathcal{U}(0) = \mathbb{1}}$. The ME of the evolutor is thus
 \begin{equation}
 	\mathcal{U}(t) = e^{\Omega(t)},\hspace{1cm} \text{with} \hspace{1cm} \Omega(t) = \sum_{k=1}^\infty \Omega_k (t)
 \end{equation}
+\begin{eqnarray}
+	\Omega_1(t) &=& -i \int_0^t \de t' H(t'), \\
+	\Omega_2(t) &=& -\frac{1}{2} \int_0^t \de t_1 \int_0^{t_1} \de t_2 \left[ H(t_1), H(t_2) \right].
+\end{eqnarray}
+We can verify that, being $\Omega_{1,2}(t)$ anti-hermitian, the truncated evolutor is a unitary operator.
 
-In the adiabatic regime solar neutrinos leave the Sun as propagation eigenstates $\ket{\nu_2}$.
+Since solar neutrinos are ultra-relativistic, we can use the distance traveled $r$ within a time $t$ as evolution variable. We split the hamiltonian as
+
 
 \bibliographystyle{unsrt}
 \bibliography{bibliography.bib}

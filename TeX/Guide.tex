@@ -221,6 +221,51 @@ We can verify that, being $\Omega_{1,2}(t)$ anti-hermitian, the truncated evolut
 
 Since solar neutrinos are ultra-relativistic, we can use the distance traveled $r$ within a time $t$ as evolution variable. We split the hamiltonian as
 
+\section{Neutrino propagation Hamiltonian}
+We follow in this section the notation of~\cite{Fantini:2018itu}.
+The propagation Hamiltonian for an ultrarelativistic neutrino propagating in a medium with electron density $n_e(x)$ is, in the flavour basis
+\begin{equation}\label{eq:hamiltonian}
+	H_\nu = U^* \text{diag}(k) U^T + V(x) \text{diag}(1,0,0),
+\end{equation}
+with
+\begin{eqnarray}
+	k_i &=& \frac{m_i^2}{2E},\\
+	V(x) &=& \sqrt{2}G_F n_e(x).
+\end{eqnarray}
+For antineutrinos, the same Eq.~\ref{eq:hamiltonian} holds, with the replacements
+\begin{eqnarray}
+	U &\rightarrow U^*,\\
+	V &\rightarrow -V.
+\end{eqnarray}
+The mixing matrix $U$ can be expressed as
+\begin{equation}
+	U = R_{23} \Delta R_{13} \Delta^* R_{12},
+\end{equation}
+where
+\begin{equation}
+	\begin{array}{ll}
+		R_{23} = \left( \begin{array}{ccc}
+		1 & 0 & 0 \\
+		0 & c_{23} & s_{23} \\
+		0 & -s_{23} & c_{23}
+	\end{array} \right), &
+	R_{13} = \left( \begin{array}{ccc}
+		c_{13} & 0 & s_{13}\\
+		0 & 1 & 0 \\
+		-s_{13} & 0 & c_{13} 
+	\end{array} \right), \\
+			R_{12} = \left( \begin{array}{ccc}
+		c_{12} & s_{12} & 0 \\
+		-s_{12} & c_{12} & 0 \\
+		0 & 0 & 1
+	\end{array} \right), &
+	\Delta = \left( \begin{array}{ccc}
+		1 & 0 & 0\\
+		0 & 1 & 0 \\
+		0 & 0 & e^{i\delta} 
+	\end{array} \right).
+	\end{array}
+\end{equation}
 
 \bibliographystyle{JHEP}
 \bibliography{bibliography.bib}

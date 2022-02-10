@@ -179,7 +179,7 @@ The parametrisation in Eq.~\ref{eq:earth_density_param} is valid for radial traj
 	\gamma'_j &=& \gamma_j.
 \end{eqnarray}
 
-If the detector is placed underground, we can define a ``detector shell'' at the detector radial distance. In our example SNO was placed 2 km underground, so we can define $r_\text{SNO} = 1 - 2 \text{ km} /r_\text{E}$, where $r_\text{E}$ is the Earth radius, cf. Figure~\ref{fig:scheme_detector_shell}.
+If the detector is placed underground, we can define a ``detector shell'' at the detector radial distance. In our example SNO was placed $H=2$ km underground, so we can define $r_{det} = r_\text{SNO} = 1 - H /R_\text{E} \equiv 1 - h$, where $R_\text{E}$ is the (not rescaled) Earth radius, $R_E = 6.371 \cdot 10^3$ km, cf. Figure~\ref{fig:scheme_detector_shell}.
 
 \begin{figure}[htb]
 	\includegraphics[width=0.8\textwidth]{earth_SNO_scheme}
@@ -189,8 +189,17 @@ If the detector is placed underground, we can define a ``detector shell'' at the
 
 In general, a shell $i$ is crossed by a neutrino trajectory with nadir angle $\eta$ if $r_i > \sin \eta$. The value of the trajectory coordinate at each shell crossing is given by 
 \begin{equation}
-	x_i = \sqrt{r_i^2 - \sin \eta^2}, \hspace{1cm} \text{ for $i$ such that} \hspace{1cm} r_i > \sin \eta.
+	x_i = \sqrt{r_i^2 - \sin^2 \eta}, \hspace{1cm} \text{ for $i$ such that} \hspace{1cm} r_i > \sin \eta.
 \end{equation}
+
+For an underground detector the contribution to the trajectory from the outer layer (between Earth surface and detector shell) is given by
+\begin{equation}
+	 \Delta x = \left\{ \begin{array}{l c c}
+		-r_{det} \cos\eta + \sqrt{1 - r_{det}^2 \sin^2 \eta} & \text{for} & 0 \leq \eta \leq \frac{\pi}{2}, \\
+		r_{det} \cos\eta + \sqrt{1 - r_{det}^2 \sin^2 \eta} & \text{for} & \frac{\pi}{2} \leq \eta \leq \pi.
+	\end{array} \right.
+\end{equation}
+$\Delta x$ reduces to $h$ for $\eta=0, \pi$, and has a maximum at $\sqrt{h(2-h)}$ for $\eta=\pi/2$ (this is approximately 160 km for SNO).
 
 In the neutrino oscillation dynamics the starting point is Eq.~\ref{eq:evolutor}, with ${\mathcal{U}(0) = \mathbb{1}}$. The ME of the evolutor is thus
 \begin{equation}

@@ -103,7 +103,7 @@ The evolutor operator is defined by the equations
 
 From the Schr{\"o}dinger equation
 \begin{eqnarray}
-	\frac{\de}{\de t} \ket{\nu_a\alpha, t}  &=& - i H_{\alpha \beta} \ket{\nu_\beta, t} \\
+	\frac{\de}{\de t} \ket{\nu_\alpha, t}  &=& - i H_{\alpha \beta} \ket{\nu_\beta, t} \\
 	\Rightarrow \hspace{0.2cm} \frac{d}{\de t} \mathcal{U}_{\alpha \beta} (t) \ket{\nu_\beta, 0} &=& -i H_{\alpha \gamma}(t)\ \mathcal{U}_{\gamma \beta}(t) \ket{\nu_\beta, 0} \\
 	\Rightarrow \hspace{0.2cm} \frac{\de}{\de t} \mathcal{U}(t) &=& - i H(t)\ \mathcal{U}(t), \label{eq:evolutor}
 \end{eqnarray}
@@ -173,7 +173,7 @@ $j$& Shell          & $[r_{j-1},\,r_j]$  &$\alpha_j$ &$\beta_j$ &$\gamma_j$\\
 
 The parametrisation in Eq.~\ref{eq:earth_density_param} is valid for radial trajectories, i.e. paths crossing the center of the Earth. For a path forming an angle $\eta$ (nadir) with radial trajectory (cf. Fig.~\ref{fig:earth_density}), the following relations hold
 \begin{eqnarray}
-	N_j(x) &=& \alpha'_j + \beta'_j x^2 + \gamma'_j x^4, \\
+	N_j(x) &=& \alpha'_j + \beta'_j x^2 + \gamma'_j x^4, \label{eq:earth_density_nadir} \\
 	\alpha'_j &=& \alpha_j + \beta_j \sin^2 \eta + \gamma_j \sin^4\eta, \\
 	\beta'_j &=& \beta_j + 2 \gamma_j \sin^2\eta, \\
 	\gamma'_j &=& \gamma_j.
@@ -214,8 +214,8 @@ In the neutrino oscillation dynamics the starting point is Eq.~\ref{eq:evolutor}
 	\mathcal{U}(t) = e^{\Omega(t)},\hspace{1cm} \text{with} \hspace{1cm} \Omega(t) = \sum_{k=1}^\infty \Omega_k (t)
 \end{equation}
 \begin{eqnarray}
-	\Omega_1(t) &=& -i \int_0^t \de t' H(t'), \\
-	\Omega_2(t) &=& -\frac{1}{2} \int_0^t \de t_1 \int_0^{t_1} \de t_2 \left[ H(t_1), H(t_2) \right].
+	\Omega_1(t) &=& -i \int_0^t \de t' H(t'), \label{eq:ME1}\\
+	\Omega_2(t) &=& -\frac{1}{2} \int_0^t \de t_1 \int_0^{t_1} \de t_2 \left[ H(t_1), H(t_2) \right]. \label{eq:ME2}
 \end{eqnarray}
 We can verify that, being $\Omega_{1,2}(t)$ anti-hermitian, the truncated evolutor is a unitary operator.
 
@@ -237,12 +237,40 @@ For antineutrinos, the same Eq.~\ref{eq:hamiltonian} holds, with the replacement
 	U &\rightarrow U^*,\\
 	V &\rightarrow -V.
 \end{eqnarray}
-The mixing matrix $U$ can be expressed as
+
+For the sake of statistical analysis it is more convenient to redefine the Hamiltonian by subtracting a constant term
 \begin{equation}
+	H_\nu \rightarrow H_\nu - U^* \left(k_j \mathbb{1}\right) U^T,
+\end{equation}
+with $j=1$ for normal ordering (NO) and $j=2$ for inverted ordering (IO), such that
+\begin{eqnarray}
+	\left(\begin{array}{ccc}
+k_1 &&\\
+& k_2 & \\
+&& k_3 	
+\end{array} \right) - k_1 \mathbb{1} &=& \frac{1}{2E} \left( \begin{array}{ccc}
+ 0 && \\
+ & \Delta m_{21}^2 & \\
+ && \Delta m_{31}^2	
+ \end{array} \right) \hspace{0.2cm} \text{ for NO} \\
+	\left(\begin{array}{ccc}
+k_1 &&\\
+& k_2 & \\
+&& k_3 	
+\end{array} \right) - k_2 \mathbb{1} &=& \frac{1}{2E} \left( \begin{array}{ccc}
+ - \Delta m_{21}^2 && \\
+ & 0 & \\
+ && \Delta m_{32}^2	
+ \end{array} \right) \hspace{0.2cm} \text{ for IO}
+\end{eqnarray}
+so that we can use as free parameters $\Delta m_{21}^2 >0$ and $\Delta m_{3\ell}^2$, with $\ell=1$ for NO ($\Delta m_{31}^2 > 0$) and $\ell=2$ for IO ($\Delta m_{32}^2 < 0$). In the following we keep using the notation $\text{diag}(k)$ for the general expressions valid for any choice of mass ordering.
+
+The mixing matrix $U$ can be expressed as
+\begin{equation}\label{eq:pmns}
 	U = R_{23} \Delta R_{13} \Delta^* R_{12},
 \end{equation}
 where
-\begin{equation}
+\begin{equation}\label{eq:PMNS_matrices}
 	\begin{array}{ll}
 		R_{23} = \left( \begin{array}{ccc}
 		1 & 0 & 0 \\
@@ -266,6 +294,55 @@ where
 	\end{array} \right).
 	\end{array}
 \end{equation}
+With the parametrisation Eq.~\ref{eq:pmns} and using $\left[\Delta,R_{12}\right] = \left[V,R_{23}\right]=\left[V,\Delta\right]=0$, the propagation Hamiltonian can be rewritten as
+\begin{equation}
+	H_\nu = R_{23} \Delta^* \tilde{H} \Delta R_{23}^T,
+\end{equation}
+with
+\begin{equation}
+	\tilde{H} = R_{13} R_{12} \text{diag}(k) R_{12}^T R_{13}^T + V(x) \text{diag}(1,0,0).
+\end{equation}
+Notice that $\tilde{H}$ does not depend on $\theta_{23}$ nor $\delta$.
+
+Given that $R_{23}$ and $\Delta$ do not depend on position, they can be factorised in the time-ordered definition of the evolutor operator
+\begin{eqnarray}
+	\mathcal{U} &=& \mathcal{T} e^{-i \int \de x H_\nu (x)} = \mathbb{1} + R_{23} \Delta^* \mathcal{T}\left[-i \int \de x \tilde{H}_\nu (x)\right] \Delta R_{23}^T +\\
+	&& \frac{1}{2} R_{23} \Delta^* \mathcal{T}\left[ \left(\left(-i\right)^2 \int \de x_1 \de x_2 \tilde{H}_\nu (x_1) \underbrace{\Delta R_{23}^T R_{23} \Delta^*}_{= \mathbb{1}}  \tilde{H}_\nu (x_2)\right)\right] \Delta R_{23}^T \\ 
+	&&  + \dots (\text{ other terms of the Dyson series for } n \rightarrow \infty ) \\
+	&=& R_{23} \Delta^* \mathcal{T} \left[ e^{- i \int \de x \tilde{H}(x)} \right] \Delta R_{23}^T. \label{eq:evolutor_factor}
+\end{eqnarray}
+
+\subsection{Magnus expansion of the neutrino propagation Hamiltonian}
+We are interested in an expression for the operator in Eq.~\ref{eq:evolutor_factor}
+\begin{equation}
+	\tilde{\mathcal{U}} = \mathcal{T} \left[ e^{- i \int \de l \tilde{H}(l)} \right],
+\end{equation}
+where $l$ is the coordinate along the neutrino path. We normalise distances to the Earth radius $R_E$, by defining $x = \l/R_E$. The Hamiltonian $\tilde{H}$ can be divided in a constant and a matter dependent terms
+\begin{equation}
+	\tilde{H}(x) = \tilde{H}_0 + h(x).
+\end{equation}
+
+We can now calculate the first terms in the ME. To implement $\Omega_1$ in Eq.~\ref{eq:ME1}
+\begin{eqnarray}
+	\int_{l_1}^{l_2} \de l' \tilde{H}(l') &=& R_E \int_{x_1}^{x_2} \de x' \tilde{H}(x') = R_E \tilde{H}_0 \left(x_2 - x_1 \right)\\
+	&& + \sqrt{2} G_F R_E \left( \alpha' \left( x_2 - x_1 \right) + \frac{\beta'}{3} \left(x_2^3 - x_1^3\right) + \frac{\gamma'}{5} \left(x_2^5 - x_1^5\right) \right),
+\end{eqnarray}
+where we assume the integration path is fully contained within a single Earth shell, so that the parametrisation Eq.~\ref{eq:earth_density_nadir} applies. We will discuss later on how the transition between shells is accounted for.
+
+For the second order term $\Omega_2$ in Eq.~\ref{eq:ME2}
+\begin{eqnarray}
+	R_E^2 \int_{x_1}^{x_2} \de x \int_{x_1}^x \de y \left[ \tilde{H}(x), \tilde{H}(y) \right] = && \\
+	 R_E^2 \tilde{H}^{(2)} \frac{\left(x_2 - x_1\right)^3 \left(x_1 + x_2 \right)}{30}\left[ 5 \beta' + 2 \gamma' \left( 2 x_1^2 + x_1 x_2 + 2x_2^2 \right) \right],
+\end{eqnarray}
+where $\tilde{H}^{(2)}$ is the constant matrix
+\begin{equation}
+	\tilde{H}^{(2)} = \frac{1}{2E} \left( \begin{array}{ccc}
+ 	0 & \Delta m_{21}^2 c_{12} c_{13} s_{12} & \frac{1}{2} \left(s_{12}^2 \Delta m_{21}^2 + \Delta m_{31} \right) \sin(2\theta_{13}) \\
+ 	- \tilde{H}^{(2)}_{12} & 0 & 0 \\
+ 	- \tilde{H}^{(2)}_{13} & 0 & 0
+ \end{array} \right).
+\end{equation}
+\emph{This is valid for NO. Check it and derive analogous for IO}
 
 \bibliographystyle{JHEP}
 \bibliography{bibliography.bib}

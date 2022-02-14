@@ -202,7 +202,7 @@ In general, a shell $i$ is crossed by a neutrino trajectory with nadir angle $\e
 
 For an underground detector the contribution to the trajectory from the outer layer (between Earth surface and detector shell) is given by
 \begin{equation}
-	 \Delta x = \left\{ \begin{array}{l c c}
+	 \Delta x(\eta) = \left\{ \begin{array}{l c c}
 		-r_{det} \cos\eta + \sqrt{1 - r_{det}^2 \sin^2 \eta} & \text{for} & 0 \leq \eta \leq \frac{\pi}{2}, \\
 		r_{det} \cos\eta + \sqrt{1 - r_{det}^2 \sin^2 \eta} & \text{for} & \frac{\pi}{2} \leq \eta \leq \pi.
 	\end{array} \right.
@@ -252,7 +252,7 @@ k_1 &&\\
  0 && \\
  & \Delta m_{21}^2 & \\
  && \Delta m_{31}^2	
- \end{array} \right) \hspace{0.2cm} \text{ for NO} \\
+ \end{array} \right) \hspace{0.2cm} \text{ for NO} \label{eq:kinetic_NO}\\
 	\left(\begin{array}{ccc}
 k_1 &&\\
 & k_2 & \\
@@ -261,7 +261,7 @@ k_1 &&\\
  - \Delta m_{21}^2 && \\
  & 0 & \\
  && \Delta m_{32}^2	
- \end{array} \right) \hspace{0.2cm} \text{ for IO}
+ \end{array} \right) \hspace{0.2cm} \text{ for IO} \label{eq:kinetic_IO}
 \end{eqnarray}
 so that we can use as free parameters $\Delta m_{21}^2 >0$ and $\Delta m_{3\ell}^2$, with $\ell=1$ for NO ($\Delta m_{31}^2 > 0$) and $\ell=2$ for IO ($\Delta m_{32}^2 < 0$). In the following we keep using the notation $\text{diag}(k)$ for the general expressions valid for any choice of mass ordering.
 
@@ -324,25 +324,57 @@ where $l$ is the coordinate along the neutrino path. We normalise distances to t
 
 We can now calculate the first terms in the ME. To implement $\Omega_1$ in Eq.~\ref{eq:ME1}
 \begin{eqnarray}
-	\int_{l_1}^{l_2} \de l' \tilde{H}(l') &=& R_E \int_{x_1}^{x_2} \de x' \tilde{H}(x') = R_E \tilde{H}_0 \left(x_2 - x_1 \right)\\
-	&& + \sqrt{2} G_F R_E \left( \alpha' \left( x_2 - x_1 \right) + \frac{\beta'}{3} \left(x_2^3 - x_1^3\right) + \frac{\gamma'}{5} \left(x_2^5 - x_1^5\right) \right),
+	\int_{l_1}^{l_2} \de l' \tilde{H}(l') &=& R_E \int_{x_1}^{x_2} \de x' \tilde{H}(x') = R_E \tilde{H}_0 \left(x_2 - x_1 \right) \label{eq:ME1}\\
+	&& + \sqrt{2} G_F R_E \left( \alpha' \left( x_2 - x_1 \right) + \frac{\beta'}{3} \left(x_2^3 - x_1^3\right) + \frac{\gamma'}{5} \left(x_2^5 - x_1^5\right) \right),\nonumber
 \end{eqnarray}
 where we assume the integration path is fully contained within a single Earth shell, so that the parametrisation Eq.~\ref{eq:earth_density_nadir} applies. We will discuss later on how the transition between shells is accounted for.
 
 For the second order term $\Omega_2$ in Eq.~\ref{eq:ME2}
-\begin{eqnarray}
-	R_E^2 \int_{x_1}^{x_2} \de x \int_{x_1}^x \de y \left[ \tilde{H}(x), \tilde{H}(y) \right] = && \\
-	 R_E^2 \tilde{H}^{(2)} \frac{\left(x_2 - x_1\right)^3 \left(x_1 + x_2 \right)}{30}\left[ 5 \beta' + 2 \gamma' \left( 2 x_1^2 + x_1 x_2 + 2x_2^2 \right) \right],
-\end{eqnarray}
-where $\tilde{H}^{(2)}$ is the constant matrix
 \begin{equation}
-	\tilde{H}^{(2)} = \frac{1}{2E} \left( \begin{array}{ccc}
- 	0 & \Delta m_{21}^2 c_{12} c_{13} s_{12} & \frac{1}{2} \left(s_{12}^2 \Delta m_{21}^2 + \Delta m_{31} \right) \sin(2\theta_{13}) \\
- 	- \tilde{H}^{(2)}_{12} & 0 & 0 \\
- 	- \tilde{H}^{(2)}_{13} & 0 & 0
- \end{array} \right).
+	R_E^2 \int_{x_1}^{x_2} \de x \int_{x_1}^x \de y \left[ \tilde{H}(x), \tilde{H}(y) \right] = R_E^2 \tilde{H}^{(2)} \int_{x_1}^{x_2} \de x \int_{x_1}^x \de y \left(h(x) - h(y) \right),
 \end{equation}
-\emph{This is valid for NO. Check it and derive analogous for IO}
+where $\tilde{H}^{(2)}$ is the constant matrix with elements
+\begin{eqnarray}
+\tilde{H}^{(2)}_{12} &=& \left(k_2 - k_1\right) c_{12} c_{13} s_{12} = -\tilde{H}^{(2)}_{21}, \\
+\tilde{H}^{(2)}_{13} &=& \frac{1}{2} s_{13} c_{13} \left( \left(k_2-k_1 \right) \left(2 c_{12}^2 - 1 \right) + 2k_3 -k_1 - k_2 \right) = -\tilde{H}^{(2)}_{31},\\
+\tilde{H}^{(2)}_{23} &=& \tilde{H}^{(2)}_{32} = \tilde{H}^{(2)}_{ii} = 0.
+\end{eqnarray}
+The expressions specific for NO and IO can be easily obtained by means of the replacements Eq.s~\ref{eq:kinetic_NO},~\ref{eq:kinetic_IO}.
+
+Assuming again that the path is fully contained within one shell, the integral gives
+\begin{equation}\label{eq:ME2}
+\int_{x_1}^{x_2} \de x \int_{x_1}^x \de y \left( h(x) - h(y) \right) = \frac{1}{30} \left( x_2 - x_1 \right)^3 \left( x_1 + x_2 \right)\left[ 5 \beta' + 2 \gamma' \left( 2 x_1^2 +  2x_2^2 + x_1 x_2 \right) \right]
+\end{equation}
+These relations allow to express the evolutor at 2nd order in ME, for a path fully contained within one shell. For paths crossing multiple shells, it can be noticed~\cite{Lisi:1997yc} that the full evolutor on a path $(x_1,x_2)$ can be expressed as a time-ordered product of evolutors along the same path
+\begin{equation}\label{eq:evolutor_product}
+	\mathcal{U}(x_2, x_1) = \mathcal{U}(x_2, x_i) \mathcal{U}(x_i, x_1),
+\end{equation}
+where $x_i$ is a generic point $x_1 < x_i <x_2$ contained on the original path. Moreover, it can be shown~\cite{Lisi:1997yc} that
+\begin{equation}\label{eq:evolutor_transpose}
+	\mathcal{U}(0, -x) = \mathcal{U}(x,0)^T.
+\end{equation}
+The consequences of Eq.s~\ref{eq:evolutor_product},~\ref{eq:evolutor_transpose} are twofold: first, for a path starting at $x=x_0$, with $0\leq  x_0 < x_1$,  crossing $n$ shells with boundaries at trajectory coordinate $(0, x_1, x_2, \dots, x_n)$, and ending at the point $x=x_f$, with $x_{n-1} < x_f \leq x_n$, the full evolutor can be expressed as
+\begin{equation}
+	\mathcal{U}(x_f, x_0) = \mathcal{U}(x_f, x_{n-1})\mathcal{U}(x_{n-1},x_{n-2})\dots \mathcal{U}(x_2, x_1)\mathcal{U}(x_1, x_0).
+\end{equation}
+Second, for detectors placed at surface, the Earth spherical symmetry implies that the electron density is symmetric with respect to the trajectory midpoint at $x=0$; thus we only need to compute the evolutor on one half-path (cf. Fig.~\ref{fig:earth_density})
+\begin{equation}
+	\mathcal{U}(x_F,x_I) = \mathcal{U}(x_F, 0) \mathcal{U}(0, - x_F) = \mathcal{U}(x_F, 0) \mathcal{U}(x_F, 0)^T.
+\end{equation}
+Eq.s~\ref{eq:ME1},~\ref{eq:ME2} allow thus to express $\mathcal{U}$ as a function of $\eta$.
+
+If the detector is placed underground at trajectory coordinate $x_{det} < x_F$, we distinguish two cases. For $0 \leq \eta < \pi/2$
+\begin{equation}
+	\mathcal{U}(x_{det},x_I) = \mathcal{U}(x_{det}, 0) \mathcal{U}(0, - x_F) = \mathcal{U}(x_{det}, 0) \mathcal{U}(x_F, 0)^T, \hspace{0.2cm} \left(0 \leq \eta < \frac{\pi}{2} \right)
+\end{equation}
+where $x_{det} = \sqrt{r_{det}^2 - \sin\eta^2}$. For $\pi/2 \leq \eta \leq \pi$ the electron density can be approximated to a constant value, since the neutrino path is never deeper than $H$ and, for $H = 2$ km,
+\begin{equation}
+	\frac{N(R_E) - N(R_E-H)}{N(R_E) + N(R_E - H)} = 10^{-4}
+\end{equation}
+We fix for simplicity the electron density value to the one at Earth radius, $n_1 = 1.67$ mol/cm${^3}$. Having assumed constant density along the path, the evolutor is simply given by
+\begin{equation}
+	\tilde{\mathcal{U}}(\eta) = e^{-i R_E \Delta x(\eta) \left(\tilde{H}_0 + \text{diag}\left(\sqrt{2}G_F n_1, 0, 0\right) \right)}, \hspace{0.5cm} \left(\frac{\pi}{2} \leq \eta < \pi \right)
+\end{equation}
 
 \bibliographystyle{JHEP}
 \bibliography{bibliography.bib}

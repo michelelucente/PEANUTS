@@ -119,25 +119,26 @@ A well known approach to the problem is the Dyson series
 \begin{equation}
 	\mathcal{U}(t) = \mathbb{1} + \sum_{n=1}^\infty \frac{\left(-i\right)^n}{n!} \int_{t_0}^t \de t_1 \int_{t_0}^t \de t_2 \cdots \int_{t_0}^t \de t_n \mathcal{T} \left[H(t_1) H(t_2) \cdots H(t_n) \right] \label{eq:Dyson_series}
 \end{equation}
-which allows for an approximate solution obtained by truncating Eq.~\ref{eq:Dyson_series} at finite values of $n$, if the series is expected to be perturbative. However, by adopting this approach the approximate evolutor operator is not longer a unitary operator.
-
-An alternative approximate solution, that we adopt here, is the Magnus expansion~\cite{magnus1954exponential} (ME) (see also~\cite{blanes2009magnus} for a modern review).
-Given the matrix differential equation
-\begin{equation}
-	\frac{\de}{\de t} Y(t) = A(t) Y(t), \hspace{1cm} \text{with} \hspace{1cm} Y(0) = Y_0,
-\end{equation}
-the solution at time $t$ can be expressed as
-\begin{equation}
-	Y(t) = e^{\Omega(t)} Y_0, \hspace{1cm} \text{with} \hspace{1cm} \Omega(t) = \sum_{k=1}^\infty \Omega_k (t). \label{eq:magnus_formal}
-\end{equation}
-The operators $\Omega_k(t)$ are formally defined for each value of $k$. As with the Dyson series, Eq.~\ref{eq:magnus_formal} gives a formal solution, but for practical applications the series must be truncated at finite values of $k$. Nevertheless, the approximate evolutor operator is unitary in the ME.
-
-The first two terms in the ME are
-\begin{eqnarray}
-	\Omega_1(t) &=& \int_0^t \de t_1 A(t_1), \\
-	\Omega_2 (t) &=& \frac{1}{2} \int_0^t \de t_1 \int_0^{t_1}  \de t_2 \left[ A(t_1), A (t_2) \right].
-\end{eqnarray} 
-$\Omega_1$ would give the exact solution if $A$ is constant, such that its commutator at different times vanish. For the general case, the higher-order terms in the ME take into account the $A(t)$ time dependency.
+which allows for an approximate solution obtained by truncating Eq.~\ref{eq:Dyson_series} at finite values of $n$, if the series is expected to be perturbative. 
+%However, by adopting this approach the approximate evolutor operator is not longer a unitary operator.
+%
+%An alternative approximate solution, that we adopt here, is the Magnus expansion~\cite{magnus1954exponential} (ME) (see also~\cite{blanes2009magnus} for a modern review).
+%Given the matrix differential equation
+%\begin{equation}
+%	\frac{\de}{\de t} Y(t) = A(t) Y(t), \hspace{1cm} \text{with} \hspace{1cm} Y(0) = Y_0,
+%\end{equation}
+%the solution at time $t$ can be expressed as
+%\begin{equation}
+%	Y(t) = e^{\Omega(t)} Y_0, \hspace{1cm} \text{with} \hspace{1cm} \Omega(t) = \sum_{k=1}^\infty \Omega_k (t). \label{eq:magnus_formal}
+%\end{equation}
+%The operators $\Omega_k(t)$ are formally defined for each value of $k$. As with the Dyson series, Eq.~\ref{eq:magnus_formal} gives a formal solution, but for practical applications the series must be truncated at finite values of $k$. Nevertheless, the approximate evolutor operator is unitary in the ME.
+%
+%The first two terms in the ME are
+%\begin{eqnarray}
+%	\Omega_1(t) &=& \int_0^t \de t_1 A(t_1), \\
+%	\Omega_2 (t) &=& \frac{1}{2} \int_0^t \de t_1 \int_0^{t_1}  \de t_2 \left[ A(t_1), A (t_2) \right].
+%\end{eqnarray} 
+%$\Omega_1$ would give the exact solution if $A$ is constant, such that its commutator at different times vanish. For the general case, the higher-order terms in the ME take into account the $A(t)$ time dependency.
 
 \subsection{Earth matter regeneration}
 In the adiabatic regime solar neutrinos leave the Sun as propagation eigenstates $\ket{\nu_2}$. They thus do not oscillate while travelling to the Earth. However, before arriving at a terrestrial detector they can cross the Earth itself, along which path the matter potential makes the propagation eigenstates different from the vacuum ones. This results in neutrino oscillations inside the Earth that, on average, result in a regeneration of $\nu_e$ with respect to the vacuum case.
@@ -209,17 +210,17 @@ For an underground detector the contribution to the trajectory from the outer la
 \end{equation}
 $\Delta x$ reduces to $h$ for $\eta=0, \pi$, and has a maximum at $\sqrt{h(2-h)}$ for $\eta=\pi/2$ (this is approximately 160 km for SNO).
 
-In the neutrino oscillation dynamics the starting point is Eq.~\ref{eq:evolutor}, with ${\mathcal{U}(0) = \mathbb{1}}$. The ME of the evolutor is thus
-\begin{equation}
-	\mathcal{U}(t) = e^{\Omega(t)},\hspace{1cm} \text{with} \hspace{1cm} \Omega(t) = \sum_{k=1}^\infty \Omega_k (t)
-\end{equation}
-\begin{eqnarray}
-	\Omega_1(t) &=& -i \int_0^t \de t' H(t'), \label{eq:ME1}\\
-	\Omega_2(t) &=& -\frac{1}{2} \int_0^t \de t_1 \int_0^{t_1} \de t_2 \left[ H(t_1), H(t_2) \right]. \label{eq:ME2}
-\end{eqnarray}
-We can verify that, being $\Omega_{1,2}(t)$ anti-hermitian, the truncated evolutor is a unitary operator.
-
-Since solar neutrinos are ultra-relativistic, we can use the distance traveled $r$ within a time $t$ as evolution variable. We split the hamiltonian as
+%In the neutrino oscillation dynamics the starting point is Eq.~\ref{eq:evolutor}, with ${\mathcal{U}(0) = \mathbb{1}}$. The ME of the evolutor is thus
+%\begin{equation}
+%	\mathcal{U}(t) = e^{\Omega(t)},\hspace{1cm} \text{with} \hspace{1cm} \Omega(t) = \sum_{k=1}^\infty \Omega_k (t)
+%\end{equation}
+%\begin{eqnarray}
+%	\Omega_1(t) &=& -i \int_0^t \de t' H(t'), \label{eq:ME1}\\
+%	\Omega_2(t) &=& -\frac{1}{2} \int_0^t \de t_1 \int_0^{t_1} \de t_2 \left[ H(t_1), H(t_2) \right]. \label{eq:ME2}
+%\end{eqnarray}
+%We can verify that, being $\Omega_{1,2}(t)$ anti-hermitian, the truncated evolutor is a unitary operator.
+%
+%Since solar neutrinos are ultra-relativistic, we can use the distance traveled $r$ within a time $t$ as evolution variable. We split the hamiltonian as
 
 \section{Neutrino propagation Hamiltonian}
 We follow in this section the notation of~\cite{Fantini:2018itu}.
@@ -309,43 +310,126 @@ Given that $R_{23}$ and $\Delta$ do not depend on position, they can be factoris
 	\mathcal{U} &=& \mathcal{T} e^{-i \int \de x H_\nu (x)} = \mathbb{1} + R_{23} \Delta^* \mathcal{T}\left[-i \int \de x \tilde{H}_\nu (x)\right] \Delta R_{23}^T +\\
 	&& \frac{1}{2} R_{23} \Delta^* \mathcal{T}\left[ \left(\left(-i\right)^2 \int \de x_1 \de x_2 \tilde{H}_\nu (x_1) \underbrace{\Delta R_{23}^T R_{23} \Delta^*}_{= \mathbb{1}}  \tilde{H}_\nu (x_2)\right)\right] \Delta R_{23}^T \\ 
 	&&  + \dots (\text{ other terms of the Dyson series for } n \rightarrow \infty ) \\
-	&=& R_{23} \Delta^* \mathcal{T} \left[ e^{- i \int \de x \tilde{H}(x)} \right] \Delta R_{23}^T. \label{eq:evolutor_factor}
+	&=& R_{23} \Delta^* \mathcal{T} \left[ e^{- i \int \de x \tilde{H}(x)} \right] \Delta R_{23}^T. \label{eq:evolutor_factor}\label{eq:evolutor_factorised}
 \end{eqnarray}
 
-\subsection{Magnus expansion of the neutrino propagation Hamiltonian}
+\subsection{Perturbative expansion of the neutrino propagation Hamiltonian}
 We are interested in an expression for the operator in Eq.~\ref{eq:evolutor_factor}
-\begin{equation}
+\begin{equation}\label{eq:evolutor_12-13}
 	\tilde{\mathcal{U}} = \mathcal{T} \left[ e^{- i \int \de l \tilde{H}(l)} \right],
 \end{equation}
-where $l$ is the coordinate along the neutrino path. We normalise distances to the Earth radius $R_E$, by defining $x = \l/R_E$. The Hamiltonian $\tilde{H}$ can be divided in a constant and a matter dependent terms
+where $l$ is the coordinate along the neutrino path. We normalise distances to the Earth radius $R_E$, by defining $x = \l/R_E$. The Hamiltonian $\tilde{H}$ can be divided in a kinetic and a matter dependent terms
 \begin{equation}
-	\tilde{H}(x) = \tilde{H}_0 + h(x).
+	\tilde{H}(x) = \tilde{H}_k + \sqrt{2} G_F n_e(x)\text{diag}(1,0,0),
 \end{equation}
+where $\tilde{H}_k$ does not depend on $x$.
 
-We can now calculate the first terms in the ME. To implement $\Omega_1$ in Eq.~\ref{eq:ME1}
-\begin{eqnarray}
-	\int_{l_1}^{l_2} \de l' \tilde{H}(l') &=& R_E \int_{x_1}^{x_2} \de x' \tilde{H}(x') = R_E \tilde{H}_0 \left(x_2 - x_1 \right) \label{eq:ME1}\\
-	&& + \sqrt{2} G_F R_E \left( \alpha' \left( x_2 - x_1 \right) + \frac{\beta'}{3} \left(x_2^3 - x_1^3\right) + \frac{\gamma'}{5} \left(x_2^5 - x_1^5\right) \right),\nonumber
-\end{eqnarray}
-where we assume the integration path is fully contained within a single Earth shell, so that the parametrisation Eq.~\ref{eq:earth_density_nadir} applies. We will discuss later on how the transition between shells is accounted for.
-
-For the second order term $\Omega_2$ in Eq.~\ref{eq:ME2}
+To work out a perturbative expression for $\mathcal{U}$, it is convenient to express the electron density as perturbation along its mean value along the path~\cite{Lisi:1997yc}
 \begin{equation}
-	R_E^2 \int_{x_1}^{x_2} \de x \int_{x_1}^x \de y \left[ \tilde{H}(x), \tilde{H}(y) \right] = R_E^2 \tilde{H}^{(2)} \int_{x_1}^{x_2} \de x \int_{x_1}^x \de y \left(h(x) - h(y) \right),
+	n_e(x) = \bar{n}_e + \delta n(x), \hspace{1cm} \bar{n}_e =\frac{1}{x_2-x_1} \int_{x_1}^{x_2} \de x \ n_e(x).
 \end{equation}
-where $\tilde{H}^{(2)}$ is the constant matrix with elements
-\begin{eqnarray}
-\tilde{H}^{(2)}_{12} &=& \left(k_2 - k_1\right) c_{12} c_{13} s_{12} = -\tilde{H}^{(2)}_{21}, \\
-\tilde{H}^{(2)}_{13} &=& \frac{1}{2} s_{13} c_{13} \left( \left(k_2-k_1 \right) \left(2 c_{12}^2 - 1 \right) + 2k_3 -k_1 - k_2 \right) = -\tilde{H}^{(2)}_{31},\\
-\tilde{H}^{(2)}_{23} &=& \tilde{H}^{(2)}_{32} = \tilde{H}^{(2)}_{ii} = 0.
-\end{eqnarray}
-The expressions specific for NO and IO can be easily obtained by means of the replacements Eq.s~\ref{eq:kinetic_NO},~\ref{eq:kinetic_IO}.
+from which it follows
+\begin{equation}
+	\int_{x_1}^{x_2} \de x\ \delta n(x) = 0.
+\end{equation} 
+We can analogously divide the Hamiltonian into a zeroth order term and a perturbation
+\begin{equation}
+	\tilde{H}(x) = \underbrace{\tilde{H}_k + \sqrt{2}G_F \bar{n}_e \text{diag}(1,0,0)}_{\tilde{H}_0} + \underbrace{\sqrt{2}G_F \delta n(x) \text{diag}(1,0,0)}_{\delta \tilde{H}(x)},
+\end{equation}
+where again $\tilde{H}_0$ does not depend on $x$.
 
-Assuming again that the path is fully contained within one shell, the integral gives
-\begin{equation}\label{eq:ME2}
-\int_{x_1}^{x_2} \de x \int_{x_1}^x \de y \left( h(x) - h(y) \right) = \frac{1}{30} \left( x_2 - x_1 \right)^3 \left( x_1 + x_2 \right)\left[ 5 \beta' + 2 \gamma' \left( 2 x_1^2 +  2x_2^2 + x_1 x_2 \right) \right]
+The evolutor can thus be expressed as~\cite{Lisi:1997yc}
+\begin{equation}
+	\mathcal{U}(x_2,x_1) = \bar{\mathcal{U}}(x_2,x_1) - i \int_{x_1}^{x_2} \de x\ \bar{\mathcal{U}}(x_2,x)\ \delta \tilde{H}(x)\ \bar{\mathcal{U}}(x,x_1) + \mathcal{O}(\delta\tilde{H}^2),\label{eq:evolutor_1}
 \end{equation}
-These relations allow to express the evolutor at 2nd order in ME, for a path fully contained within one shell. For paths crossing multiple shells, it can be noticed~\cite{Lisi:1997yc} that the full evolutor on a path $(x_1,x_2)$ can be expressed as a time-ordered product of evolutors along the same path
+where $\bar{\mathcal{U}}$ is the evolutor for constant matter density $\bar{n}_e$.
+
+In the mass basis,
+\begin{equation}\label{eq:Hmass}
+	\bar{H}_m = \text{diag}(k_1,k_2,k_3) + U^T \text{diag}(\sqrt{2}G_F \bar{n}_e, 0, 0) U,
+\end{equation}
+the evolutor for a constant Hamiltonian can generally be expressed in a closed form~\cite{Ohlsson:1999xb}
+\begin{equation}
+	e^{- i \bar{H}_m x} = \phi \sum_{a=1}^3 e^{-i x \lambda_a} \frac{1}{3\lambda_a^2 + c_1}\left[ \left(\lambda_a^2 + c_1\right) \mathbb{1} + \lambda_a T + T^2 \right] \equiv \phi \sum_{a=1}^3 e^{-i x \lambda_a} M_a,
+\end{equation}
+where $T = \bar{H}_m - \text{Tr}(\bar{H}_m) \mathbb{1}/3 $ is a traceless matrix. $\lambda_a$ are the roots of the characteristic equation
+\begin{eqnarray}
+\lambda_1 &=& - \sqrt{-\frac{1}{3} c_1} \cos \left[ \frac{1}{3}
+\arctan \left( \frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3}
+\right) \right] + \sqrt{-c_1} \sin \left[ \frac{1}{3} \arctan \left(
+\frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3} \right) \right],\\
+\lambda_2 &=& - \sqrt{-\frac{1}{3} c_1} \cos \left[ \frac{1}{3} \arctan
+\left( \frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3} \right)
+\right] - \sqrt{-c_1} \sin \left[ \frac{1}{3} \arctan \left(
+\frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3} \right) \right], \\
+\lambda_3 &=& 2 \sqrt{-\frac{1}{3} c_1} \cos \left[ \frac{1}{3} \arctan
+\left( \frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3} \right)
+\right]
+\end{eqnarray}
+with
+\begin{eqnarray}
+	c_1 &=& T_{11} T_{22} - T_{12} T_{21} + T_{11} T_{33} - T_{13} T_{31}
++ T_{22} T_{33} - T_{23} T_{32}, \\
+c_0 &=& - \det T.
+\end{eqnarray}
+Finally
+\begin{equation}
+	\phi = e^{- i x \frac{\text{Tr}(\bar{H}_m)}{3} }.
+\end{equation}
+
+In defining $\bar{H}_m$ in Eq.~\ref{eq:Hmass} we assumed the mixing matrix to be real, $U = U^*$, since the effect of CP-violation in neutrino oscillations can be factorised as in Eq.~\ref{eq:evolutor_factorised}.
+
+By noticing that the full dependence on $x$ in $e^{-i \bar{H}_m x}$ is now contained within the scalar functions $e^{- i \lambda_a x}$, the first order correction in Eq.~\ref{eq:evolutor_1} can be computed as
+\begin{eqnarray}
+\mathcal{U}^{(1)}_m(x_2,x_1) &=&	- i \int_{x_1}^{x_2} \de x\ \bar{\mathcal{U}}(x_2,x)\ \delta \tilde{H}(x)\ \bar{\mathcal{U}}(x,x_1) \\
+&=& - i \sum_{a,b=1}^3 \int_{x_1}^{x_2} \de x e^{- i \tilde{\lambda}_a (x_2-x)} M_a U^T \text{diag}\left(\sqrt{2} G_F \delta n(x),0,0\right) U M_b e^{- i \tilde{\lambda}_b (x-x_1)}\\
+&=& - i \sum_{a,b=1}^3 M_a U^T \text{diag}\left(\sqrt{2}G_F I_{ab}(x_2, x_1), 0, 0\right) U M_b,
+\end{eqnarray}
+where  $\tilde{\lambda}_a = \lambda_a + \text{Tr}(\bar{H}_m)/3$ and we defined
+\begin{equation}
+	I_{ab}(x_2,x_1) = \int_{x_1}^{x_2}\de x\ e^{- i \tilde{\lambda}_a (x_2-x)}\ \delta n(x)\ e^{- i \tilde{\lambda}_b (x-x_1)}.
+\end{equation}
+For a path fully contained within one shell, 
+\begin{equation}
+	\delta n (x) = \tilde{\alpha}' + \beta' x^2 + \gamma' x^4,
+\end{equation}
+where $\tilde{\alpha}' = \alpha' - \bar{n}_e$, and $I_{ab}$ can be expressed analytically in closed form.
+Finally, we rotate back to flavour basis
+\begin{equation}
+	\mathcal{U}_f(x_2,x_1) = U\ \mathcal{U}_m(x_2,x_1)\ U^T,
+\end{equation}
+obtaining
+\begin{eqnarray}
+\mathcal{U}_f(x_2,x_1) &=& \mathcal{U}^{(0)}_f(x_2,x_1) +\mathcal{U}^{(1)}_f(x_2,x_1) + \mathcal{O}(\delta \tilde{H}^2),\\
+\mathcal{U}^{(0)}_f(x_2,x_1) &=& 	e^{- i \bar{H}_f (x_2-x_1)} = \phi \sum_{a=1}^3 e^{-i (x_2-x_1) \lambda_a} U M_a U^T = \phi \sum_{a=1}^3 e^{-i (x_2-x_1) \lambda_a} \tilde{M}_a,\\
+\mathcal{U}^{(1)}_f(x_2,x_1) &=& - i \sum_{a,b=1}^3 \tilde{M}_a\ \text{diag}\left(\sqrt{2}G_F I_{ab}(x_2, x_1), 0, 0\right)\ \tilde{M}_b,
+\end{eqnarray}
+with $\tilde{M}_a = U M_a U^T$. In our code we implement these perturbative expressions to compute $\tilde{\mathcal{U}}$ in Eq.~\ref{eq:evolutor_12-13}, thus using a ``reduced'' mixing matrix $U = R_{13} R_{12}$, and subsequently use Eq.~\ref{eq:evolutor_factor} to obtain the full dynamics.
+
+%We can now calculate the first terms in the ME. To implement $\Omega_1$ in Eq.~\ref{eq:ME1}
+%\begin{eqnarray}
+%	\int_{l_1}^{l_2} \de l' \tilde{H}(l') &=& R_E \int_{x_1}^{x_2} \de x' \tilde{H}(x') = R_E \tilde{H}_0 \left(x_2 - x_1 \right) \label{eq:ME1}\\
+%	&& + \sqrt{2} G_F R_E \left( \alpha' \left( x_2 - x_1 \right) + \frac{\beta'}{3} \left(x_2^3 - x_1^3\right) + \frac{\gamma'}{5} \left(x_2^5 - x_1^5\right) \right),\nonumber
+%\end{eqnarray}
+%where we assume the integration path is fully contained within a single Earth shell, so that the parametrisation Eq.~\ref{eq:earth_density_nadir} applies. We will discuss later on how the transition between shells is accounted for.
+%
+%For the second order term $\Omega_2$ in Eq.~\ref{eq:ME2}
+%\begin{equation}
+%	R_E^2 \int_{x_1}^{x_2} \de x \int_{x_1}^x \de y \left[ \tilde{H}(x), \tilde{H}(y) \right] = R_E^2 \tilde{H}^{(2)} \int_{x_1}^{x_2} \de x \int_{x_1}^x \de y \left(h(x) - h(y) \right),
+%\end{equation}
+%where $\tilde{H}^{(2)}$ is the constant matrix with elements
+%\begin{eqnarray}
+%\tilde{H}^{(2)}_{12} &=& \left(k_2 - k_1\right) c_{12} c_{13} s_{12} = -\tilde{H}^{(2)}_{21}, \\
+%\tilde{H}^{(2)}_{13} &=& \frac{1}{2} s_{13} c_{13} \left( \left(k_2-k_1 \right) \left(2 c_{12}^2 - 1 \right) + 2k_3 -k_1 - k_2 \right) = -\tilde{H}^{(2)}_{31},\\
+%\tilde{H}^{(2)}_{23} &=& \tilde{H}^{(2)}_{32} = \tilde{H}^{(2)}_{ii} = 0.
+%\end{eqnarray}
+%The expressions specific for NO and IO can be easily obtained by means of the replacements Eq.s~\ref{eq:kinetic_NO},~\ref{eq:kinetic_IO}.
+%
+%Assuming again that the path is fully contained within one shell, the integral gives
+%\begin{equation}\label{eq:ME2}
+%\int_{x_1}^{x_2} \de x \int_{x_1}^x \de y \left( h(x) - h(y) \right) = \frac{1}{30} \left( x_2 - x_1 \right)^3 \left( x_1 + x_2 \right)\left[ 5 \beta' + 2 \gamma' \left( 2 x_1^2 +  2x_2^2 + x_1 x_2 \right) \right]
+%\end{equation}
+This procedure allows to express the evolutor at 1st order in $\delta H$, for a path fully contained within one shell. For paths crossing multiple shells, it can be noticed~\cite{Lisi:1997yc} that the full evolutor on a path $(x_1,x_2)$ can be expressed as a time-ordered product of evolutors along the same path
 \begin{equation}\label{eq:evolutor_product}
 	\mathcal{U}(x_2, x_1) = \mathcal{U}(x_2, x_i) \mathcal{U}(x_i, x_1),
 \end{equation}
@@ -361,7 +445,7 @@ Second, for detectors placed at surface, the Earth spherical symmetry implies th
 \begin{equation}
 	\mathcal{U}(x_F,x_I) = \mathcal{U}(x_F, 0) \mathcal{U}(0, - x_F) = \mathcal{U}(x_F, 0) \mathcal{U}(x_F, 0)^T.
 \end{equation}
-Eq.s~\ref{eq:ME1},~\ref{eq:ME2} allow thus to express $\mathcal{U}$ as a function of $\eta$.
+Notice that the final evolutor is only a function of $\eta$, since both the density profile and travelled distance within Earth are a function of the nadir angle.
 
 If the detector is placed underground at trajectory coordinate $x_{det} < x_F$, we distinguish two cases. For $0 \leq \eta < \pi/2$
 \begin{equation}
@@ -373,7 +457,7 @@ where $x_{det} = \sqrt{r_{det}^2 - \sin\eta^2}$. For $\pi/2 \leq \eta \leq \pi$ 
 \end{equation}
 We fix for simplicity the electron density value to the one at Earth radius, $n_1 = 1.67$ mol/cm${^3}$. Having assumed constant density along the path, the evolutor is simply given by
 \begin{equation}
-	\tilde{\mathcal{U}}(\eta) = e^{-i R_E \Delta x(\eta) \left(\tilde{H}_0 + \text{diag}\left(\sqrt{2}G_F n_1, 0, 0\right) \right)}, \hspace{0.5cm} \left(\frac{\pi}{2} \leq \eta < \pi \right)
+	\tilde{\mathcal{U}}(\eta) = e^{-i R_E \Delta x(\eta) \left(\tilde{H}_0 + \text{diag}\left(\sqrt{2}G_F n_1, 0, 0\right) \right)}, \hspace{0.5cm} \left(\frac{\pi}{2} \leq \eta < \pi \right).
 \end{equation}
 
 \bibliographystyle{JHEP}

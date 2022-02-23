@@ -7,18 +7,23 @@ Created on Thu Feb 10 14:41:03 2022
 """
 
 import numpy as np
-from math import sin, cos
+from math import cos, sin
 
-def EarthDensity (x = 0, eta = 0, integrated = False): 
+
+def EarthDensity (x = 0, eta = 0, parameters = False): 
     """EarthDensity(x, eta, integrated) computes:
-    - if integrated = False: the value of Earth electron density in units of mol/cm^3 for trajectory coordinate 
+    - if parameters == False: the value of Earth electron density in units of mol/cm^3 for trajectory coordinate 
     x and nadir angle eta;
-    -if integrated = True: the integrated electron density along each shell crossed by a path with nadir angle 
-    eta.
-See hep-ph/9702343 for the definition of trajectory coordinate."""
+    - if parameters == True: a list of lists, where each element [[a, b, c], x_i] refers to a Earth shell 
+    (from inner to outer layers) having density profile n_e(x) = a + b x^2 + c x^4, with shell external boundary 
+    at x == x_i.
+See hep-ph/9702343 for the definition of trajectory coordinate and Earth density parametrisation."""
+    
+    # The density profile is symmetric with respect to x=0 
+    x = np.abs(x)
     
     # If x > cos(eta) the trajectory coordinate is beyond Earth surface, thus density is zero.
-    if ((~integrated) & (x > cos(eta))):
+    if ((~parameters) & (x > cos(eta))):
         return 0
     else:
         # Define the Earth density parametrisation, in units of mol/cm^3, following hep-ph/9702343
@@ -43,16 +48,11 @@ See hep-ph/9702343 for the definition of trajectory coordinate."""
         # The index "idx" determines within which shell xj[idx] the point x is
         idx = np.searchsorted(xj, x)
         
-        # If integrated = true, the function returns the values of the integrated electron densities for the
-        # path along each crossed shell
-        if integrated:
-            # Define xj_zero, a list containing the values of trajectory coordinates for each shell boundary
-            # (including the lower end x = 0), user to perform integration on each shell
-            xj_zero = np.insert(xj, 0, 0)
-            
-            # Return the value of the integrated density along each crossed shell
-            return [(alpha_prime[i] * (xj_zero[i+1] - xj_zero[i]) + beta_prime[i] * (xj_zero[i+1]**3 - xj_zero[i]**3) / 3 + gamma_prime[i] * (xj_zero[i+1]**5 - xj_zero[i]**5) / 5) for i in range(len(alpha_prime))]
+        # If parameters == true, the function returns the values of the density parameters for the shells 
+        # crossed by the path with nadir angle = eta
+        if parameters:
+            return [ [ [alpha_prime[i], beta_prime[i], gamma_prime[i]], xj[i] ] for i in range(len(alpha_prime))]
        
-        # If integrated = False, return the value of electron density at trajectory point x for nadir angle eta
+        # If parameters == False, return the value of electron density at trajectory point x for nadir angle = eta
         else:
             return alpha_prime[idx] + beta_prime[idx] * x**2 + gamma_prime[idx] * x**4

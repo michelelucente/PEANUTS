@@ -44,7 +44,7 @@ See also Eq. 1.22 in FiuzadeBarros:2011qna."""
 
 # Compute survival probability at Sun surface for fixed energy and electron density
 def Pnuenue (th12, th13, DeltamSq21, DeltamSq31, E, ne):
-    """Pnuenue(th12, th13, DeltamSq21, DeltamSq31, E, ne) computes the survival probability of an electron
+    """Pnuenue(th12, th13, DeltamSq21, DeltamSq31, E, ne) computes the survival probability of an electron neutrino
     neutrino at the Sun surface in the adiabatic approximation, as a function of vacuum oscillation parameters.
     - th1j are the vacuum mixing angles in radians;
     - DeltamSqj1 are the vacuum squared mass difference between mass eigenstates 2 and 1;
@@ -59,7 +59,7 @@ See also Eq. 6.14 in FiuzadeBarros:2011qna."""
 # Compute the survival probability at Sun surface for a given reaction, integrated over the production point
 def PnuenueReaction (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction):
     """PnuenueReaction (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction) computes the
-    survival probability at Sun surface for an electron neutrino with energy E produced in a specific reaction.
+    survival probability at Sun surface for an electron with energy E produced in a specific reaction.
     - th1j are the vacuum mixing angles in radians;
     - DeltamSqj1 are the vacuum squared mass difference between mass eigenstates 2 and 1;
     - E is the neutrino energy, in units of MeV;

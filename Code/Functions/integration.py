@@ -7,8 +7,8 @@ Created on Wed Feb 23 11:35:15 2022
 """
 
 import numpy as np
-from math import sin, cos, sqrt, atan
-from cmath import exp
+from math import cos
+from cmath import exp, sqrt
 
 from potentials import k, MatterPotential
 
@@ -48,6 +48,7 @@ See hep-ph/9910546 for the full context of the definition."""
   3*(k1 + k2 - 2*k3)*V*cos(2*th13))/12
 
 
+
 # Computes the solutions of the characteristic equation for the matrix T = H - Tr(H)/3, cf. hep-ph/9910546 
 def lambdas (c0, c1):
     """lambdas(c0, c1) computes the solutions (roots) of the characteristic equation for the matrix 
@@ -58,13 +59,12 @@ def lambdas (c0, c1):
     
     The function returns a list containing the 3 roots.
 See hep-ph/9910546 for the full context of the definition."""
-    l1 = -(sqrt(-(1/3) * c1)*cos(1/3 * atan(1/c0 * sqrt(-c0**2 - 4/27 * c1**3))) + 
-   sqrt(-c1) * sin(1/3 * atan(1/c0 * sqrt(-c0**2 - 4/27 * c1**3))))
-    l2 = -( sqrt(-(1/3) * c1)*cos(1/3 * atan(1/c0 * sqrt(-c0**2 - 4/27 * c1**3))) - 
-   sqrt(-c1) * sin(1/3 * atan(1/c0 * sqrt(-c0**2 - 4/27 * c1**3))))
-    l3 = (2 * sqrt(-(1/3) * c1) * cos(1/3 * atan(1/c0 * sqrt(-c0**2 - 4/27 * c1**3))) )
+    l1 = (-2*3**(1/3)*c1 + 2**(1/3)*(-9*c0 + sqrt(81*c0**2 + 12*c1**3))**(2/3))/(6**(2/3)*(-9*c0 + sqrt(81*c0**2 + 12*c1**3))**(1/3))
+    l2 = ((-1)**(1/3)*(2*3**(1/3)*c1 + (-2)**(1/3)*(-9*c0 + sqrt(81*c0**2 + 12*c1**3))**(2/3)))/(6**(2/3)*(-9*c0 + sqrt(81*c0**2 + 12*c1**3))**(1/3))
+    l3 = -(((-1)**(1/3)*(2*(-3)**(1/3)*c1 + 2**(1/3)*(-9*c0 + sqrt(81*c0**2 + 12*c1**3))**(2/3)))/(6**(2/3)*(-9*c0 + sqrt(81*c0**2 + 12*c1**3))**(1/3)))
     
     return [l1, l2, l3]
+
 
 
 

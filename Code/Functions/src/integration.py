@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Feb 23 11:35:15 2022
+Created on Feb 23 2022
 
 @author: Michele Lucente <lucente@physik.rwth-aachen.de>
 """
@@ -10,7 +10,7 @@ import numpy as np
 from math import cos
 from cmath import exp, sqrt
 
-from potentials import k, MatterPotential
+from src.potentials import k, MatterPotential
 
 
 # Computes coefficients of the characteristic equation for the matrix T = H - Tr(H)/3, cf. hep-ph/9910546 

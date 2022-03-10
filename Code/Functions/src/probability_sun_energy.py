@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Feb  7 09:59:59 2022
+Created on Feb 7 2022
 
 @author: Michele Lucente <lucente@physik.rwth-aachen.de>
 """
@@ -43,8 +43,8 @@ See also Eq. 1.22 in FiuzadeBarros:2011qna."""
 
 
 # Compute survival probability at Sun surface for fixed energy and electron density
-def Pnuenue (th12, th13, DeltamSq21, DeltamSq31, E, ne):
-    """Pnuenue(th12, th13, DeltamSq21, DeltamSq31, E, ne) computes the survival probability of an electron neutrino
+def PnuenueSun (th12, th13, DeltamSq21, DeltamSq31, E, ne):
+    """PnuenueSun(th12, th13, DeltamSq21, DeltamSq31, E, ne) computes the survival probability of an electron neutrino
     neutrino at the Sun surface in the adiabatic approximation, as a function of vacuum oscillation parameters.
     - th1j are the vacuum mixing angles in radians;
     - DeltamSqj1 are the vacuum squared mass difference between mass eigenstates 2 and 1;
@@ -57,8 +57,8 @@ See also Eq. 6.14 in FiuzadeBarros:2011qna."""
 
 
 # Compute the survival probability at Sun surface for a given reaction, integrated over the production point
-def PnuenueReaction (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction):
-    """PnuenueReaction (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction) computes the
+def PnuenueSunReaction (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction):
+    """PnuenueSunReaction (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction) computes the
     survival probability at Sun surface for an electron with energy E produced in a specific reaction.
     - th1j are the vacuum mixing angles in radians;
     - DeltamSqj1 are the vacuum squared mass difference between mass eigenstates 2 and 1;
@@ -68,6 +68,6 @@ def PnuenueReaction (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, dens
     - fraction is the relative fraction of neutrinos produced in the considered reaction, sampled at radius_samples."""
     
     IntegratedFraction = integrate.trapezoid(y=fraction, x=radius_samples)
-    PnuenueRadius = np.array([Pnuenue(th12, th13, DeltamSq21, DeltamSq31, E, ne_r) for ne_r in density])
+    PnuenueSunRadius = np.array([PnuenueSun(th12, th13, DeltamSq21, DeltamSq31, E, ne_r) for ne_r in density])
     
-    return integrate.trapezoid(y=(PnuenueRadius * fraction), x = radius_samples) / IntegratedFraction
+    return integrate.trapezoid(y=(PnuenueSunRadius * fraction), x = radius_samples) / IntegratedFraction

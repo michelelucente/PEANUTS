@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Feb 23 11:36:24 2022
+Created on Feb 23 2022
 
 @author: Michele Lucente <lucente@physik.rwth-aachen.de>
 """
@@ -11,21 +11,18 @@ from numpy.linalg import multi_dot
 from math import sin, cos, sqrt, pi
 from cmath import exp
 
-from pmns import R12, R13, R23, Delta
-from potentials import k, MatterPotential, R_E
-from integration import c0, c1, lambdas, Iab
-from earth_density import EarthDensity
+from src.potentials import k, MatterPotential, R_E
+from src.integration import c0, c1, lambdas, Iab
 
-
-def Upert (m1Sq, m2Sq, m3Sq, E, th12, th13, x2=1, x1=0, a=0, b=0, c=0):
-    """Upert(m1Sq, m2Sq, m3Sq, E, th12, th13, x2=1, x1=0, a=0, b=0, c=0, order = 1) computes the evolutor
+def Upert (m1Sq, m2Sq, m3Sq, pmns, E, x2=1, x1=0, a=0, b=0, c=0):
+    """Upert(m1Sq, m2Sq, m3Sq, pmns, E,  x2=1, x1=0, a=0, b=0, c=0, order = 1) computes the evolutor
     for an ultrarelativistic neutrino state in flavour basis, for a reduced mixing matrix U = R_{13} R_{12}
     (the dependence on th_{23} and CP-violating phase \delta_{CP} can be factorised) for a density profile 
     parametrised by a 4th degree even poliomial in the trajectory coordinate, to 1st order corrections around
     the mean density value:
     - miSq are the squared masses (or mass differences) in units of eV^2;
+    - pmns is the PMNS matrix;
     - E is the neutrino energy, in units of MeV;
-    - thij are the PMNS mixing angles;
     - x1 (x2) is the starting (ending) point in the path;
     - a, b, c parametrise the density profile on the path, n_e(x) = a + b x^2 + c x^4.
 See hep-ph/9702343 for the definition of the perturbative expansion of the evolutor in a 2-flavours case."""
@@ -47,7 +44,7 @@ See hep-ph/9702343 for the definition of the perturbative expansion of the evolu
     L = (x2 - x1)
 
     # Reduced mixing matrix U = R_{13} R_{12}
-    U = np.dot(R13(th13), R12(th12))
+    U = pmns.U
     
     # Hamiltonian in the reduced flavour basis
     H = multi_dot([U, np.diag([k1, k2, k3]), U.transpose()]) + np.diag([V, 0, 0])
@@ -57,8 +54,8 @@ See hep-ph/9702343 for the definition of the perturbative expansion of the evolu
     T = H - tr/3 * np.identity(3)
 
     # Coefficients of the characteristic equation for T
-    c0_loc = c0(m1Sq, m2Sq, m3Sq, th12, th13, E, naverage)
-    c1_loc = c1(m1Sq, m2Sq, m3Sq, th12, th13, E, naverage)
+    c0_loc = c0(m1Sq, m2Sq, m3Sq, pmns.theta12, pmns.theta13, E, naverage)
+    c1_loc = c1(m1Sq, m2Sq, m3Sq, pmns.theta12, pmns.theta13, E, naverage)
 
     # Roots of the characteristic equation for T
     lam = lambdas(c0_loc, c1_loc)
@@ -84,12 +81,13 @@ See hep-ph/9702343 for the definition of the perturbative expansion of the evolu
 
 
 
-def FullEvolutor (m1Sq, m2Sq, m3Sq, E, th12, th13, th23, d, eta, H):
-    """FullEvolutor(m1Sq, m2Sq, m3Sq, E, th12, th13, eta, H) computes the full evolutor for an ultrarelativistic
+def FullEvolutor (density, m1Sq, m2Sq, m3Sq, pmns, E, eta, H):
+    """FullEvolutor(density, m1Sq, m2Sq, m3Sq, pmns, E, eta, H) computes the full evolutor for an ultrarelativistic
     neutrino crossing the Earth:
+    - density is the Earth density object
     - miSq are the squared masses (or mass differences) in units of eV^2;
+    - pmns is the PMNS matrix
     - E is the neutrino energy, in units of MeV;
-    - thij are the PMNS mixing angles;
     - d is the CP-violating PMNS phase;
     - eta is the nadir angle;
     - H is the underground detector depth, in units of meters."""
@@ -103,18 +101,18 @@ def FullEvolutor (m1Sq, m2Sq, m3Sq, E, th12, th13, th23, d, eta, H):
     
     # Compute the factorised matrices R_{23} and \Delta 
     # (remember that U_{PMNS} = R_{23} \Delta R_{13} \Delta^* R_{12})
-    r23= R23(th23)
-    delta = Delta(d)
+    r23= pmns.R23(pmns.theta23)
+    delta = pmns.Delta(pmns.delta)
     
     # If 0 <= eta < pi/2 we compute the evolutor taking care of matter density perturbation around the
     # density mean value at first order
     if 0 <= eta < pi/2:
         # params is a list of lists, each element [[a, b, c], x_i] contains the parameters of the density 
         # profile n_e(x) = a + b x^2 + c x^4 along the crossed shell, with each shell ending at x == x_i
-        params = EarthDensity(eta=eta, parameters=True)
+        params = density.parameters(eta)
 
         # Compute the evolutors for the path from Earth entry point to trajectory mid-point at x == 0
-        evolutors_full_path = [Upert(m1Sq, m2Sq, m3Sq, E, th12, th13, params[i][1], params[i-1][1] if i > 0 else 0, 
+        evolutors_full_path = [Upert(m1Sq, m2Sq, m3Sq, pmns, E, params[i][1], params[i-1][1] if i > 0 else 0, 
                            params[i][0][0], params[i][0][1], params[i][0][2]) for i in reversed(range(len(params)))]
 
         # Multiply the single evolutors
@@ -124,7 +122,7 @@ def FullEvolutor (m1Sq, m2Sq, m3Sq, E, th12, th13, th23, d, eta, H):
         # Compute the evolutors for the path from the trajectory mid-point at x == 0 to the detector point x_d
         # Only the evolutor for the most external shell needs to be computed
         evolutors_to_detectors = evolutors_full_path.copy()
-        evolutors_to_detectors[0] = Upert(m1Sq, m2Sq, m3Sq, E, th12, th13, x_d, params[-2][1] if len(params) > 1 else 0, 
+        evolutors_to_detectors[0] = Upert(m1Sq, m2Sq, m3Sq, pmns, E, x_d, params[-2][1] if len(params) > 1 else 0, 
                            params[-1][0][0], params[-1][0][1], params[-1][0][2])
 
         # Multiply the single evolutors
@@ -138,7 +136,8 @@ def FullEvolutor (m1Sq, m2Sq, m3Sq, E, th12, th13, th23, d, eta, H):
 
     # If pi/2 <= eta <= pi we approximate the density to the constant value taken at r = 1 - h/2
     elif pi/2 <= eta <= pi:
-        n_1 = EarthDensity(x = 1 - h / 2)
+        #n_1 = EarthDensity(x = 1 - h / 2) TODO: eta = 0?
+        n_1 = density(1 - h/2, 0)
 
         # Deltax is the lenght of the crossed path
         Deltax = r_d * cos(eta) + sqrt(1 - r_d**2 * sin(eta)**2)
@@ -146,7 +145,7 @@ def FullEvolutor (m1Sq, m2Sq, m3Sq, E, th12, th13, th23, d, eta, H):
         # Compute the evolutor for constant density n_1 and traveled distance Deltax,
         # and include the factorised dependence on th23 and d to obtain the full evolutor
         evolutor = multi_dot([r23, delta.conjugate(), 
-                              Upert(m1Sq, m2Sq, m3Sq, E, th12, th13, Deltax, 0, n_1, 0, 0), 
+                              Upert(m1Sq, m2Sq, m3Sq, pmns, E, Deltax, 0, n_1, 0, 0), 
                               delta, r23.transpose()])
         return evolutor
 

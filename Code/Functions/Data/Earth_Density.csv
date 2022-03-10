@@ -1,0 +1,11 @@
+# Earth density parametrisation, in units of mol/cm^3, following hep-ph/9702343
+# In each layer N_j = alpha_j + beta_j*r_j**2 + gamma_j*r_j**4 
+# Radius  alpha  beta  gamma
+
+0.192, 6.099, -4.119, 0
+0.546, 5.803, -3.653, -1.086
+0.895, 3.156, -1.459, 0.280
+0.937, -5.376, 19.210, -12.520
+1, 11.540, -20.280, 10.410
+
+

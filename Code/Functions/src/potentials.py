@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Feb 23 11:34:45 2022
+Created on Feb 23 2022
 
 @author: Michele Lucente <lucente@physik.rwth-aachen.de>
 """

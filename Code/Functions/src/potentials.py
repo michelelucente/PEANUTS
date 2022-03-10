@@ -10,14 +10,12 @@ Created on Feb 23 2022
 # multiplied by R_E
 R_E = 6.371e6 # meters
 
-
 # Matter potential
 def MatterPotential (n):
     """MatterPotential(n) computes the matter potential due to an electron density n, expressed in mol/cm^3
 See Eq. 4.17 in 1802.05781."""
     # n in mol / cm^3
     return R_E * 3.868e-7 * n
-
 
 # Kinetic potential
 def k(mSq, E):

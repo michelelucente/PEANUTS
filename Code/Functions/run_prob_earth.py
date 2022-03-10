@@ -14,8 +14,7 @@ from optparse import OptionParser
 
 import src.files as f
 from src.pmns import PMNS
-from src.earth_density import EarthDensity
-from src.earth_regeneration import PnuenueEarth, PnuenueEarth_analytical
+from src.earth import EarthDensity, Pearth, Pearth_analytical
 
 mainfilename = 'run_prob_earth'
 
@@ -68,12 +67,12 @@ earth_density = EarthDensity(density_file)
 # Check if analytical solution was requested
 if options.analytical:
   print("Using analytical computation")
-  prob = PnuenueEarth_analytical(earth_density, pmns, DeltamSq21, DeltamSq31, eta, E, H)
+  prob = Pearth_analytical(earth_density, pmns, DeltamSq21, DeltamSq31, eta, E, H)
 
 # Otherwise use numerical solution
 else:
  print("Using numerical computation")
- prob = PnuenueEarth(earth_density, pmns, DeltamSq21, DeltamSq31, eta, E, H)
+ prob = Pearth(earth_density, pmns, DeltamSq21, DeltamSq31, eta, E, H)
 
 
 print("Probability of survival of electron neutrinos with nadir angle eta =", eta, "and energy E =", E, "at ", H, "meters below the surface of the Earth is", prob)

@@ -12,8 +12,7 @@ from optparse import OptionParser
 
 import src.files as f
 from src.pmns import PMNS
-from src.solar_model import SolarModel
-from src.probability_sun_energy import PnuenueSunReaction
+from src.solar import SolarModel, Psolar
 
 mainfilename = 'run_prob_sun'
 
@@ -62,7 +61,7 @@ DeltamSq21 = nu_params['dm21']
 DeltamSq31 = nu_params['dm31']
 
 # Compute probability for the given sample fraction and energy
-prob = PnuenueSunReaction(th12, th13, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction[nu_fraction])
+prob = Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction[nu_fraction])
 
 # TODO: Which unit do we expect the energy?
 print("Probability of electron neutrinos of sample fraction", nu_fraction, "with energy E =", E, "at Sun exit is", prob)

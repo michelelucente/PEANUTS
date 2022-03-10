@@ -14,8 +14,7 @@ from optparse import OptionParser
 
 import src.files as f
 from src.pmns import PMNS
-from src.solar_model import SolarModel
-from src.probability_sun_energy import PnuenueSunReaction
+from src.solar import SolarModel, Psolar
 
 mainfilename = 'run_SNO_test'
 
@@ -68,8 +67,8 @@ ne = 100 # TODO: What is this for?
 
 # Compute probability for the sample fractions '8B' and 'hep' in the energy ragnge E=[1,20]
 xrange = np.arange(1,20,0.1)
-ProbB8 = [PnuenueSunReaction(th12, th13, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['8B']) for E in xrange]
-Probhep = [PnuenueSunReaction(th12, th13, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['hep']) for E in xrange]
+ProbB8 = [Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['8B']) for E in xrange]
+Probhep = [Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['hep']) for E in xrange]
 
 # Use SNO's example data files for comparison
 SNO_B8 = f.read_csv("./Data/B8.csv", names=['energy', 'Pnuenue'])
@@ -107,7 +106,7 @@ plt.show()
 # Test Earth density profiles
 #############################
 from math import pi
-from src.earth_density import EarthDensity
+from src.earth import EarthDensity
 
 x = np.arange(0,1,0.001)
 eta = [0, pi/6, pi/4, pi/3]
@@ -128,7 +127,7 @@ plt.show()
 
 # Test Earth regeneration
 #########################
-from src.earth_regeneration import PneunueEarth, PnuenueEarth_analytical
+from src.earth import Pearth, Pearth_analytical
 
 # Use SNO location for comparison
 H = 2e3 # meters
@@ -137,10 +136,10 @@ H = 2e3 # meters
 eta = np.random.uniform(0, pi/2)
 E = np.random.uniform(1,20)
 
-One_num = PnuenueEarth(earth_density, pmns, DeltamSq21, DeltamSq31, eta, E, H)
+One_num = Pearth(earth_density, pmns, DeltamSq21, DeltamSq31, eta, E, H)
 
 # Check analytical solution
-One_an = PnuenueEarth_analytical(earth_density, pmns, DeltamSq21, DeltamSq31, eta, E, H)
+One_an = Pearth_analytical(earth_density, pmns, DeltamSq21, DeltamSq31, eta, E, H)
 
 err = np.linalg.norm(One_num - One_an)/np.linalg.norm(One_num + One_an)
 

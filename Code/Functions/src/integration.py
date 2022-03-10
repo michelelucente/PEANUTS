@@ -8,7 +8,8 @@ Created on Feb 23 2022
 
 import numpy as np
 from math import cos
-from cmath import exp, sqrt
+from cmath import exp
+from cmath import sqrt as csqrt
 
 from src.potentials import k, MatterPotential
 
@@ -17,10 +18,10 @@ from src.potentials import k, MatterPotential
 def c0 (m1Sq, m2Sq, m3Sq, th12, th13, E, n):
     """c0(m1Sq, m2Sq, m3Sq, E, n) computes the coefficient c_0 defined in hep-ph/9910546, for the specific case
     in which the mixing matrix is the reduced one U = R_{13} R_{12}:
-    - miSq are the squared masses (or mass differences) in units of eV^2;
+    - miSq are the squared masses (or mass differences) in units of eV**2;
     - thij are the PMNS mixing angles;
     - E is the neutrino energy, in units of MeV;
-    - n is the electron matted density, in units of mol/cm^3.
+    - n is the electron matted density, in units of mol/cm**3.
 See hep-ph/9910546 for the full context of the definition."""
     [k1, k2, k3] = k(np.array([m1Sq, m2Sq, m3Sq]), E)
     V = MatterPotential(n)
@@ -35,10 +36,10 @@ See hep-ph/9910546 for the full context of the definition."""
 def c1(m1Sq, m2Sq, m3Sq, th12, th13, E, n):
     """c1(m1Sq, m2Sq, m3Sq, E, n) computes the coefficient c_1 defined in hep-ph/9910546, for the specific case
     in which the mixing matrix is the reduced one U = R_{13} R_{12}:
-    - miSq are the squared masses (or mass differences) in units of eV^2;
+    - miSq are the squared masses (or mass differences) in units of eV**2;
     - thij are the PMNS mixing angles;
     - E is the neutrino energy, in units of MeV;
-    - n is the electron matted density, in units of mol/cm^3.
+    - n is the electron matted density, in units of mol/cm**3.
 See hep-ph/9910546 for the full context of the definition."""
     [k1, k2, k3] = k(np.array([m1Sq,m2Sq,m3Sq]), E)
     V = MatterPotential(n)
@@ -46,7 +47,6 @@ See hep-ph/9910546 for the full context of the definition."""
     return (-4*(k1**2 - k1*k2 + k2**2 - (k1 + k2)*k3 + k3**2) + (k1 + k2 - 2*k3)*V - 
   4*V**2 + 6*(-k1 + k2)*V*cos(2*th12)*cos(th13)**2 - 
   3*(k1 + k2 - 2*k3)*V*cos(2*th13))/12
-
 
 
 # Computes the solutions of the characteristic equation for the matrix T = H - Tr(H)/3, cf. hep-ph/9910546 
@@ -59,22 +59,21 @@ def lambdas (c0, c1):
     
     The function returns a list containing the 3 roots.
 See hep-ph/9910546 for the full context of the definition."""
-    l1 = (-2*3**(1/3)*c1 + 2**(1/3)*(-9*c0 + sqrt(81*c0**2 + 12*c1**3))**(2/3))/(6**(2/3)*(-9*c0 + sqrt(81*c0**2 + 12*c1**3))**(1/3))
-    l2 = ((-1)**(1/3)*(2*3**(1/3)*c1 + (-2)**(1/3)*(-9*c0 + sqrt(81*c0**2 + 12*c1**3))**(2/3)))/(6**(2/3)*(-9*c0 + sqrt(81*c0**2 + 12*c1**3))**(1/3))
-    l3 = -(((-1)**(1/3)*(2*(-3)**(1/3)*c1 + 2**(1/3)*(-9*c0 + sqrt(81*c0**2 + 12*c1**3))**(2/3)))/(6**(2/3)*(-9*c0 + sqrt(81*c0**2 + 12*c1**3))**(1/3)))
+    l1 = (-2*3**(1/3)*c1 + 2**(1/3)*(-9*c0 + csqrt(81*c0**2 + 12*c1**3))**(2/3))/(6**(2/3)*(-9*c0 + csqrt(81*c0**2 + 12*c1**3))**(1/3))
+    l2 = ((-1)**(1/3)*(2*3**(1/3)*c1 + (-2)**(1/3)*(-9*c0 + csqrt(81*c0**2 + 12*c1**3))**(2/3)))/(6**(2/3)*(-9*c0 + csqrt(81*c0**2 + 12*c1**3))**(1/3))
+    l3 = -(((-1)**(1/3)*(2*(-3)**(1/3)*c1 + 2**(1/3)*(-9*c0 + csqrt(81*c0**2 + 12*c1**3))**(2/3)))/(6**(2/3)*(-9*c0 + csqrt(81*c0**2 + 12*c1**3))**(1/3)))
     
     return [l1, l2, l3]
-
 
 
 
 # Compute the integrals required for the first order correction in the evolutor
 def Iab (la, lb, atilde, b, c, x2, x1):
     """Iab(la, lb, atilde, b, c, x2, x1) computes the definite integral: 
-    \int_x1^x2 dx e^{- i la (x2-x)} (atilde + b x^2 + c x^4) e^{- i lb (x-x1)}.
+    \int_x1**x2 dx e**{- i la (x2-x)} (atilde + b x**2 + c x**4) e**{- i lb (x-x1)}.
     
-    It is assumed that the integral of (atilde + b x^2 + c x^4) vanished on the considered interval, i.e.
-    atilde (x2-x1) + b (x2^3 -x1^3)/3 + c (x2^5 - x1^5)/5 = 0.
+    It is assumed that the integral of (atilde + b x**2 + c x**4) vanished on the considered interval, i.e.
+    atilde (x2-x1) + b (x2**3 -x1**3)/3 + c (x2**5 - x1**5)/5 = 0.
     
     The integral is identically zero if la == lb.
     

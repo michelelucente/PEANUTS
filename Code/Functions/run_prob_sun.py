@@ -19,6 +19,7 @@ mainfilename = 'run_prob_sun'
 parser = OptionParser()
 parser.add_option("-v", "--verbose", help = "Print debug output", action='store_true', dest='verbose', default=False)
 parser.add_option("-s", "--solar", help ="Add custom solar model", action='store', dest="solar", default="")
+parser.add_option("-f", "--flavour", help="Neutrino flavour", action='store', dest='flav', default="")
 (options, args) = parser.parse_args()
 if len(args) < 3 :
   print('Wrong number of arguments \n\
@@ -64,4 +65,13 @@ DeltamSq31 = nu_params['dm31']
 prob = Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction[nu_fraction])
 
 # TODO: Which unit do we expect the energy?
-print("Probability of electron neutrinos of sample fraction", nu_fraction, "with energy E =", E, "at Sun exit is", prob)
+if options.flav == '':
+  print("Probabilities of neutrinos of sample fraction", nu_fraction, "with energy E =", E, "at Sun exit is", prob)
+elif options.flav == 'e':
+  print("Probabilities of electron neutrinos of sample fraction", nu_fraction, "with energy E =", E, "at Sun exit is", prob[0])
+elif options.flav == 'mu':
+  print("Probabilities of muon neutrinos of sample fraction", nu_fraction, "with energy E =", E, "at Sun exit is", prob[1])
+elif options.flav == 'tau':
+  print("Probabilities of tau neutrinos of sample fraction", nu_fraction, "with energy E =", E, "at Sun exit is", prob[2])
+else:
+  print("Error: Unknown neutrino flavour")

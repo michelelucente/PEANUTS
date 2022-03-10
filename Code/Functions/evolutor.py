@@ -8,7 +8,7 @@ Created on Wed Feb 23 11:36:24 2022
 
 import numpy as np
 from numpy.linalg import multi_dot
-from math import sin, cos, sqrt, pi
+from math import sin, asin, cos, sqrt, pi
 from cmath import exp
 
 from pmns import R12, R13, R23, Delta
@@ -84,6 +84,8 @@ See hep-ph/9702343 for the definition of the perturbative expansion of the evolu
 
 
 
+
+
 def FullEvolutor (m1Sq, m2Sq, m3Sq, E, th12, th13, th23, d, eta, H):
     """FullEvolutor(m1Sq, m2Sq, m3Sq, E, th12, th13, eta, H) computes the full evolutor for an ultrarelativistic
     neutrino crossing the Earth:
@@ -94,12 +96,16 @@ def FullEvolutor (m1Sq, m2Sq, m3Sq, E, th12, th13, th23, d, eta, H):
     - eta is the nadir angle;
     - H is the underground detector depth, in units of meters."""
     
-    # Detector depth normalised to Earth radius
-    h = H/R_E
+    # If the detector is on the surface and neutrinos are coming from above the horizon, there is no
+    # matter effect
+    if H == 0 and (pi/2 <= eta <= pi):
+        return np.identity(3)
     
-    # Position of the detector along the trajectory coordinate
+    # Detector depth normalised to Earth radius
+    h = H / R_E
+    
+    # Position of detector the on a radial path
     r_d = 1 - h # This is valid for eta = 0
-    x_d = sqrt(r_d**2 - sin(eta)**2) # For generic values of eta
     
     # Compute the factorised matrices R_{23} and \Delta 
     # (remember that U_{PMNS} = R_{23} \Delta R_{13} \Delta^* R_{12})
@@ -109,9 +115,16 @@ def FullEvolutor (m1Sq, m2Sq, m3Sq, E, th12, th13, th23, d, eta, H):
     # If 0 <= eta < pi/2 we compute the evolutor taking care of matter density perturbation around the
     # density mean value at first order
     if 0 <= eta < pi/2:
+        # Nadir angle if the detector was on surface
+        eta_prime = asin(r_d * sin(eta))
+        
+        # Position of the detector along the trajectory coordinate
+        # x_d = sqrt(r_d**2 - sin(eta)**2) -- wrong old definition
+        x_d = r_d * cos(eta)
+        
         # params is a list of lists, each element [[a, b, c], x_i] contains the parameters of the density 
         # profile n_e(x) = a + b x^2 + c x^4 along the crossed shell, with each shell ending at x == x_i
-        params = EarthDensity(eta=eta, parameters=True)
+        params = EarthDensity(eta=eta_prime, parameters=True)
 
         # Compute the evolutors for the path from Earth entry point to trajectory mid-point at x == 0
         evolutors_full_path = [Upert(m1Sq, m2Sq, m3Sq, E, th12, th13, params[i][1], params[i-1][1] if i > 0 else 0, 

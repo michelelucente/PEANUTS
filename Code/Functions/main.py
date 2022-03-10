@@ -10,12 +10,15 @@ import numpy as np
 from numpy import arctan, arcsin
 from probability_sun_energy import PnuenueReaction
 from earth_density import EarthDensity
+import matplotlib.pyplot as plt
 
 
 # Import data from solar model
 solar_model = pd.read_csv("./Data/bs2005agsopflux.csv", 
-                          usecols=[1, 3, 7, 13],
-                          names = ['radius', 'density_log_10', '8B fraction', 'hep fraction'],
+                          usecols=[1, 3, *range(6,14)],
+                          names = ['radius', 'density_log_10', 'pp fraction', '8B fraction', '13N fraction',
+                                   '15O fraction', '17F fraction', '7Be fraction', 'pep fraction',
+                                   'hep fraction'],
                           sep=" ", skiprows=27, header=None)
 
 solar_model['density'] = 10**solar_model['density_log_10']
@@ -23,16 +26,41 @@ solar_model['density'] = 10**solar_model['density_log_10']
 
 # Define paths to save plots
 from pathlib import Path
+
 project_folder = str(Path(Path.cwd()).parents[1])
 plots_folder = project_folder + "/TeX/figs/"
 
 
-# Test Sun survival probabilities
-from math import sqrt
-import matplotlib.pyplot as plt
+# Plot solar model
+plot = solar_model.plot(x='radius', y='density', logy=True)
+plot.set_xlabel("r")
+plot.set_ylabel("$n_e(r)$ [mol/cm${}^3$]")
+plot.legend(labels=['Solar electron density'])
 
-th12 = arctan(sqrt(0.469))
-th13 = arcsin(sqrt(0.01))
+plt.savefig(plots_folder + "sun_density.pdf")
+
+plt.show()
+
+
+
+plot = solar_model.plot(x='radius', y=['pp fraction', '8B fraction', '13N fraction',
+                                   '15O fraction', '17F fraction', '7Be fraction', 'pep fraction',
+                                   'hep fraction'])
+plot.set_xlabel('r')
+plot.set_ylabel('Neutrino fraction')
+plot.legend(labels=['pp', '${}^8$B', '${}^{13}$N','${}^{15}$O', '${}^{17}$F', '${}^7$Be', 'pep', 'hep'])
+
+plt.savefig(plots_folder + "reaction_fraction.pdf")
+
+plt.show()
+
+
+# Test Sun survival probabilities
+from math import sqrt, atan, asin
+
+th12 = atan(sqrt(0.469))
+th13 = asin(sqrt(0.01))
+[th23, d] = [0.855211, 3.40339]
 DeltamSq21 = 7.9e-5
 DeltamSq31 = 2.46e-3
 E = 10
@@ -42,8 +70,9 @@ density = solar_model.density
 fraction = solar_model['8B fraction']
 
 xrange = np.arange(1,20,0.1)
-ProbB8 = [PnuenueReaction(th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, solar_model['8B fraction']) for E in xrange]
-Probhep = [PnuenueReaction(th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, solar_model['hep fraction']) for E in xrange]
+ProbB8 = [Psolar(th12, th13, th23, d, DeltamSq21, DeltamSq31, E, radius_samples, density, solar_model['8B fraction']) for E in xrange]
+Probhep = [Psolar(th12, th13, th23, d, DeltamSq21, DeltamSq31, E, radius_samples, density, solar_model['hep fraction']) for E in xrange]
+
 
 SNO_B8 = pd.read_csv("./Data/B8.csv", names=['energy', 'Pnuenue'])
 SNO_hep = pd.read_csv("./Data/hep.csv", names=['energy', 'Pnuenue'])

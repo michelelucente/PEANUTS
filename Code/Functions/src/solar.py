@@ -136,7 +136,8 @@ def Psolar (pmns, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction):
     Tei = np.array(solar_flux_mass(pmns.theta12, pmns.theta13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction))
     
     # Compute the probabilities that a mass eigenstate is observed as a given flavour
-    #P_i_to_a = np.square(np.abs(PMNS(th12, th13, th23, -d))) # TODO: Why negative -d? 
+    #P_i_to_a = np.square(np.abs(PMNS(th12, th13, th23, -d))) # TODO: Why negative -d? ANSWER: because the mass eigenstates are given by 
+    # the conjugate of the PMNS mixing matrix, thus we can simply invert the CP phase instead of taking the conjugate of the full matrix
     P_i_to_a = np.square(np.abs(pmns.pmns))
     
     # Multiply probabilities by weights, and return the result

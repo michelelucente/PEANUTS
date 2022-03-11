@@ -9,7 +9,7 @@ Created on Feb 10 2022
 
 import numpy as np
 from numpy.linalg import multi_dot
-from math import sin, cos, sqrt, pi
+from math import sin, cos, sqrt, pi, asin
 from scipy.integrate import complex_ode
 
 import src.files as f
@@ -105,18 +105,23 @@ def Pearth(density, pmns, DeltamSq21, DeltamSq31, eta, E, H):
 
   h = H/R_E
   r_d = 1 - h
-  x_d = sqrt(r_d**2 - sin(eta)**2)
+  x_d = r_d * cos(eta)
   Deltax = r_d * cos(eta) + sqrt(1 - r_d**2 * sin(eta)**2)
   n_1 = density(1-h/2,0)
-  #n_1 = EarthDensity(x=1 - h/2) # TODO: Is eta=0 here? why?
+  #n_1 = EarthDensity(x=1 - h/2) # TODO: Is eta=0 here? why? - ANSWER: for downstream neutrinos we approximate
+  # the density as constant. I've taken for simplicity the value at half-distance between detector and surface,
+  # but we can equivalently take into account non-zero eta. However in that case one should consider the
+  # actual path travelled by the neutrino. I am not sure this is worth, since the density changes at most
+  # at the  10^-4 level
+  eta_prime = asin(r_d * sin(eta))
 
-  params = density.parameters(eta)
+  params = density.parameters(eta_prime)
   x1, x2 = (-params[-1][1], x_d) if 0 <= eta < pi/2 else (0, Deltax)
 
   def model(t, y):
     nue, numu, nutau = y
     dnudt = - 1j * np.dot(multi_dot([r23, delta.conjugate(), Hk + np.diag([
-        MatterPotential(density(t, eta)) if 0 <= eta < pi/2 else n_1
+        MatterPotential(density(t, eta_prime)) if 0 <= eta < pi/2 else n_1
         ,0,0]), delta, r23.transpose()]), [nue, numu, nutau])
     return dnudt
 
@@ -132,7 +137,7 @@ def Pearth(density, pmns, DeltamSq21, DeltamSq31, eta, E, H):
   sol = [nu.integrate(xi) for xi in x[1::]]
   sol.insert(0, np.array(nu0)[0])
 
-  return sol[-1]
+  return sol, x
 
 
 def Pearth_analytical(density, pmns, DeltamSq21, DeltamSq31, eta, E, H):

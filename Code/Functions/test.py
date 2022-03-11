@@ -6,6 +6,7 @@ Created on Mon Feb  7 17:47:01 2022
 @author: michele
 """
 import pandas as pd
+from src.pmns import PMNS
 
 
 # Import data from solar model
@@ -56,11 +57,14 @@ plt.show()
 import numpy as np 
 
 from math import sqrt, atan, asin
-from solar import Psolar
+from src.solar import Psolar
 
 th12 = atan(sqrt(0.469))
 th13 = asin(sqrt(0.01))
 [th23, d] = [0.855211, 3.40339]
+
+pmns = PMNS(th12, th13, th23, d)
+
 DeltamSq21 = 7.9e-5
 DeltamSq31 = 2.46e-3
 E = 10
@@ -70,8 +74,8 @@ density = solar_model.density
 fraction = solar_model['8B fraction']
 
 xrange = np.arange(1,20,0.1)
-ProbB8 = [Psolar(th12, th13, th23, d, DeltamSq21, DeltamSq31, E, radius_samples, density, solar_model['8B fraction']) for E in xrange]
-Probhep = [Psolar(th12, th13, th23, d, DeltamSq21, DeltamSq31, E, radius_samples, density, solar_model['hep fraction']) for E in xrange]
+ProbB8 = [Psolar(pmns, DeltamSq21, DeltamSq31, E, radius_samples, density, solar_model['8B fraction']) for E in xrange]
+Probhep = [Psolar(pmns, DeltamSq21, DeltamSq31, E, radius_samples, density, solar_model['hep fraction']) for E in xrange]
 
 
 SNO_B8 = pd.read_csv("./Data/B8.csv", names=['energy', 'Pnuenue'])
@@ -116,13 +120,15 @@ plt.show()
 import matplotlib.pyplot as plt
 from math import pi
 
-from earth import EarthDensity
+from src.earth import EarthDensity
 
 x = np.arange(0,1,0.001)
 eta = [0, pi/6, pi/4, pi/3]
 labels = ["0", "pi/6", "pi/4", "pi/3"]
 
-density = [ [EarthDensity(r, n) for r in x] for n in eta]
+density_file = './Data/Earth_Density.csv'
+earth_density = EarthDensity(density_file)
+density = [ [earth_density(r, n) for r in x] for n in eta]
 
 plt.xlabel("x")
 plt.ylabel("Density [mol/cm${}^3$]")
@@ -136,20 +142,20 @@ plt.show()
 
 
 # Test Earth regeneration
-from pmns import R12, R13, R23, Delta
+from src.pmns import PMNS
 from numpy.linalg import multi_dot
 from math import sin, cos
 from scipy.integrate import complex_ode
 
-from potentials import k, MatterPotential, R_E
-from evolutor import FullEvolutor
+from src.potentials import k, MatterPotential, R_E
+from src.evolutor import FullEvolutor
 
-r13 = R13(th13)
-r12 = R12(th12)
-r23 = R23(th23)
-delta = Delta(d)
+r13 = PMNS.R13(0, th13)
+r12 = PMNS.R12(0, th12)
+r23 = PMNS.R23(0, th23)
+delta = PMNS.Delta(0, d)
 
-pmns = multi_dot([r23, delta, r13, delta.conjugate(), r12])
+pmns = PMNS(th12, th13, th23, d)
 U = np.dot(r13, r12)
 
 
@@ -164,16 +170,16 @@ h = H/R_E
 r_d = 1 - h
 x_d = r_d * cos(eta) #sqrt(r_d**2 - sin(eta)**2)
 Deltax = r_d * cos(eta) + sqrt(1 - r_d**2 * sin(eta)**2)
-n_1 = EarthDensity(x=1 - h/2)
+n_1 = earth_density(1 - h/2, 0)
 eta_prime = asin(r_d * sin(eta))
 
-params = EarthDensity(eta=eta_prime, parameters=True)
+params = earth_density.parameters(eta_prime)
 x1, x2 = (-params[-1][1], x_d) if 0 <= eta < pi/2 else (0, Deltax)
 
 def model(t, y):
     nue, numu, nutau = y
     dnudt = - 1j * np.dot(multi_dot([r23, delta.conjugate(), Hk + np.diag([
-        MatterPotential(EarthDensity(t, eta=eta_prime)) if 0 <= eta < pi/2 else n_1
+        MatterPotential(earth_density(t, eta_prime)) if 0 <= eta < pi/2 else n_1
         ,0,0]), delta, r23.transpose()]), [nue, numu, nutau])
     return dnudt
 
@@ -192,7 +198,7 @@ sol.insert(0, np.array(nu0)[0])
 One_num = sol[-1]
 One_num = np.array([One_num])
 
-One_an = np.dot(FullEvolutor(0, DeltamSq21, DeltamSq31, E, th12, th13, th23, d, eta, H), nu0.transpose()).transpose()
+One_an = np.dot(FullEvolutor(earth_density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H), nu0.transpose()).transpose()
 One_an = np.array(One_an)
 
 err = np.linalg.norm(One_num - One_an)/np.linalg.norm(One_num + One_an)
@@ -207,7 +213,7 @@ plt.ylabel("Probability")
 plt.title("Energy = %.2f MeV, nadir $\eta$ = %.2f $\pi$ | error = %f" % (E, eta/pi, err))
 plt.plot(x, probs, label=["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"])
 plt.legend()
-plt.savefig(plots_folder + "eart_regeneration090.pdf")
+plt.savefig(plots_folder + "earth_regeneration090.pdf")
 
 plt.show()
 
@@ -223,16 +229,16 @@ h = H/R_E
 r_d = 1 - h
 x_d = r_d * cos(eta) #sqrt(r_d**2 - sin(eta)**2)
 Deltax = r_d * cos(eta) + sqrt(1 - r_d**2 * sin(eta)**2)
-n_1 = EarthDensity(x=1 - h/2)
+n_1 = earth_density(1 - h/2, 0)
 eta_prime = asin(r_d * sin(eta))
 
-params = EarthDensity(eta=eta_prime, parameters=True)
+params = earth_density.parameters(eta_prime)
 x1, x2 = (-params[-1][1], x_d) if 0 <= eta < pi/2 else (0, Deltax)
 
 def model(t, y):
     nue, numu, nutau = y
     dnudt = - 1j * np.dot(multi_dot([r23, delta.conjugate(), Hk + np.diag([
-        MatterPotential(EarthDensity(t, eta=eta_prime)) if 0 <= eta < pi/2 else n_1
+        MatterPotential(earth_density(t, eta_prime)) if 0 <= eta < pi/2 else n_1
         ,0,0]), delta, r23.transpose()]), [nue, numu, nutau])
     return dnudt
 
@@ -251,7 +257,7 @@ sol.insert(0, np.array(nu0)[0])
 One_num = sol[-1]
 One_num = np.array([One_num])
 
-One_an = np.dot(FullEvolutor(0, DeltamSq21, DeltamSq31, E, th12, th13, th23, d, eta, H), nu0.transpose()).transpose()
+One_an = np.dot(FullEvolutor(earth_density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H), nu0.transpose()).transpose()
 One_an = np.array(One_an)
 
 err = np.linalg.norm(One_num - One_an)/np.linalg.norm(One_num + One_an)
@@ -266,20 +272,20 @@ plt.ylabel("Probability")
 plt.title("Energy = %.2f MeV, nadir $\eta$ = %.2f $\pi$ | error = %f" % (E, eta/pi, err))
 plt.plot(x, probs, label=["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"])
 plt.legend()
-plt.savefig(plots_folder + "eart_regeneration90180.pdf")
+plt.savefig(plots_folder + "earth_regeneration90180.pdf")
 
 plt.show()
 
 
 # Test Sun-Earth xurvival probability
-from solar import solar_flux_mass
+from src.solar import solar_flux_mass
 
 th12 = atan(sqrt(0.469))
 th13 = asin(sqrt(0.01))
 DeltamSq21 = 7.9e-5
 DeltamSq31 = 2.46e-3
 
-pmns = multi_dot([r23, delta, r13, delta.conjugate(), r12])
+pmns = PMNS(th12, th13, th23, d)
 
 E = np.random.uniform(1, 20)
 eta = np.random.uniform(0, pi)
@@ -293,7 +299,7 @@ fraction = solar_model['8B fraction']
 
 mass_weights = solar_flux_mass(th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction)
 
-mass_to_flavour_probabilitites = np.square(np.abs(np.dot(FullEvolutor(0, DeltamSq21, DeltamSq31, E, th12, th13, th23, d, eta, H), pmns.conjugate())))
+mass_to_flavour_probabilitites = np.square(np.abs(np.dot(FullEvolutor(earth_density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H), pmns.conjugate())))
 
 flavour_probabilities = np.array(np.dot(mass_to_flavour_probabilitites, mass_weights))
 
@@ -352,7 +358,7 @@ radius_samples = solar_model.radius
 density = solar_model.density
 fraction = solar_model['8B fraction']
 
-survival_prob = np.array([Psolar(th12, th13, th23, d, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction) for E in B8_shape['Energy MeV']])
+survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction) for E in B8_shape['Energy MeV']])
 distorted_shape = np.array([B8_shape.Fraction]).T * survival_prob
 
 labels = ["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"]

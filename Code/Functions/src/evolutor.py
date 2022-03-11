@@ -106,7 +106,7 @@ def FullEvolutor (density, m1Sq, m2Sq, m3Sq, pmns, E, eta, H):
     
     # Compute the factorised matrices R_{23} and \Delta 
     # (remember that U_{PMNS} = R_{23} \Delta R_{13} \Delta^* R_{12})
-    r23= pmns.R23(pmns.theta23)
+    r23 = pmns.R23(pmns.theta23)
     delta = pmns.Delta(pmns.delta)
     
     # If 0 <= eta < pi/2 we compute the evolutor taking care of matter density perturbation around the

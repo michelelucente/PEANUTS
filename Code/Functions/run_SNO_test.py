@@ -8,8 +8,8 @@ Created on Feb 2022
 """
 
 import numpy as np
-#from math import sqrt # TODO Not needed right now, re-add if needed or delete
-#from numpy import arctan, arcsin # TODO: Not needed right now, re-add if needed or delete
+from math import sqrt
+from numpy import arctan, arcsin
 from optparse import OptionParser
 
 import src.files as f
@@ -93,13 +93,15 @@ pmns = PMNS(th12, th13, th23, d)
 
 DeltamSq21 = nu_params['dm21']
 DeltamSq31 = nu_params['dm31']
-#th12 = arctan(sqrt(0.469)) TODO: These values are different than the PDG's, why? - ANSWER: they are
-# the values used in the SNO reference, so that to compare our code with their prediction
+
+# Values to compare with SNO, uncomment for exact comparison
+#th12 = arctan(sqrt(0.469))
 #th13 = arcsin(sqrt(0.01))
 #DeltamSq21 = 7.9e-5
 #DeltamSq31 = 2.46e-3
+#pmns = PMNS(th12, th13, th13, d)
+
 E = 10
-ne = 100 # TODO: What is this for? - ANSWER: it was a reference value for solar density, not used anymore, can be deleted
 
 # Compute probability for the sample fractions '8B' and 'hep' in the energy ragnge E=[1,20]
 xrange = np.arange(1,20,0.1)

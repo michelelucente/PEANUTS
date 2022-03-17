@@ -21,7 +21,8 @@ mainfilename = 'run_prob_earth'
 parser = OptionParser()
 parser.add_option("-v", "--verbose", help = "Print debug output", action='store_true', dest='verbose', default=False)
 parser.add_option("-d", "--density", help ="Add custom earth density profile", action='store', dest="density", default="")
-parser.add_option("-a", "--analytical", help="Perform analytical evolution", action='store_true', dest="analytical", default=False)
+parser.add_option("-a", "--analytical", help="Perform analytical evolution", action='store_false', dest="analytical", default=True)
+parser.add_option("-n", "--numerial", help="Perform numerical evolution", action='store_true', dest="analytical", default=False)
 (options, args) = parser.parse_args()
 if len(args) < 4 :
   print('Wrong number of arguments \n\

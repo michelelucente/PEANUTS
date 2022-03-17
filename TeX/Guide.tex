@@ -5,7 +5,9 @@
 \usepackage{graphicx}
 \graphicspath{ {./figs/} }
 \usepackage{bbold}
+\usepackage{color}
 
+\newcommand{\todo}[1]{\textbf{To do:} \emph{\color{blue} #1}}
 \newcommand{\MeV}[0]{\text{MeV}}
 \newcommand{\cm}[0]{\text{cm}}
 \newcommand{\de}[0]{\text{d}}
@@ -17,12 +19,21 @@
 
 \section{Solar neutrino flux}
 	\subsection{Neutrino survival probability at Sun surface}
+The solar neutrino flux at Earth is given by an incoherent superposition of neutrino mass eigenstates~\cite{Mikheev:1987wa, Lisi:1997yc}. In the adiabatic approximation the neutrino state at the Sun surface only depends on the matter effects at neutrino production point; being $T$ the matrix that diagonalises the neutrino Hamiltonian in matter~\cite{FiuzadeBarros:2011qna}: \todo{Check diagonalisation, probably CP-phases missing - does not impact since we square}
+\begin{equation}
+	T\left(E, n_e\right) =\left( \begin{array}{ccc}
+		c_{13, M} c_{12, M} & c_{13,M} s_{12, M} & s_{13, M} \\
+		-s_{12, M} & c_{12,M} & 0 \\
+		-s_{13,M} c_{12,M} & -s_{13,M} s_{12,M} & c_{13, M}
+	\end{array}
+	\right),
+\end{equation}
 	
-	The survival probability at the exit of the Sun for an electron neutrino produced with energy $E$ is given, under the adiabatic approximation, by (cf. Eq. 6.14 in \cite{FiuzadeBarros:2011qna})
-	
-	\begin{equation}
-		P_{\nu_e \rightarrow \nu_e}(E, n_e(x)) = c_{13}^2 c_{13,M}^2 \left( c_{12}^2 c_{12,M}^2 + s_{12}^2 s_{12,M}^2 \right) + s_{13}^2 s_{13,M}^2,
-	\end{equation}
+%	The survival probability at the exit of the Sun for an electron neutrino produced with energy $E$ is given, under the adiabatic approximation, by (cf. Eq. 6.14 in \cite{FiuzadeBarros:2011qna})
+%	
+%	\begin{equation}
+%		P_{\nu_e \rightarrow \nu_e}(E, n_e(x)) = c_{13}^2 c_{13,M}^2 \left( c_{12}^2 c_{12,M}^2 + s_{12}^2 s_{12,M}^2 \right) + s_{13}^2 s_{13,M}^2,
+%	\end{equation}
 	
 where $c_{ij} \equiv \cos \theta_{ij},\ s_{ij} \equiv \sin \theta_{ij}$ and the mixing angles in matter $\theta_{ij}^M$ are related to the vacuum ones by
 
@@ -30,11 +41,11 @@ where $c_{ij} \equiv \cos \theta_{ij},\ s_{ij} \equiv \sin \theta_{ij}$ and the 
 	\tan 2 \theta_{12}^M &=& \frac{\tan 2 \theta_{12}}{1-\frac{\cos^2 \theta_{13} A_{CC}}{\cos \theta_{12} \Delta m^2_{21}} },\\
 	\sin \theta_{13}^M &=& \sin \theta_{13} \left[1 + \frac{A_{CC}}{\Delta m^2_{31}} \cos^2\theta_{13}\right],
 \end{eqnarray}
-where
+whit
 \begin{equation}
 	A_{CC} = 2 E V_{CC} = 2 \sqrt{2} E G_F n_e(x),
 \end{equation}
-represents the matter potential, with $E$ the neutrino energy, $G_F$ the Fermi constant and $n_e(x)$ the electron density at the neutrino creation point $x$.
+representing the matter potential,  $E$ the neutrino energy, $G_F$ the Fermi constant and $n_e(x)$ the electron density at the neutrino creation point $x$.
 
 Numerically (cf. eq.s 4.17, 4.18 in \cite{Fantini:2018itu})
 \begin{eqnarray}
@@ -46,9 +57,11 @@ where the wavenumber $k$ is useful in the relation
 	\frac{A_{CC}}{\Delta m^2} = \frac{2 \sqrt{2} E G_F n_e}{\Delta m^2} = \frac{V}{k}.
 \end{equation}
 
-For a fixed value of neutrino energy $E$, the survival probability at Sun surface is given by the average over the neutrino production point inside the Sun. Assuming spherical symmetry, if $f(r)$ is the fraction of neutrinos produced at point $r \equiv R/R_\odot$, where $R_\odot$ is the solar radius and $R$ the distance from the center of the Sun, 
+The probability of producing a neutrino mass eigenstate $i$ in matter is thus $\left| T_{\alpha i}\left( E, n_e \right)\right|^2$, where $\alpha$ is the flavour of the charged lepton entering the neutrino production vertex.
+
+In the adiabatic approximation neutrinos evolve as pure mass eigenstates within the Sun. For a fixed value of neutrino energy $E$, the flux composition  at Sun surface is given by the average over the neutrino production points inside the Sun. Assuming spherical symmetry, if $f(r)$ is the fraction of neutrinos produced at point $r \equiv R/R_\odot$, where $R_\odot$ is the solar radius and $R$ the distance from the center of the Sun, 
 \begin{equation}
-	P_{\nu_e \rightarrow \nu_e}(E) = \int_0^1 \de r P_{\nu_e \rightarrow \nu_e}(E, n_e(r)) f(r),
+	P_{\nu_e \rightarrow \nu_i}^\odot(E) = \int_0^1 \de r \left| T_{e i}\left( E, n_e(r) \right)\right|^2 f(r),
 \end{equation}
 with the normalization
 \begin{equation}
@@ -68,10 +81,10 @@ The electron density in~\cite{Bahcall:2004pz} is given in units:
 \caption{Solar density (left) and fraction of solar neutrinos produced (right), as a function of relative radius $r \equiv R/R_\odot$, from Solar model BS05(AGS,OP)~\cite{Bahcall:2004pz}.}
 \end{figure}
 
-We compare in Fig.~\ref{fig:SNO_8B_hep_comparison} the prediction from our code with the SNO survival probabilities at the surface of the Sun for the ${}^8$B and hep neutrino, digitised from Fig. 6.3 in~\cite{FiuzadeBarros:2011qna}. 
+We compare in Fig.~\ref{fig:SNO_8B_hep_comparison} the prediction from our code with the SNO survival probabilities at the surface of the Sun for the ${}^8$B and hep neutrino, digitised from Fig. 6.3 in~\cite{FiuzadeBarros:2011qna}. \todo{The SNO reference uses different values than current best fits. Prepare model files for it.}
 
 \begin{figure}[ht]
-	\includegraphics[width=0.5\textwidth]{8B_SNO_cmparison}
+	\includegraphics[width=0.5\textwidth]{8B_SNO_comparison}
 	\includegraphics[width=0.5\textwidth]{hep_SNO_comparison}
 	\caption{Survival probability at the surface of the Sun for mixing parameters $\tan^2\theta_{12} = 0.469$, $\Delta m_{21}^2 = 7.9 \times 10^{-5} \text{eV}^2$, $\sin^2 \theta_{13} = 0.01$, $\Delta m_{31}^2 = 2.46 \times 10^{-3} \text{eV}^2$. The blue lines are the prediction from our code, the orange ones are the digitised curves from 6.3 in~\cite{FiuzadeBarros:2011qna}.}
 	\label{fig:SNO_8B_hep_comparison}
@@ -80,44 +93,85 @@ We compare in Fig.~\ref{fig:SNO_8B_hep_comparison} the prediction from our code 
 \section{Neutrino propagation from Sun and detection at Earth}
 
 \subsection{Probability of transition $\nu_i \rightarrow \nu_\alpha$}
-The neutrino interaction (aka flavour) eigenstates $\ket{\nu_\alpha, t}$ at time $t$ are related to the propagation (aka mass) eigenstates by the relation
+Being it an incoherent flux, the fraction of mass eigenstates within the solar neutrino flux remains constant as long as neutrinos propagate in the vacuum, on their path from Sun surface to Earth. The probability of observing a neutrino of flavour $\alpha$ from a mass eigenstate $i$ is given by $|U_{\alpha i}^*|^2$, where $U$ is the unitary PMNS mixing matrix. Thus, the probability of a solar neutrino to manifest as flavour $\alpha$ is given by
 \begin{equation}
-	\ket{\nu_\alpha, t} = U_{\alpha i}^* \ket{\nu_i, t}
+	P^S_{\nu_e \rightarrow \nu_\alpha}(E) = |U_{\alpha i}^*|^2 P^\odot_{\nu_e \rightarrow \nu_i}(E),
 \end{equation}
-where $U$ is the unitary PMNS mixing matrix. The flavour eigenstate at time $t$ is  obtained by evolving the one at $t=0$ with the evolutor operator
-\begin{equation}
-	\ket{\nu_\alpha, t} = \mathcal{U}_{\alpha \beta}(t) \ket{\nu_\beta,0}.
-\end{equation}
-From this relation the probability amplitude for a neutrino mass eigenstate produced at $t=0$ of interacting as a flavour eigenstate at time $t$ is given by
-\begin{eqnarray}
-	P_{i \rightarrow \alpha}(t) &=& \braket{\nu_\alpha, 0}{\nu_i,t} = \bra{\nu_\alpha, 0} U^T_{i \beta} \ \mathcal{U}_{\beta \gamma}(t) \ket{\nu_\alpha,0} \\ 
-	&=& U^T_{i\beta} \ \mathcal{U}_{\beta \alpha}(t) = \left( U^T \mathcal{U}(t) \right)_{i\alpha}
-\end{eqnarray}
+and we assume throughout this paper that repeated indexes are summed.
 
-\subsection{Evolutor equation and Magnus expansion}
+If the neutrino flux crosses the Earth the probabilities are modified, since the propagation eigenstates in matter differ from the vacuum ones. In general the flavour eigenstate at time $t$ is  obtained by evolving the one at $t=0$ with the appropriate evolutor operator $\mathcal{U}$
+\begin{equation}
+	\ket{\nu_\alpha, t} = \mathcal{U}_{\alpha \beta}(t) \ket{\nu_\beta,0},
+\end{equation}
+where we assume a pure flavour (vacuum) eigenstate vacuum at $t=0$,
+\begin{equation}
+	\ket{\nu_\alpha, 0} = U_{\alpha i}^* \ket{\nu_i, 0}.
+\end{equation}
+Notice that the propagation of a single neutrino within Earth is given by the \emph{coherent} propagation of mass eigenstates. The determination of the evolutor operator $\mathcal{U}$ is in general a non-trivial problem, and will be discussed in detail in the following sections; for the moment let us assume we know a closed form expression for it.
+
+A general neutrino state $\ket{\nu}$ can be expressed as a linear superposition of flavour or mass eigenstates. Working in the flavour basis
+\begin{equation}
+	\ket{\nu, t = 0} = c_\alpha (t=0) \ket{\nu_\alpha, t=0},
+\end{equation}
+where $\ket{\nu_\alpha, 0}$ stands for a vacuum flavour eigenstate. This state will evolve as
+\begin{equation}
+	\ket{\nu, t} = c_\alpha(0) \mathcal{U}_{\alpha \beta} \ket{\nu_\beta, 0},
+\end{equation}
+which allows to define the linear coefficients at time $t$
+\begin{equation}
+	c_\alpha (t) = \braket{\nu_\alpha, 0}{\nu,t} =  \mathcal{U}_{\alpha \beta}^T (t)\ c_\beta(0),
+\end{equation}
+coinciding with the probability amplitude of the state $\ket{\nu,t}$ to interact as $\alpha$ flavour at time $t$.
+
+A mass eigenstate expressed as linear combination of flavour eigenstates is
+\begin{equation}
+	\ket{\nu_i, 0} = U_{i \alpha}^T \ket{\nu_\alpha, 0} = U_{\alpha i} \ket{\nu_\alpha,0},
+\end{equation}
+which implies a transition amplitude from mass to flavour eigenstate
+\begin{equation}
+	\braket{\nu_\alpha, 0}{\nu_i, t} = \mathcal{U}_{\alpha \beta}^T (t) U_{\beta i}.
+\end{equation}
+
+Putting everything together, the final probability for a solar neutrino to manifest as $\alpha$ flavour while crossing the Earth is given by
+\begin{equation}\label{eq:sun_earth_probability}
+	P_\alpha^{SE}(t, E) = \left| \mathcal{U}_{\alpha \beta}^T(t) U_{\beta i} \right|^2  P_{\nu_e \rightarrow \nu_i}^\odot(E),
+\end{equation}
+where $t=0$ is defined at the neutrino crossing the Earth surface.
+The interpretation of Eq.~\ref{eq:sun_earth_probability} is the following: $U_{\beta i}$ are the coefficients of the mass eigenstate $i$ expressed as linear combination of flavour eigenstates, $\ket{\nu_i, 0} = U_{\beta i} \ket{\nu_\beta, 0}$, and $\mathcal{U}^T_{\alpha \beta}(t) U_{\beta i} = \braket{\nu_\alpha, 0}{\nu_i, t}$ is the transition amplitude from the evolved mass eigenstate $i$ to interaction eigenstate $\alpha$. Finally, each probability $|\braket{\nu_\alpha, 0}{\nu_i, t}|^2$ is multiplied by the weight of the mass eigenstate $i$ in the incoherent solar flux, $P_{\nu_e \rightarrow \nu_i}^\odot(E)$.
+
+%From this relation the probability amplitude for a neutrino mass eigenstate produced at $t=0$ of interacting as a flavour eigenstate at time $t$ is given by
+%\begin{eqnarray}
+%	P_{i \rightarrow \alpha}(t) &=& \braket{\nu_\alpha, 0}{\nu_i,t} = \bra{\nu_\alpha, 0} U^T_{i \beta} \ \mathcal{U}_{\beta \gamma}(t) \ket{\nu_\alpha,0} \\ 
+%	&=& U^T_{i\beta} \ \mathcal{U}_{\beta \alpha}(t) = \left( U^T \mathcal{U}(t) \right)_{i\alpha}
+%\end{eqnarray}
+
+\subsection{Evolutor equations}
 
 The evolutor operator is defined by the equations
 \begin{equation}
 	\ket{\nu_\alpha, t} = \mathcal{U}_{\alpha \beta}(t) \ket{\nu_\beta, 0}, \hspace{1cm} \text{ with } \hspace{1cm} \mathcal{U}(0) = \mathbb{1}.
 \end{equation}
 
-From the Schr{\"o}dinger equation
+It is possible to define an effective Hamiltonian $H$ for neutrinos~\cite{Fantini:2018itu}, such that the flavour states obey to the Schr{\"o}dinger equation
+\begin{equation}
+	\frac{\de}{\de t} \ket{\nu_\alpha, t}  = - i H_{\alpha \beta}(t) \ket{\nu_\beta, t},
+\end{equation}
+giving the differential equation for $\mathcal{U}$
 \begin{eqnarray}
-	\frac{\de}{\de t} \ket{\nu_\alpha, t}  &=& - i H_{\alpha \beta} \ket{\nu_\beta, t} \\
-	\Rightarrow \hspace{0.2cm} \frac{d}{\de t} \mathcal{U}_{\alpha \beta} (t) \ket{\nu_\beta, 0} &=& -i H_{\alpha \gamma}(t)\ \mathcal{U}_{\gamma \beta}(t) \ket{\nu_\beta, 0} \\
+ \frac{d}{\de t} \mathcal{U}_{\alpha \beta} (t) \ket{\nu_\beta, 0} &=& -i H_{\alpha \gamma}(t)\ \mathcal{U}_{\gamma \beta}(t) \ket{\nu_\beta, 0} \\
 	\Rightarrow \hspace{0.2cm} \frac{\de}{\de t} \mathcal{U}(t) &=& - i H(t)\ \mathcal{U}(t), \label{eq:evolutor}
 \end{eqnarray}
-where $H$ is the Hamiltonian of the system.
+where the second equation follows from the states $\ket{\nu_\alpha,0}$ forming a complete orthonormal basis.
 
 Eq.~\ref{eq:evolutor} allows to express the evolutor as a function of the Hamiltonian of the system. Its formal solution is
 \begin{equation}
 	\mathcal{U}(t) = \mathcal{T} \left[ e^{-i \int_{t_0}^t \de t' H(t')} \right].\label{eq:evolutor_formal}
 \end{equation}
-Eq.~\ref{eq:evolutor_formal} does not generally admit an analytic closed form, expect for very special cases, for instance if the Hamiltonian does not depend on time.
+where $\mathcal{T}$ is the time-order operator. Eq.~\ref{eq:evolutor_formal} does not generally admit an analytic closed form, except for very special cases, for instance if the Hamiltonian at different times does commute.
 
 A well known approach to the problem is the Dyson series 
 \begin{equation}
-	\mathcal{U}(t) = \mathbb{1} + \sum_{n=1}^\infty \frac{\left(-i\right)^n}{n!} \int_{t_0}^t \de t_1 \int_{t_0}^t \de t_2 \cdots \int_{t_0}^t \de t_n \mathcal{T} \left[H(t_1) H(t_2) \cdots H(t_n) \right] \label{eq:Dyson_series}
+	\mathcal{U}(t) = \mathbb{1} + \sum_{n=1}^\infty \frac{\left(-i\right)^n}{n!} \int_{t_0}^t \de t_1 \int_{t_0}^t \de t_2 \cdots \int_{t_0}^t \de t_n \mathcal{T} \left[H(t_1) H(t_2) \cdots H(t_n) \right], \label{eq:Dyson_series}
 \end{equation}
 which allows for an approximate solution obtained by truncating Eq.~\ref{eq:Dyson_series} at finite values of $n$, if the series is expected to be perturbative. 
 %However, by adopting this approach the approximate evolutor operator is not longer a unitary operator.
@@ -459,6 +513,47 @@ We fix for simplicity the electron density value to the one at Earth radius, $n_
 \begin{equation}
 	\tilde{\mathcal{U}}(\eta) = e^{-i R_E \Delta x(\eta) \left(\tilde{H}_0 + \text{diag}\left(\sqrt{2}G_F n_1, 0, 0\right) \right)}, \hspace{0.5cm} \left(\frac{\pi}{2} \leq \eta < \pi \right).
 \end{equation}
+
+\section{Time integration}
+Solar neutrino experiments typically collect data over a finite interval of time. As such, the measured survival probability is averaged over exposure
+\begin{equation}\label{eq:time_integral_general}
+	\left< P_E \right> = \frac{\int_{\tau_{d_1}}^{\tau_{d_2}} \de \tau_d \int_{\tau_{h_1} (\tau_d)}^{\tau_{h_2} (\tau_d)} \de \tau_h P_E \left(\eta(\tau_d, \tau_h) \right)}{\int_{\tau_{d_1}}^{\tau_{d_2}} \de \tau_d \int_{\tau_{h_1} (\tau_d)}^{\tau_{h_2} (\tau_d)} \de \tau_h },
+\end{equation}
+
+where $\tau_d$ is the daily time, $\tau_h$ the hourly time and $\eta$ the Sun nadir angle at detector location. The integration in Eq.~\ref{eq:time_integral_general} is typically not the most convenient choice for practical applications, a more effective option is to transform the double integral into a single one over $\eta$~\cite{Lisi:1997yc}
+\begin{equation}
+	\left< P_E \right> = \int_{0}^{\pi} \de \eta W(\eta) P_E(\eta),
+\end{equation}
+where $W(\eta)$ is a normalized weight function representing the fraction of time the experiment collected data at nadir angle $\eta$.
+For real experiments $W(\eta)$ must be provided by the collaboration, taking into account the actual times in which the detector collected data or has been offline. It is nevertheless possible to compute $W(\eta)$ analytically, for the ideal case of an experiment continuously taking data between days $\tau_{d_1}$ and $\tau_{d_2}$~\cite{Lisi:1997yc}.
+This is done by changing integration variables
+\begin{eqnarray}
+	\int_{\tau_{d_1}}^{\tau_{d_2}} \de \tau_d \int_{\tau_{h_1} (\tau_d)}^{\tau_{h_2} (\tau_d)} \de \tau_h P_E \left(\eta(\tau_d, \tau_h) \right) &=& \int_{\tau_{d_1}}^{\tau_{d_2}} \de \tau_d \int_{0}^{\pi} \de \eta \frac{\de \tau_h (\tau_d, \eta)}{\de \eta} P_E \left(\eta \right) \\
+	= \int_{0}^{\pi} \de \eta  P_E \left(\eta \right) \int_{\tau_{d_1}}^{\tau_{d_2}} \de \tau_d \frac{\de \tau_h (\tau_d, \eta)}{\de \eta} &=& \int_{0}^{\pi} \de \eta P_E(\eta) W(\eta) \label{eq:integral_W}
+\end{eqnarray}
+
+By normalising the daily and hourly times to the interval $[0, 2 \pi]$
+\begin{equation}
+	\tau_d = \frac{\text{day}}{365} 2\pi, \hspace{2cm} \tau_h = \frac{\text{hour}}{24} 2\pi,
+\end{equation}
+with $\tau_d=0$ at winter solstice and $\tau_h=0$ at mid-night, it is possible to express
+\begin{equation}
+	\tau_h = \arccos\left(\frac{\sin(\lambda) \sin(\delta_S) + \cos(\eta)}{\cos(\lambda) \cos(\delta_S)} \right),
+\end{equation}
+with $\lambda$ the detector latitude and $\delta_S$ the Sun declination, given by
+\begin{equation}
+	\delta_S = \arcsin\left(-\sin(i) \cos(\tau_d)\right),
+\end{equation}
+with $i=0.4091$ rad the Earth inclination. With these definitions it is possible to perform the integral defining $W(\eta)$ in in Eq.~\ref{eq:integral_W}; it is convenient to restrict $\tau_d$ within the interval $[0, \pi]$ (the alternative case can be easily derived from this one by using the symmetry of the orbit) and to change integration variable from $\tau_d$ to $T = \cos(\tau_d)$. 
+The resulting indefinite integral is expressed in terms of elementary functions and of the incomplete elliptic integral of the first kind; its analytic expression is not particularly illuminating but can be easily evaluated numerically.
+Some care must be taken in defining the range of integration for the definite integral, as it is given by the intersection of three intervals: i) $T \in [-1, 1]$ is the interval where $T=\cos(\tau_d)$ is defined, ii) $T \in [\sin(\lambda - \eta)/\sin(i), \sin(\lambda + \eta)/\sin(i)]$ is the range where $T$ can take values for fixed values of $\eta, \lambda, i$, iii) $T \in [\cos(\tau_{d_2}), \cos(\tau_{d_1})]$ is the observation time. If the intersection of the three interval is null then $W(\eta)$ will vanish for that given combination of $\lambda, \eta$ values.
+
+We plot in Fig.~\ref{fig:eta_weights} the weight function for one full year of exposure for three ideal detectors located at latitudes $\lambda = 0, 45^\circ, 89^\circ$.
+\begin{figure}[ht]
+	\includegraphics[width=0.8\textwidth]{eta_weights.pdf}	
+	\caption{Weight of the nadir angle exposure for an ideal experiment located at latitude $\lambda$, taking data continuously over a full year. The coloured regions represent the nadir angles subtending the Earth internal shells as parametrised in Table~\ref{tab:shell_parameters}, for a detector located at the Earth surface.}
+	\label{fig:eta_weights}
+\end{figure}
 
 \bibliographystyle{JHEP}
 \bibliography{bibliography.bib}

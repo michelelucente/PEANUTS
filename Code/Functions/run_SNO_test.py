@@ -38,8 +38,8 @@ Options:\n\
   exit()
 
 # Read the input files
-slha_file = args[0]
-#slha_file = './Data/example_slha.slha2' # To load from interactive session
+#slha_file = args[0]
+slha_file = './Data/example_slha.slha2' # To load from interactive session
 solar_file = './Data/bs2005agsopflux.csv' if options.solar == "" else options.solar
 density_file = './Data/Earth_Density.csv' if options.density == '' else options.density
 

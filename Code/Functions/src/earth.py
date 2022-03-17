@@ -117,27 +117,48 @@ def Pearth(density, pmns, DeltamSq21, DeltamSq31, eta, E, H):
 
   params = density.parameters(eta_prime)
   x1, x2 = (-params[-1][1], x_d) if 0 <= eta < pi/2 else (0, Deltax)
-
+  
   def model(t, y):
     nue, numu, nutau = y
     dnudt = - 1j * np.dot(multi_dot([r23, delta.conjugate(), Hk + np.diag([
-        MatterPotential(density(t, eta_prime)) if 0 <= eta < pi/2 else n_1
+        MatterPotential(density(t, eta=eta_prime) if 0 <= eta < pi/2 else n_1)
         ,0,0]), delta, r23.transpose()]), [nue, numu, nutau])
     return dnudt
 
-  nu0 = (pmns.transpose()[1, :]).conjugate()
-
-  nu = complex_ode(model)
-
-  nu.set_integrator("Isoda")
-  nu.set_initial_value(nu0, x1)
-
-
+  num_evol = []
+    
   x = np.linspace(x1, x2, 10**3)
-  sol = [nu.integrate(xi) for xi in x[1::]]
-  sol.insert(0, np.array(nu0)[0])
+    
+  successful_integration = True
+    
+  for col in range(3):
+    if successful_integration:
+        nu0 = np.identity(3)[:, col]
 
-  return sol, x
+        nu = complex_ode(model)
+
+        nu.set_integrator("Isoda")
+        nu.set_initial_value(nu0, x1)
+
+        sol = [nu.integrate(xi) for xi in x[1::]]
+
+        successful_integration = successful_integration and nu.successful()
+
+        sol.insert(0, np.array(nu0))
+
+        num_evol.append(sol)
+            
+    
+  num_solution = [np.column_stack((num_evol[0][k], num_evol[1][k], num_evol[2][k])) for k in range(len(x))]
+    
+  NU0 = pmns.pmns[:, 1]
+
+  evolution = [np.array(np.dot(num_solution[i].transpose(), NU0)).transpose()[0] for i in range(len(x))]
+    
+  return evolution, x
+
+
+
 
 
 def Pearth_analytical(density, pmns, DeltamSq21, DeltamSq31, eta, E, H):
@@ -151,8 +172,8 @@ def Pearth_analytical(density, pmns, DeltamSq21, DeltamSq31, eta, E, H):
   - E is the neutrino energy
   - H is the detector depth below the surface of the Earth
   """
-  nu0 = (pmns.transpose()[1, :]).conjugate()
+  NU0 = pmns.pmns[:, 1]
 
-  return np.dot(FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H), nu0.transpose()).transpose()
+  return np.dot(FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H).transpose(), NU0).transpose()
 
 

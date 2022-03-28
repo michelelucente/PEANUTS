@@ -182,7 +182,6 @@ E = np.random.uniform(1,20)
 sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="numerical", full_oscillation=True)
 
 One_num = sol[-1]
-print(One_num)
 One_num = np.array([One_num])
 
 # Check analytical solution

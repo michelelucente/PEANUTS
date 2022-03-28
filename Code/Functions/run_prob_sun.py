@@ -74,4 +74,5 @@ elif options.flav == 'mu':
 elif options.flav == 'tau':
   print("Probabilities of tau neutrinos of sample fraction", nu_fraction, "with energy E =", E, "at Sun exit is", prob[2])
 else:
-  print("Error: Unknown neutrino flavour")
+  print("Error: Unknown neutrino flavour. Options: [e, mu, tau]")
+

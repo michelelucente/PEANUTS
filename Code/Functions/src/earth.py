@@ -84,15 +84,16 @@ class EarthDensity:
     return alpha_prime[idx] + beta_prime[idx] * x**2 + gamma_prime[idx] * x**4
 
 
-def Pearth(density, pmns, DeltamSq21, DeltamSq31, eta, E, H):
+def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, full_oscillation=False):
   """
-  PnuenueEarth(density, pmns, DeltamSq21, DeltamSq31, eta, E, H) computes
-  numerically the probability of survival of an incident electron neutrino
+  Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H) computes
+  numerically the probability of survival of an incident electron neutrino spectrum
+  - nustate is the array of weights of the incoherent neutrino flux
   - density is the Earth density object
   - pmns is the PMNS matrix
   - DeltamSq21, Deltamq31 are the mass squared differences
-  - eta is the nadir angle
   - E is the neutrino energy
+  - eta is the nadir angle
   - H is the detector depth below the surface of the Earth
   """
 
@@ -108,11 +109,6 @@ def Pearth(density, pmns, DeltamSq21, DeltamSq31, eta, E, H):
   x_d = r_d * cos(eta)
   Deltax = r_d * cos(eta) + sqrt(1 - r_d**2 * sin(eta)**2)
   n_1 = density(1-h/2,0)
-  #n_1 = EarthDensity(x=1 - h/2) # TODO: Is eta=0 here? why? - ANSWER: for downstream neutrinos we approximate
-  # the density as constant. I've taken for simplicity the value at half-distance between detector and surface,
-  # but we can equivalently take into account non-zero eta. However in that case one should consider the
-  # actual path travelled by the neutrino. I am not sure this is worth, since the density changes at most
-  # at the  10^-4 level
   eta_prime = asin(r_d * sin(eta))
 
   params = density.parameters(eta_prime)
@@ -151,29 +147,59 @@ def Pearth(density, pmns, DeltamSq21, DeltamSq31, eta, E, H):
     
   num_solution = [np.column_stack((num_evol[0][k], num_evol[1][k], num_evol[2][k])) for k in range(len(x))]
     
-  NU0 = pmns.pmns[:, 1]
+  #NU0 = pmns.pmns[:, 1]
+  nustate = np.array(nustate).reshape((1,3)).transpose()
+  NU0 = np.dot(pmns.pmns, nustate)
 
-  evolution = [np.array(np.dot(num_solution[i].transpose(), NU0)).transpose()[0] for i in range(len(x))]
+  # TODO: This is also the probability, as below, so it should be ||^2 I think
+  #evolution = [np.array(np.dot(num_solution[i].transpose(), NU0)).transpose()[0] for i in range(len(x))]
+  evolution = [np.array(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns))), nustate)).transpose()[0] for i in range(len(x))]
     
-  return evolution, x
+  if full_oscillation:
+    return evolution, x
+  else:
+    return evolution[-1]
 
 
 
-
-
-def Pearth_analytical(density, pmns, DeltamSq21, DeltamSq31, eta, E, H):
+def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H):
   """
-  PnuenueEarth_analytical(density, pmns, DeltamSq21, DeltamSq31, eta, E, H) computes
-  analytically the probability of survival of an incident electron neutrino
+  Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H) computes
+  analytically the probability of survival of an incident electron neutrino spectrum
+  - nustate is the array of weights of the incoherent neutrino flux
   - density is the Earth density object
   - pmns is the PMNS matrix
   - DeltamSq21, Deltamq31 are the mass squared differences
-  - eta is the nadir angle
   - E is the neutrino energy
+  - eta is the nadir angle
   - H is the detector depth below the surface of the Earth
   """
-  NU0 = pmns.pmns[:, 1]
+  #NU0 = pmns.pmns[:, 1]
+  #nustate = np.array(nustate).reshape((1,3)).transpose()
 
-  return np.dot(FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H).transpose(), NU0).transpose()
+  # TODO: Following eq 19 in the draft, this should be |Evolutor^T x PMNS|^2, right?
+  return np.array(np.dot(np.square(np.abs(np.dot(FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H).transpose(), pmns.pmns))), nustate))[0]
 
+
+def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="analytical", full_oscillation=False):
+  """
+  Pearth(nustate, density, pmns, DeltamSq21, DeltamSq21, E, eta, H), computes with a given mode 
+  the probability of survival of an incident electron neutrino spectrum
+  - nustate is the array of weights of the incoherent neutrino flux
+  - density is the Earth density object
+  - pmns is the PMNS matrix
+  - DeltamSq21, Deltamq31 are the mass squared differences
+  - E is the neutrino energy
+  - eta is the nadir angle
+  - H is the detector depth below the surface of the Earth
+  """
+
+  if mode == "analytical":
+    return Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H)
+
+  elif mode == "numerical":
+    return Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, full_oscillation=full_oscillation)
+
+  else:
+    raise Exception("Error: Unkown mode for the computation of evoulutor")
 

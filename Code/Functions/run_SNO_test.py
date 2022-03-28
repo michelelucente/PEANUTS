@@ -165,30 +165,34 @@ plt.savefig(plots_folder + "earth_density.pdf")
 plt.show()
 
 
-# Test Earth regeneration
-#########################
-from src.earth import Pearth, Pearth_analytical
+# Test analytical vs numerical solutions
+########################################
+from src.earth import Pearth
 
 # Use SNO location for comparison
 H = 2e3 # meters
+
+# Sample neutrino state
+state = np.array([0,1,0])
 
 # Case 1: 0 <= eta <= pi/2
 eta = np.random.uniform(0, pi/2)
 E = np.random.uniform(1,20)
 
-sol, x = Pearth(earth_density, pmns, DeltamSq21, DeltamSq31, eta, E, H)
+sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="numerical", full_oscillation=True)
 
 One_num = sol[-1]
+print(One_num)
 One_num = np.array([One_num])
 
 # Check analytical solution
-One_an = Pearth_analytical(earth_density, pmns, DeltamSq21, DeltamSq31, eta, E, H)
+One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H)
 
 err = np.linalg.norm(One_num - One_an)/np.linalg.norm(One_num + One_an)
 
 print("For E = %.2f and eta = %.2f pi the relative error between analytic and numerical solutions is %f" % (E, eta/pi, err))
 
-probs = np.square(np.abs(sol))
+probs = sol
 
 plt.xlabel("Trajectory coordinate")
 plt.ylabel("Probability")
@@ -204,12 +208,13 @@ plt.show()
 eta = np.random.uniform(pi/2, pi)
 E = np.random.uniform(1,20)
 
-sol, x = Pearth(earth_density, pmns, DeltamSq21, DeltamSq31, eta, E, H)
+sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="numerical", full_oscillation=True)
+
 One_num = sol[-1]
 One_num = np.array([One_num])
 
 # Check analytical solution
-One_an = Pearth_analytical(earth_density, pmns, DeltamSq21, DeltamSq31, eta, E, H)
+One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H)
 
 err = np.linalg.norm(One_num - One_an)/np.linalg.norm(One_num + One_an)
 
@@ -228,7 +233,8 @@ plt.show()
 
 
 
-# Test Sun-Earth xurvival probability
+# Test Sun-Earth survival probability
+#####################################
 from src.solar import solar_flux_mass
 from src.evolutor import FullEvolutor
 
@@ -244,17 +250,19 @@ fraction = solar_model.fraction['8B']
 
 mass_weights = solar_flux_mass(th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction)
 
-mass_to_flavour_probabilitites = np.square(np.abs(np.dot(FullEvolutor(earth_density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H), pmns.conjugate())))
+#mass_to_flavour_probabilitites = np.square(np.abs(np.dot(FullEvolutor(earth_density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H), pmns.conjugate())))
 
-flavour_probabilities = np.array(np.dot(mass_to_flavour_probabilitites, mass_weights))
+#flavour_probabilities = np.array(np.dot(mass_to_flavour_probabilitites, mass_weights))
+# TODO:  This should now be the same as using the Pearth function, so do that
+flavour_probabilities = Pearth(mass_weights, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H)
 
-print("For E = %.2f and eta = %.2f pi the flavour probabilitites are %s" % (E, eta/pi, str(flavour_probabilities[0])) )
+print("For E = %.2f and eta = %.2f pi the flavour probabilitites are %s" % (E, eta/pi, str(flavour_probabilities)) )
 
-
+exit()
 
 # Test time average
 from math import radians
-from time_average import IntegralDay
+from src.time_average import IntegralDay
 from scipy import integrate
 
 lat = [0, 45, 89]

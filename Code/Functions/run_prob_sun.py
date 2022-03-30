@@ -12,6 +12,7 @@ import numpy as np
 from optparse import OptionParser
 
 import src.files as f
+from src.utils import print_banner, print_inputs
 from src.pmns import PMNS
 from src.solar import SolarModel, solar_flux_mass, Psolar
 
@@ -20,7 +21,6 @@ mainfilename = 'run_prob_sun'
 parser = OptionParser()
 parser.add_option("-v", "--verbose", help = "Print debug output", action='store_true', dest='verbose', default=False)
 parser.add_option("-s", "--solar", help ="Add custom solar model", action='store', dest="solar", default="")
-parser.add_option("-f", "--flavour", help="Neutrino flavour", action='store', dest='flav', default="")
 (options, args) = parser.parse_args()
 if len(args) < 3 :
   print('Wrong number of arguments \n\
@@ -52,6 +52,7 @@ if not solar_model.has_fraction(nu_fraction):
    print("Error: The fraction ", nu_fraction, " does not exist in the solar model.")
    exit()
 
+
 # Read example slha file and fill PMNS matrix
 nu_params = f.read_slha(slha_file)
 th12 = nu_params['theta12']
@@ -63,19 +64,17 @@ pmns = PMNS(th12, th13, th23, d)
 DeltamSq21 = nu_params['dm21']
 DeltamSq31 = nu_params['dm31']
 
+# Print program banner and inputs
+print_banner()
+print_inputs("solar", options, pmns, DeltamSq21, DeltamSq31, E, nu_fraction)
+
 # Compute probability for the given sample fraction and energy
-print(solar_flux_mass(th12, th13, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction[nu_fraction]))
+print("Running SNuF...")
 prob = Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction[nu_fraction])
 
-# TODO: Which unit do we expect the energy?
-if options.flav == '':
-  print("Probabilities of neutrinos of sample fraction", nu_fraction, "with energy E =", E, "at Sun exit is", prob)
-elif options.flav == 'e':
-  print("Probabilities of electron neutrinos of sample fraction", nu_fraction, "with energy E =", E, "at Sun exit is", prob[0])
-elif options.flav == 'mu':
-  print("Probabilities of muon neutrinos of sample fraction", nu_fraction, "with energy E =", E, "at Sun exit is", prob[1])
-elif options.flav == 'tau':
-  print("Probabilities of tau neutrinos of sample fraction", nu_fraction, "with energy E =", E, "at Sun exit is", prob[2])
-else:
-  print("Error: Unknown neutrino flavour. Options: [e, mu, tau]")
+# Print results
+print()
+print("Probability to oscillate to an electron neutrino : ", prob[0])
+print("Probability to oscillate to a muon neutrino      : ", prob[1])
+print("Probability to oscillate to a tau neutrino       : ", prob[2])
 

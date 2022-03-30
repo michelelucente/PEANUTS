@@ -173,7 +173,7 @@ from src.earth import Pearth
 # Use SNO location for comparison
 H = 2e3 # meters
 
-# Sample neutrino state
+# Sample neutrino state, muon flavour
 state = np.array([0,1,0])
 
 # Case 1: 0 <= eta <= pi/2
@@ -250,11 +250,8 @@ fraction = solar_model.fraction['8B']
 
 mass_weights = solar_flux_mass(th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction)
 
-#mass_to_flavour_probabilitites = np.square(np.abs(np.dot(FullEvolutor(earth_density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H), pmns.conjugate())))
-
-#flavour_probabilities = np.array(np.dot(mass_to_flavour_probabilitites, mass_weights))
-# TODO:  This should now be the same as using the Pearth function, so do that
-flavour_probabilities = Pearth(mass_weights, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H)
+# Choose the second mass eigestate
+flavour_probabilities = np.dot(Pearth(pmns.pmns[:,1].transpose(), earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H), mass_weights)
 
 print("For E = %.2f and eta = %.2f pi the flavour probabilitites are %s" % (E, eta/pi, str(flavour_probabilities)) )
 

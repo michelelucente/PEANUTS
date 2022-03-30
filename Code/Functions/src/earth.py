@@ -150,13 +150,7 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
     
   num_solution = [np.column_stack((num_evol[0][k], num_evol[1][k], num_evol[2][k])) for k in range(len(x))]
     
-  #NU0 = pmns.pmns[:, 1]
-  nustate = np.array(nustate).reshape((1,3)).transpose()
-  NU0 = np.dot(pmns.pmns, nustate)
-
-  # TODO: This is also the probability, as below, so it should be ||^2 I think
-  #evolution = [np.array(np.dot(num_solution[i].transpose(), NU0)).transpose()[0] for i in range(len(x))]
-  evolution = [np.array(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns))), nustate)).transpose()[0] for i in range(len(x))]
+  evolution = [np.array(np.square(np.abs(np.dot(num_solution[i].transpose(), nustate))) ) for i in range(len(x))]
     
   if full_oscillation:
     return evolution, x
@@ -177,11 +171,8 @@ def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H)
   - eta is the nadir angle
   - H is the detector depth below the surface of the Earth
   """
-  #NU0 = pmns.pmns[:, 1]
-  #nustate = np.array(nustate).reshape((1,3)).transpose()
 
-  # TODO: Following eq 19 in the draft, this should be |Evolutor^T x PMNS|^2, right?
-  return np.array(np.dot(np.square(np.abs(np.dot(FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H).transpose(), pmns.pmns))), nustate))[0]
+  return np.array(np.square(np.abs(np.dot(FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H).transpose(), nustate))))[0]
 
 
 def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="analytical", full_oscillation=False):
@@ -196,6 +187,14 @@ def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="anal
   - eta is the nadir angle
   - H is the detector depth below the surface of the Earth
   """
+
+  # Make sure nustate has the write format
+  if len(nustate) != 3:
+    print("Error: neutrino state provided has the wrong format, it must be a vector of size 3.")
+    exit()
+  if np.abs(np.sum(np.square(np.abs(nustate))) - 1) > 1e-3:
+    print("Error: neutrino state provided has the wrong format, it elements square must sum to 1.")
+    exit()
 
   if mode == "analytical":
     return Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H)

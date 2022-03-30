@@ -7,6 +7,7 @@ Created on Feb 2022
 @author Tomas Gonzalo <gonzalo@physik.rwth-aachen.de>
 """
 
+import os
 import numpy as np
 from math import sqrt
 from numpy import arctan, arcsin
@@ -38,10 +39,10 @@ Options:\n\
   exit()
 
 # Read the input files
-#slha_file = args[0]
-slha_file = './Data/example_slha.slha2' # To load from interactive session
-solar_file = './Data/bs2005agsopflux.csv' if options.solar == "" else options.solar
-density_file = './Data/Earth_Density.csv' if options.density == '' else options.density
+path = os.path.dirname(os.path.realpath( __file__ ))
+slha_file = args[0]
+solar_file = path + '/Data/bs2005agsopflux.csv' if options.solar == "" else options.solar
+density_file = path + '/Data/Earth_Density.csv' if options.density == '' else options.density
 
 
 # Define paths to save plots
@@ -109,8 +110,8 @@ ProbB8 = [Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_mode
 Probhep = [Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['hep']) for E in xrange]
 
 # Use SNO's example data files for comparison
-SNO_B8 = f.read_csv("./Data/B8.csv", names=['energy', 'Pnuenue'])
-SNO_hep = f.read_csv("./Data/HEP.csv", names=['energy', 'Pnuenue'])
+SNO_B8 = f.read_csv(path + "/Data/B8.csv", names=['energy', 'Pnuenue'])
+SNO_hep = f.read_csv(path + "/Data/HEP.csv", names=['energy', 'Pnuenue'])
 
 labels = ["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"]
 
@@ -257,7 +258,6 @@ flavour_probabilities = Pearth(mass_weights, earth_density, pmns, DeltamSq21, De
 
 print("For E = %.2f and eta = %.2f pi the flavour probabilitites are %s" % (E, eta/pi, str(flavour_probabilities)) )
 
-exit()
 
 # Test time average
 from math import radians
@@ -292,7 +292,7 @@ plt.show()
 # Import 8B energy spectrum
 import pandas as pd
 
-B8_shape = pd.read_csv('./Data/8B_shape.csv', header=None, names=['Energy MeV', 'Fraction'])
+B8_shape = pd.read_csv(path + '/Data/8B_shape.csv', header=None, names=['Energy MeV', 'Fraction'])
 B8_shape.Fraction[B8_shape.Fraction < 0] = 0
 print(integrate.trapezoid(x=B8_shape['Energy MeV'], y=B8_shape['Fraction']))
 

@@ -7,12 +7,13 @@ Created on Mar 10 2022
 @author Tomas Gonzalo <gonzalo@physik.rwth-aachen.de>
 """
 
+import os
 import numpy as np
 from optparse import OptionParser
 
 import src.files as f
 from src.pmns import PMNS
-from src.solar import SolarModel, Psolar
+from src.solar import SolarModel, solar_flux_mass, Psolar
 
 mainfilename = 'run_prob_sun'
 
@@ -37,8 +38,9 @@ Options:\n\
   exit()
 
 # Read the input files
+path = os.path.dirname(os.path.realpath( __file__ ))
 slha_file = args[0]
-solar_file = './Data/bs2005agsopflux.csv' if options.solar == "" else options.solar
+solar_file = path + '/Data/bs2005agsopflux.csv' if options.solar == "" else options.solar
 
 # Import data from solar model
 solar_model = SolarModel(solar_file)
@@ -62,6 +64,7 @@ DeltamSq21 = nu_params['dm21']
 DeltamSq31 = nu_params['dm31']
 
 # Compute probability for the given sample fraction and energy
+print(solar_flux_mass(th12, th13, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction[nu_fraction]))
 prob = Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction[nu_fraction])
 
 # TODO: Which unit do we expect the energy?

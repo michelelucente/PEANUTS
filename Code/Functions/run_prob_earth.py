@@ -7,6 +7,7 @@ Created on Feb 2022
 @author Tomas Gonzalo <gonzalo@physik.rwth-aachen.de>
 """
 
+import os
 import numpy as np
 #from math import sqrt # TODO Not needed right now, re-add if needed or delete
 #from numpy import arctan, arcsin # TODO: Not needed right now, re-add if needed or delete
@@ -46,9 +47,10 @@ Options:\n\
 
 
 # Read the input files
+path = os.path.dirname(os.path.realpath( __file__ ))
 slha_file = args[0]
-solar_file = './Data/bs2005agsopflux.csv' if options.solar == "" else options.solar
-density_file = './Data/Earth_Density.csv' if options.density == '' else options.density
+solar_file = path + '/Data/bs2005agsopflux.csv' if options.solar == "" else options.solar
+density_file = path +'/Data/Earth_Density.csv' if options.density == '' else options.density
 
 # Import data from solar model
 solar_model = SolarModel(solar_file)

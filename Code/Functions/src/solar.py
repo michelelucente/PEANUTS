@@ -7,6 +7,7 @@ Created on Feb 7 2022
 @author: Tomas Gonzalo <gonzalo@physik.rwth-aachen.de>
 """
 # Import libraries
+import os
 import numpy as np
 from math import cos, sin
 from scipy import integrate
@@ -20,18 +21,19 @@ class SolarModel:
     Class containing the info of the solar model
     """
 
-    def __init__(self, filename="./Data/bs2005agsopflux.csv"):
+    def __init__(self, filename=None):
         """
         Constructor of the solar model. 
         Reads the solar model file and fills useful variables
         """
 
         # Set file name
-        self.filename = "./Data/bs2005agsopflux.csv" if filename == "" else filename
+        path = os.path.dirname(os.path.realpath( __file__ ))
+        self.filename = path + "/../Data/bs2005agsopflux.csv" if filename == None else filename
           
         # Import data from solar model
         # TODO: This assumes that any solar model file is the same format, make it more general
-        self.model = f.read_csv(filename, 
+        self.model = f.read_csv(self.filename, 
                                 usecols=[1, 3, 7, 13],
                                 names = ['radius', 'density_log_10', '8B fraction', 'hep fraction'],
                                 sep=" ", skiprows=27, header=None)

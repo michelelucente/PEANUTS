@@ -7,5 +7,10 @@ Created on Mar 2022
 @author Tomas Gonzalo <gonzalo@physik.rwth-aachen.de>
 """
 
-from src.solar import Psolar, solar_flux_mass
-from src.earth import Pearth
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.realpath( __file__ )))
+
+from src.pmns import PMNS
+from src.solar import SolarModel, Psolar, solar_flux_mass
+from src.earth import EarthDensity, Pearth

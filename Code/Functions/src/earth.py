@@ -7,6 +7,7 @@ Created on Feb 10 2022
 @author: Tomas Gonzalo <gonzalo@physik.rwth-aachen.de>
 """
 
+import os
 import numpy as np
 from numpy.linalg import multi_dot
 from math import sin, cos, sqrt, pi, asin
@@ -22,13 +23,15 @@ class EarthDensity:
   See hep-ph/9702343 for the definition of trajectory coordinate and Earth density parametrisation.
   """
 
-  def __init__(self, density_file="./Data/Earth_Density.csv"):
+  def __init__(self, density_file=None):
     """
     Read the Earth density parametrisation, in units of mol/cm^3, following hep-ph/9702343
     """
 
     # TODO: This is specific for the example file, make general
-    earth_density = f.read_csv(density_file, names=["rj", "alpha", "beta", "gamma"], skiprows=3)
+    path = os.path.dirname(os.path.realpath( __file__ ))
+    self.density_file = path + "/../Data/Earth_Density.csv" if density_file == None else density_file
+    earth_density = f.read_csv(self.density_file, names=["rj", "alpha", "beta", "gamma"], skiprows=3)
 
     self.rj = earth_density.rj.to_numpy()
     self.alpha = earth_density.alpha.to_numpy()

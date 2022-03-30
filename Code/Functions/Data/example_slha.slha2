@@ -18,7 +18,7 @@ BLOCK SMINPUTS
     24  1.280000000000000e+00   # mc(mc)^MSbar
 BLOCK UPMNSIN
     1   5.836380000000000e-01   # theta12 (solar angle)
-    2   8.552100000000000e-01   # theta12 (atmospheric mixing angle)
+    2   8.552100000000000e-01   # theta23 (atmospheric mixing angle)
     3   1.495750000000000e-01   # theta13
     4   3.403390000000000e+00   # delta13 (Dirac CP-violating phase)
     5   0.000000000000000e+00   # alpha1 (first Majorana CP-violating phase)

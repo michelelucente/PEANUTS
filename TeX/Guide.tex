@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[11pt,a4paper]{article}
 
 \usepackage{amsmath}
 \usepackage{hyperref}
@@ -6,6 +6,8 @@
 \graphicspath{ {./figs/} }
 \usepackage{bbold}
 \usepackage{color}
+\usepackage{geometry}
+\usepackage{setspace}
 
 \newcommand{\todo}[1]{\textbf{To do:} \emph{\color{blue} #1}}
 \newcommand{\MeV}[0]{\text{MeV}}
@@ -15,11 +17,63 @@
 \newcommand{\bra}[1]{\left< #1 \right|}
 \newcommand{\braket}[2]{\left< #1 | #2 \right>}
 
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2cm,rmargin=2cm}
+\renewcommand{\baselinestretch}{1.3}
+
 \begin{document}
+
+\noindent \today
+\hfill TTK-XXX
+
+\vskip 0.4cm
+
+\begin{center}
+\bigskip
+{\huge\bf
+\begin{spacing}{1.1}
+XXX: a software for the automatic computation of solar neutrino flux and its propagation within Earth
+\end{spacing}
+}
+
+\vskip 0.4cm
+
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
+{\large
+Tomás E. Gonzalo$^{\dagger}$ and Michele Lucente$^{\star}$
+\\[3mm]
+{\it{
+Institute for Theoretical Particle Physics and Cosmology (TTK), RWTH Aachen University, D-52056 Aachen, Germany}
+}}
+\\[3mm]
+{$^{\dagger}$gonzalo@physik.rwth-aachen.de, $^{\star}$lucente@physik.rwth-aachen.de}
+\end{center}
+\vskip 0.4cm
+
+\renewcommand*{\thefootnote}{\arabic{footnote}}
+\setcounter{footnote}{0}
+
+\begin{abstract}
+A fast software for solar neutrino flux generation and propagation.	
+\end{abstract}
+
+\thispagestyle{empty}
+
+%%% Table of contents %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{small}
+\tableofcontents
+\end{small}
+
+\newpage
+
+%%% Main Text 
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+blablalba
 
 \section{Solar neutrino flux}
 	\subsection{Neutrino survival probability at Sun surface}
-The solar neutrino flux at Earth is given by an incoherent superposition of neutrino mass eigenstates~\cite{Mikheev:1987wa, Lisi:1997yc}. In the adiabatic approximation the neutrino state at the Sun surface only depends on the matter effects at neutrino production point; being $T$ the matrix that diagonalises the neutrino Hamiltonian in matter~\cite{FiuzadeBarros:2011qna}: \todo{Check diagonalisation, probably CP-phases missing - does not impact since we square}
+The solar neutrino flux at Earth is given by an incoherent superposition of neutrino mass eigenstates~\cite{Mikheev:1987wa, Lisi:1997yc}. In the adiabatic approximation the neutrino state at the Sun surface only depends on the matter effects at neutrino production point; let us define $T$ the matrix that diagonalises the neutrino Hamiltonian in matter~\cite{FiuzadeBarros:2011qna}:
 \begin{equation}
 	T\left(E, n_e\right) =\left( \begin{array}{ccc}
 		c_{13, M} c_{12, M} & c_{13,M} s_{12, M} & s_{13, M} \\
@@ -93,7 +147,11 @@ We compare in Fig.~\ref{fig:SNO_8B_hep_comparison} the prediction from our code 
 \section{Neutrino propagation from Sun and detection at Earth}
 
 \subsection{Probability of transition $\nu_i \rightarrow \nu_\alpha$}
-Being it an incoherent flux, the fraction of mass eigenstates within the solar neutrino flux remains constant as long as neutrinos propagate in the vacuum, on their path from Sun surface to Earth. The probability of observing a neutrino of flavour $\alpha$ from a mass eigenstate $i$ is given by $|U_{\alpha i}^*|^2$, where $U$ is the unitary PMNS mixing matrix. Thus, the probability of a solar neutrino to manifest as flavour $\alpha$ is given by
+Being it an incoherent flux, the fraction of mass eigenstates within the solar neutrino flux remains constant as long as neutrinos propagate in the vacuum, on their path from Sun surface to Earth. From 
+\begin{equation}
+	\ket{\nu_\alpha, 0} = U_{\alpha i}^* \ket{\nu_i, 0}.
+\end{equation}
+the probability of observing a neutrino of flavour $\alpha$ from a mass eigenstate $i$ is given by $|U_{\alpha i}^*|^2$, where $U$ is the unitary PMNS mixing matrix. Thus, the probability of a solar neutrino to manifest as flavour $\alpha$ is given by
 \begin{equation}
 	P^S_{\nu_e \rightarrow \nu_\alpha}(E) = |U_{\alpha i}^*|^2 P^\odot_{\nu_e \rightarrow \nu_i}(E),
 \end{equation}
@@ -103,11 +161,11 @@ If the neutrino flux crosses the Earth the probabilities are modified, since the
 \begin{equation}
 	\ket{\nu_\alpha, t} = \mathcal{U}_{\alpha \beta}(t) \ket{\nu_\beta,0},
 \end{equation}
-where we assume a pure flavour (vacuum) eigenstate vacuum at $t=0$,
+where we assume a pure flavour (vacuum) eigenstate  at $t=0$,
 \begin{equation}
 	\ket{\nu_\alpha, 0} = U_{\alpha i}^* \ket{\nu_i, 0}.
 \end{equation}
-Notice that the propagation of a single neutrino within Earth is given by the \emph{coherent} propagation of mass eigenstates. The determination of the evolutor operator $\mathcal{U}$ is in general a non-trivial problem, and will be discussed in detail in the following sections; for the moment let us assume we know a closed form expression for it.
+Notice that the propagation of a single neutrino within Earth is given by the \emph{coherent} propagation of incoming mass eigenstates. The determination of the evolutor operator $\mathcal{U}$ is in general a non-trivial problem, and will be discussed in detail in the following sections; for the moment let us assume we know a closed form expression for it.
 
 A general neutrino state $\ket{\nu}$ can be expressed as a linear superposition of flavour or mass eigenstates. Working in the flavour basis
 \begin{equation}
@@ -115,7 +173,7 @@ A general neutrino state $\ket{\nu}$ can be expressed as a linear superposition 
 \end{equation}
 where $\ket{\nu_\alpha, 0}$ stands for a vacuum flavour eigenstate. This state will evolve as
 \begin{equation}
-	\ket{\nu, t} = c_\alpha(0) \mathcal{U}_{\alpha \beta} \ket{\nu_\beta, 0},
+	\ket{\nu, t} = c_\alpha(0) \mathcal{U}_{\alpha \beta}(t) \ket{\nu_\beta, 0},
 \end{equation}
 which allows to define the linear coefficients at time $t$
 \begin{equation}
@@ -136,7 +194,7 @@ Putting everything together, the final probability for a solar neutrino to manif
 \begin{equation}\label{eq:sun_earth_probability}
 	P_\alpha^{SE}(t, E) = \left| \mathcal{U}_{\alpha \beta}^T(t) U_{\beta i} \right|^2  P_{\nu_e \rightarrow \nu_i}^\odot(E),
 \end{equation}
-where $t=0$ is defined at the neutrino crossing the Earth surface.
+where $t=0$ at the neutrino crossing the Earth surface.
 The interpretation of Eq.~\ref{eq:sun_earth_probability} is the following: $U_{\beta i}$ are the coefficients of the mass eigenstate $i$ expressed as linear combination of flavour eigenstates, $\ket{\nu_i, 0} = U_{\beta i} \ket{\nu_\beta, 0}$, and $\mathcal{U}^T_{\alpha \beta}(t) U_{\beta i} = \braket{\nu_\alpha, 0}{\nu_i, t}$ is the transition amplitude from the evolved mass eigenstate $i$ to interaction eigenstate $\alpha$. Finally, each probability $|\braket{\nu_\alpha, 0}{\nu_i, t}|^2$ is multiplied by the weight of the mass eigenstate $i$ in the incoherent solar flux, $P_{\nu_e \rightarrow \nu_i}^\odot(E)$.
 
 %From this relation the probability amplitude for a neutrino mass eigenstate produced at $t=0$ of interacting as a flavour eigenstate at time $t$ is given by
@@ -165,7 +223,7 @@ where the second equation follows from the states $\ket{\nu_\alpha,0}$ forming a
 
 Eq.~\ref{eq:evolutor} allows to express the evolutor as a function of the Hamiltonian of the system. Its formal solution is
 \begin{equation}
-	\mathcal{U}(t) = \mathcal{T} \left[ e^{-i \int_{t_0}^t \de t' H(t')} \right].\label{eq:evolutor_formal}
+	\mathcal{U}(t) = \mathcal{T} \left[ e^{-i \int_{t_0}^t \de t' H(t')} \right],\label{eq:evolutor_formal}
 \end{equation}
 where $\mathcal{T}$ is the time-order operator. Eq.~\ref{eq:evolutor_formal} does not generally admit an analytic closed form, except for very special cases, for instance if the Hamiltonian at different times does commute.
 
@@ -195,7 +253,7 @@ which allows for an approximate solution obtained by truncating Eq.~\ref{eq:Dyso
 %$\Omega_1$ would give the exact solution if $A$ is constant, such that its commutator at different times vanish. For the general case, the higher-order terms in the ME take into account the $A(t)$ time dependency.
 
 \subsection{Earth matter regeneration}
-In the adiabatic regime solar neutrinos leave the Sun as propagation eigenstates $\ket{\nu_2}$. They thus do not oscillate while travelling to the Earth. However, before arriving at a terrestrial detector they can cross the Earth itself, along which path the matter potential makes the propagation eigenstates different from the vacuum ones. This results in neutrino oscillations inside the Earth that, on average, result in a regeneration of $\nu_e$ with respect to the vacuum case.
+Due to the incoherent nature of the solar neutrino flux, its relative weights in mass eigenstates components are constant while travelling from Sun to Earth in vacuum. However, before arriving at a terrestrial detector, a solar neutrino can cross the Earth itself, along which path the matter potential makes the propagation eigenstates different from the vacuum ones. This results in coherent neutrino oscillations inside the Earth that, on average, result in a regeneration of $\nu_e$ with respect to the vacuum case.
 
 The electron density inside Earth can be parametrised with 5 shells, within which the electron density varies smoothly as~\cite{Lisi:1997yc}
 \begin{equation}\label{eq:earth_density_param}
@@ -226,7 +284,7 @@ $j$& Shell          & $[r_{j-1},\,r_j]$  &$\alpha_j$ &$\beta_j$ &$\gamma_j$\\
 	\label{fig:earth_density}	
 \end{figure}
 
-The parametrisation in Eq.~\ref{eq:earth_density_param} is valid for radial trajectories, i.e. paths crossing the center of the Earth. For a path forming an angle $\eta$ (nadir) with radial trajectory (cf. Fig.~\ref{fig:earth_density}), the following relations hold
+The parametrisation in Eq.~\ref{eq:earth_density_param} is valid for radial trajectories, i.e. paths crossing the center of the Earth. For a path forming an angle $\eta$ (nadir) with the radial trajectory (cf. Fig.~\ref{fig:earth_density}), the parametrisation is functionally invariant, with modified coefficients
 \begin{eqnarray}
 	N_j(x) &=& \alpha'_j + \beta'_j x^2 + \gamma'_j x^4, \label{eq:earth_density_nadir} \\
 	\alpha'_j &=& \alpha_j + \beta_j \sin^2 \eta + \gamma_j \sin^4\eta, \\
@@ -234,7 +292,7 @@ The parametrisation in Eq.~\ref{eq:earth_density_param} is valid for radial traj
 	\gamma'_j &=& \gamma_j.
 \end{eqnarray}
 
-The Earth density profile for different values of the nadir angle $\eta$ is reported in Fig.~\ref{fig:earth_density}.
+The Earth density profile for some example values of the nadir angle $\eta$ is reported in Fig.~\ref{fig:earth_density}.
 
 \begin{figure}[ht]
 	\includegraphics[width=0.8\textwidth]{earth_density}
@@ -242,7 +300,7 @@ The Earth density profile for different values of the nadir angle $\eta$ is repo
 	\label{fig:earth_density}
 \end{figure}
 
-If the detector is placed underground, we can define a ``detector shell'' at the detector radial distance. In our example SNO was placed $H=2$ km underground, so we can define $r_{det} = r_\text{SNO} = 1 - H /R_\text{E} \equiv 1 - h$, where $R_\text{E}$ is the (not rescaled) Earth radius, $R_E = 6.371 \cdot 10^3$ km, cf. Figure~\ref{fig:scheme_detector_shell}.
+If the detector is located underground, we can define a ``detector shell'' at the detector radial distance. In our example SNO was placed $H=2$ km underground, so we can define $r_{det} = r_\text{SNO} = 1 - H /R_\text{E} \equiv 1 - h$, where $R_\text{E}$ is the (not rescaled) Earth radius, $R_E = 6.371 \cdot 10^3$ km, cf. Figure~\ref{fig:scheme_detector_shell}.
 
 \begin{figure}[ht]
 	\includegraphics[width=0.8\textwidth]{earth_SNO_scheme}
@@ -250,9 +308,9 @@ If the detector is placed underground, we can define a ``detector shell'' at the
 	\label{fig:scheme_detector_shell}
 \end{figure} 
 
-In general, a shell $i$ is crossed by a neutrino trajectory with nadir angle $\eta$ if $r_i > \sin \eta$. The value of the trajectory coordinate at each shell crossing is given by 
+In general, a shell $i$ is crossed by a neutrino trajectory with nadir angle $\eta$ if $r_i > r_{det} \sin \eta$. The value of the trajectory coordinate at each shell crossing is given by 
 \begin{equation}
-	x_i = \sqrt{r_i^2 - \sin^2 \eta}, \hspace{1cm} \text{ for $i$ such that} \hspace{1cm} r_i > \sin \eta.
+	x_i = r_i \cos\eta, \hspace{1cm} \text{ for $i$ such that} \hspace{1cm} r_i > r_{det} \sin \eta.
 \end{equation}
 
 For an underground detector the contribution to the trajectory from the outer layer (between Earth surface and detector shell) is given by
@@ -398,28 +456,27 @@ The evolutor can thus be expressed as~\cite{Lisi:1997yc}
 \end{equation}
 where $\bar{\mathcal{U}}$ is the evolutor for constant matter density $\bar{n}_e$.
 
-In the mass basis,
-\begin{equation}\label{eq:Hmass}
-	\bar{H}_m = \text{diag}(k_1,k_2,k_3) + U^T \text{diag}(\sqrt{2}G_F \bar{n}_e, 0, 0) U,
-\end{equation}
-the evolutor for a constant Hamiltonian can generally be expressed in a closed form~\cite{Ohlsson:1999xb}
+The evolutor for a constant Hamiltonian can generally be expressed in a closed form~\cite{Ohlsson:1999xb}
 \begin{equation}
-	e^{- i \bar{H}_m x} = \phi \sum_{a=1}^3 e^{-i x \lambda_a} \frac{1}{3\lambda_a^2 + c_1}\left[ \left(\lambda_a^2 + c_1\right) \mathbb{1} + \lambda_a T + T^2 \right] \equiv \phi \sum_{a=1}^3 e^{-i x \lambda_a} M_a,
+	e^{- i \bar{H} x} = \phi \sum_{a=1}^3 e^{-i x \lambda_a} \frac{1}{3\lambda_a^2 + c_1}\left[ \left(\lambda_a^2 + c_1\right) \mathbb{1} + \lambda_a T + T^2 \right] \equiv \phi \sum_{a=1}^3 e^{-i x \lambda_a} M_a,
 \end{equation}
-where $T = \bar{H}_m - \text{Tr}(\bar{H}_m) \mathbb{1}/3 $ is a traceless matrix. $\lambda_a$ are the roots of the characteristic equation
-\begin{eqnarray}
-\lambda_1 &=& - \sqrt{-\frac{1}{3} c_1} \cos \left[ \frac{1}{3}
-\arctan \left( \frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3}
-\right) \right] + \sqrt{-c_1} \sin \left[ \frac{1}{3} \arctan \left(
-\frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3} \right) \right],\\
-\lambda_2 &=& - \sqrt{-\frac{1}{3} c_1} \cos \left[ \frac{1}{3} \arctan
-\left( \frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3} \right)
-\right] - \sqrt{-c_1} \sin \left[ \frac{1}{3} \arctan \left(
-\frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3} \right) \right], \\
-\lambda_3 &=& 2 \sqrt{-\frac{1}{3} c_1} \cos \left[ \frac{1}{3} \arctan
-\left( \frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3} \right)
-\right]
-\end{eqnarray}
+where $T = \bar{H} - \text{Tr}(\bar{H}) \mathbb{1}/3 $ is a traceless matrix. $\lambda_a$ are the roots of the characteristic equation
+\begin{equation}
+	\lambda^3 + c_1 \lambda + c_0 = 0,
+\end{equation}
+%\begin{eqnarray}
+%\lambda_1 &=& - \sqrt{-\frac{1}{3} c_1} \cos \left[ \frac{1}{3}
+%\arctan \left( \frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3}
+%\right) \right] + \sqrt{-c_1} \sin \left[ \frac{1}{3} \arctan \left(
+%\frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3} \right) \right],\\
+%\lambda_2 &=& - \sqrt{-\frac{1}{3} c_1} \cos \left[ \frac{1}{3} \arctan
+%\left( \frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3} \right)
+%\right] - \sqrt{-c_1} \sin \left[ \frac{1}{3} \arctan \left(
+%\frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3} \right) \right], \\
+%\lambda_3 &=& 2 \sqrt{-\frac{1}{3} c_1} \cos \left[ \frac{1}{3} \arctan
+%\left( \frac{1}{c_0} \sqrt{-c_0^2 - \frac{4}{27} c_1^3} \right)
+%\right]
+%\end{eqnarray}
 with
 \begin{eqnarray}
 	c_1 &=& T_{11} T_{22} - T_{12} T_{21} + T_{11} T_{33} - T_{13} T_{31}
@@ -428,18 +485,18 @@ c_0 &=& - \det T.
 \end{eqnarray}
 Finally
 \begin{equation}
-	\phi = e^{- i x \frac{\text{Tr}(\bar{H}_m)}{3} }.
+	\phi = e^{- i x \frac{\text{Tr}(\bar{H})}{3} }.
 \end{equation}
 
-In defining $\bar{H}_m$ in Eq.~\ref{eq:Hmass} we assumed the mixing matrix to be real, $U = U^*$, since the effect of CP-violation in neutrino oscillations can be factorised as in Eq.~\ref{eq:evolutor_factorised}.
+%In defining $\bar{H}_m$ in Eq.~\ref{eq:Hmass} we assumed the mixing matrix to be real, $U = U^*$, since the effect of CP-violation in neutrino oscillations can be factorised as in Eq.~\ref{eq:evolutor_factorised}.
 
 By noticing that the full dependence on $x$ in $e^{-i \bar{H}_m x}$ is now contained within the scalar functions $e^{- i \lambda_a x}$, the first order correction in Eq.~\ref{eq:evolutor_1} can be computed as
 \begin{eqnarray}
-\mathcal{U}^{(1)}_m(x_2,x_1) &=&	- i \int_{x_1}^{x_2} \de x\ \bar{\mathcal{U}}(x_2,x)\ \delta \tilde{H}(x)\ \bar{\mathcal{U}}(x,x_1) \\
-&=& - i \sum_{a,b=1}^3 \int_{x_1}^{x_2} \de x e^{- i \tilde{\lambda}_a (x_2-x)} M_a U^T \text{diag}\left(\sqrt{2} G_F \delta n(x),0,0\right) U M_b e^{- i \tilde{\lambda}_b (x-x_1)}\\
-&=& - i \sum_{a,b=1}^3 M_a U^T \text{diag}\left(\sqrt{2}G_F I_{ab}(x_2, x_1), 0, 0\right) U M_b,
+\mathcal{U}^{(1)}(x_2,x_1) &=&	- i \int_{x_1}^{x_2} \de x\ \bar{\mathcal{U}}(x_2,x)\ \delta \tilde{H}(x)\ \bar{\mathcal{U}}(x,x_1) \\
+&=& - i \sum_{a,b=1}^3 \int_{x_1}^{x_2} \de x e^{- i \tilde{\lambda}_a (x_2-x)} M_a \text{diag}\left(\sqrt{2} G_F \delta n(x),0,0\right) M_b e^{- i \tilde{\lambda}_b (x-x_1)}\\
+&=& - i \sum_{a,b=1}^3 M_a \text{diag}\left(\sqrt{2}G_F I_{ab}(x_2, x_1), 0, 0\right) M_b,
 \end{eqnarray}
-where  $\tilde{\lambda}_a = \lambda_a + \text{Tr}(\bar{H}_m)/3$ and we defined
+where  $\tilde{\lambda}_a = \lambda_a + \text{Tr}(\bar{H})/3$ and we defined
 \begin{equation}
 	I_{ab}(x_2,x_1) = \int_{x_1}^{x_2}\de x\ e^{- i \tilde{\lambda}_a (x_2-x)}\ \delta n(x)\ e^{- i \tilde{\lambda}_b (x-x_1)}.
 \end{equation}
@@ -448,17 +505,18 @@ For a path fully contained within one shell,
 	\delta n (x) = \tilde{\alpha}' + \beta' x^2 + \gamma' x^4,
 \end{equation}
 where $\tilde{\alpha}' = \alpha' - \bar{n}_e$, and $I_{ab}$ can be expressed analytically in closed form.
-Finally, we rotate back to flavour basis
-\begin{equation}
-	\mathcal{U}_f(x_2,x_1) = U\ \mathcal{U}_m(x_2,x_1)\ U^T,
-\end{equation}
-obtaining
+%Finally, we rotate back to flavour basis
+%\begin{equation}
+%	\mathcal{U}_f(x_2,x_1) = U\ \mathcal{U}_m(x_2,x_1)\ U^T,
+%\end{equation}
+Summarising, we obtain
 \begin{eqnarray}
-\mathcal{U}_f(x_2,x_1) &=& \mathcal{U}^{(0)}_f(x_2,x_1) +\mathcal{U}^{(1)}_f(x_2,x_1) + \mathcal{O}(\delta \tilde{H}^2),\\
-\mathcal{U}^{(0)}_f(x_2,x_1) &=& 	e^{- i \bar{H}_f (x_2-x_1)} = \phi \sum_{a=1}^3 e^{-i (x_2-x_1) \lambda_a} U M_a U^T = \phi \sum_{a=1}^3 e^{-i (x_2-x_1) \lambda_a} \tilde{M}_a,\\
-\mathcal{U}^{(1)}_f(x_2,x_1) &=& - i \sum_{a,b=1}^3 \tilde{M}_a\ \text{diag}\left(\sqrt{2}G_F I_{ab}(x_2, x_1), 0, 0\right)\ \tilde{M}_b,
+\mathcal{U}(x_2,x_1) &=& \mathcal{U}^{(0)}(x_2,x_1) +\mathcal{U}^{(1)}(x_2,x_1) + \mathcal{O}(\delta \tilde{H}^2),\\
+\mathcal{U}^{(0)}(x_2,x_1) &=& 	e^{- i \bar{H} (x_2-x_1)} = \phi \sum_{a=1}^3 e^{-i (x_2-x_1) \lambda_a} M_a, \\ %= \phi \sum_{a=1}^3 e^{-i (x_2-x_1) \lambda_a} \tilde{M}_a,\\
+\mathcal{U}^{(1)}(x_2,x_1) &=& - i \sum_{a,b=1}^3 M_a\ \text{diag}\left(\sqrt{2}G_F I_{ab}(x_2, x_1), 0, 0\right)\ M_b.
 \end{eqnarray}
-with $\tilde{M}_a = U M_a U^T$. In our code we implement these perturbative expressions to compute $\tilde{\mathcal{U}}$ in Eq.~\ref{eq:evolutor_12-13}, thus using a ``reduced'' mixing matrix $U = R_{13} R_{12}$, and subsequently use Eq.~\ref{eq:evolutor_factor} to obtain the full dynamics.
+%with $\tilde{M}_a = U M_a U^T$. 
+In our code we implement these perturbative expressions to compute $\tilde{\mathcal{U}}$ in Eq.~\ref{eq:evolutor_12-13}, thus using a ``reduced'' mixing matrix $U = R_{13} R_{12}$, and subsequently use Eq.~\ref{eq:evolutor_factor} to obtain the full dynamics.
 
 %We can now calculate the first terms in the ME. To implement $\Omega_1$ in Eq.~\ref{eq:ME1}
 %\begin{eqnarray}

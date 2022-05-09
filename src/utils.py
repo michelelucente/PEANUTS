@@ -11,13 +11,13 @@ def print_banner():
   Print banner for the program
   """
 
-  banner =  "Solar Neutrino Fluxes (SNuF) \n"\
+  banner =  "Propagation and Evolution of Active NeUTrinoS (PEANUTS) \n"\
             "================================\n\n"\
             "Created by:\n"\
             "   Michele Lucente (lucente@physik.rwth-aachen.de)\n"\
             "   Tomas Gonzalo   (gonzalo@physik.rwht-aachen.de)\n\n"\
-            "SNuF 1.0 is open source and under the terms of the GPL-3 license.\n\n"\
-            "Documentation and details for SNuF can be found at\n"\
+            "PEANUTS 1.0 is open source and under the terms of the GPL-3 license.\n\n"\
+            "Documentation and details for PEANUTS can be found at\n"\
             "T. Gonzalo and M. Lucente, arXiv:xxxx.xxxx\n\n"\
             "==========================================\n"
 
@@ -65,5 +65,8 @@ def get_comma_separated_floats(option, opt, value, parser):
   comma-separated values and make a
   list of floats
   """
-  setattr(parser.values, option.dest, [float(x) for x in value.split(',')])
-
+  try:
+    setattr(parser.values, option.dest, [complex(x) for x in value.split(',')])
+  except ValueError:
+    print("Error: Wrong format for neutrino state")
+    exit()

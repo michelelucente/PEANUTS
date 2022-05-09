@@ -30,7 +30,8 @@ parser.add_option("-m", "--mass", help="Input neutrino state, in mass basis", ty
 if len(args) < 4 :
   print('Wrong number of arguments \n\
         \n\
-Usage: python '+mainfilename+'.py <in_file> <energy> <eta> <depth>\n\
+Usage: python '+mainfilename+'.py -f/-m <eigensate> <in_file> <energy> <eta> <depth>\n\
+       <eigenstate>                Flavour (-f/--flavour) or mass (-m/--mass) input eigenstate\n\
        <in_file>                   Input file\n\
        <energy>                    Energy of neutrinos\n\
        <eta>                       Nadir angle of the incident neutrinos\n\
@@ -41,21 +42,22 @@ Options:\n\
        -v, --verbose                 Print debug output\n\
        -d, --density                 Add custom earth density profile\n\
        -a, --analytical              Perform analytical evolution\n\
-       -n, --numerical               Perform numerical evolution\n\
-       -f, --flavour                 Input neutrino state, in flavour basis\n\
-       -m, --mass                    Input neutrino state, in mass basis')
+       -n, --numerical               Perform numerical evolution')
   exit()
 
+
+# Check that we have a valid neutrino state
+if options.flavour == None and options.mass == None:
+  print("Error: Missing neutrino state, you need to provide a neutrino state in either the flavour or mass basis.")
+  exit()
+elif options.flavour != None and options.mass != None:
+  print("Error: Neutrino state cannot be given simultaneously in the flavour and mass basis, choose one.")
+  exit()
 
 # Read the input files
 path = os.path.dirname(os.path.realpath( __file__ ))
 slha_file = args[0]
 density_file = path +'/Data/Earth_Density.csv' if options.density == '' else options.density
-
-# Get parameters
-E = float(args[1])
-eta = float(args[2])
-H = float(args[3])
 
 # Read example slha file and fill PMNS matrix
 nu_params = f.read_slha(slha_file)
@@ -70,19 +72,18 @@ DeltamSq31 = nu_params['dm31']
 
 # Parse neutrino state
 nustate = np.zeros(3)
-if options.flavour == None and options.mass == None:
-  print("Error: Missing neutrino state, you need to provide a neutrino state in either the flavour or mass basis.")
-  exit()
-elif options.flavour != None and options.mass != None:
-  print("Error: Neutrino state cannot be given simultaneously in the flavour and mass basis, choose one.")
-  exit()
-elif options.flavour != None:
+if options.flavour != None:
   nustate = np.array(options.flavour)
 elif options.mass != None:
   if len(options.mass) != 3:
     print("Error: neutrino state provided has the wrong format, it must be a vector of size 3.")
     exit()
   nustate = np.array(np.dot(pmns.pmns, np.array(options.mass)))[0]
+
+# Get parameters
+E = float(args[1])
+eta = float(args[2])
+H = float(args[3])
 
 # Earth density
 earth_density = EarthDensity(density_file)
@@ -92,7 +93,7 @@ print_banner()
 print_inputs("earth", options, pmns, DeltamSq21, DeltamSq31, E, eta, H)
 
 # Compute probability of survival after propagation through Earth 
-print("Running SNuF...")
+print("Running PEANUTS...")
 
 # Check if analytical solution was requested
 if options.analytical:

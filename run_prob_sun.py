@@ -69,7 +69,7 @@ print_banner()
 print_inputs("solar", options, pmns, DeltamSq21, DeltamSq31, E, nu_fraction)
 
 # Compute probability for the given sample fraction and energy
-print("Running SNuF...")
+print("Running PEANUTS...")
 prob = Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction[nu_fraction])
 
 # Print results

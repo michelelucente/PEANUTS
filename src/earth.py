@@ -87,7 +87,7 @@ class EarthDensity:
     return alpha_prime[idx] + beta_prime[idx] * x**2 + gamma_prime[idx] * x**4
 
 
-def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, full_oscillation=False):
+def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis="flavour", full_oscillation=False):
   """
   Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H) computes
   numerically the probability of survival of an incident electron neutrino spectrum
@@ -150,8 +150,14 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
     
   num_solution = [np.column_stack((num_evol[0][k], num_evol[1][k], num_evol[2][k])) for k in range(len(x))]
     
-  evolution = [np.array(np.square(np.abs(np.dot(num_solution[i].transpose(), nustate))) ) for i in range(len(x))]
-    
+  if basis == "flavour":
+      evolution = [np.array(np.square(np.abs(np.dot(num_solution[i].transpose(), nustate))) ) for i in range(len(x))]
+  elif basis == "mass":
+      evolution = [np.array(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns))),nustate))[0] for i in range(len(x))]
+  else:
+      print("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")
+      exit()
+ 
   if full_oscillation:
     return evolution, x
   else:
@@ -159,7 +165,7 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
 
 
 
-def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H):
+def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis="flavour"):
   """
   Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H) computes
   analytically the probability of survival of an incident electron neutrino spectrum
@@ -172,10 +178,16 @@ def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H)
   - H is the detector depth below the surface of the Earth
   """
 
-  return np.array(np.square(np.abs(np.dot(FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H).transpose(), nustate))))[0]
+  if basis == "flavour":
+      return np.array(np.square(np.abs(np.dot(FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H).transpose(), nustate))))[0]
+  elif basis == "mass":
+      return np.array(np.dot(np.square(np.abs(np.dot(FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H).transpose(), pmns.pmns))),nustate))[0]
+  else:
+      print("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")
+      exit()
 
 
-def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="analytical", full_oscillation=False):
+def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="analytical", basis="flavour", full_oscillation=False):
   """
   Pearth(nustate, density, pmns, DeltamSq21, DeltamSq21, E, eta, H), computes with a given mode 
   the probability of survival of an incident electron neutrino spectrum
@@ -192,15 +204,15 @@ def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="anal
   if len(nustate) != 3:
     print("Error: neutrino state provided has the wrong format, it must be a vector of size 3.")
     exit()
-  if np.abs(np.sum(np.square(np.abs(nustate))) - 1) > 1e-3:
-    print("Error: neutrino state provided has the wrong format, it elements square must sum to 1.")
-    exit()
+  #if np.abs(np.sum(np.square(np.abs(nustate))) - 1) > 1e-3:
+  #  print("Error: neutrino state provided has the wrong format, it elements square must sum to 1.")
+  #  exit()
 
   if mode == "analytical":
-    return Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H)
+    return Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis=basis)
 
   elif mode == "numerical":
-    return Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, full_oscillation=full_oscillation)
+    return Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis=basis, full_oscillation=full_oscillation)
 
   else:
     raise Exception("Error: Unkown mode for the computation of evoulutor")

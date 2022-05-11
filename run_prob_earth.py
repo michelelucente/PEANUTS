@@ -74,11 +74,14 @@ DeltamSq31 = nu_params['dm31']
 nustate = np.zeros(3)
 if options.flavour != None:
   nustate = np.array(options.flavour)
+  basis = "flavour"
 elif options.mass != None:
-  if len(options.mass) != 3:
-    print("Error: neutrino state provided has the wrong format, it must be a vector of size 3.")
-    exit()
-  nustate = np.array(np.dot(pmns.pmns, np.array(options.mass)))[0]
+  #if len(options.mass) != 3:
+  #  print("Error: neutrino state provided has the wrong format, it must be a vector of size 3.")
+  #  exit()
+  #nustate = np.array(np.dot(pmns.pmns, np.array(options.mass)))[0]
+  nustate = np.array(options.mass)
+  basis = "mass"
 
 # Get parameters
 E = float(args[1])
@@ -97,11 +100,11 @@ print("Running PEANUTS...")
 
 # Check if analytical solution was requested
 if options.analytical:
-  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H)
+  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis=basis)
 
 # Otherwise use numerical solution
 else:
- prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="numerical")
+ prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="numerical", basis=basis)
 
 
 # Print results

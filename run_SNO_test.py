@@ -48,8 +48,8 @@ density_file = path + '/Data/Earth_Density.csv' if options.density == '' else op
 # Define paths to save plots
 import matplotlib.pyplot as plt
 from pathlib import Path
-project_folder = str(Path(Path.cwd()).parents[1])
-plots_folder = project_folder + "/TeX/figs/"
+project_folder = str(Path(Path.cwd()))
+plots_folder = project_folder + "/figs/"
 
 
 
@@ -250,9 +250,7 @@ fraction = solar_model.fraction['8B']
 
 mass_weights = solar_flux_mass(th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction)
 
-# Choose the second mass eigestate
-NU0 = np.array(pmns.pmns[:,1].transpose())[0]
-flavour_probabilities = np.dot(Pearth(NU0, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H), mass_weights)
+flavour_probabilities = Pearth(mass_weights, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis="mass")
 
 print("For E = %.2f and eta = %.2f pi the flavour probabilitites are %s" % (E, eta/pi, str(flavour_probabilities)) )
 

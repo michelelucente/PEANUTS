@@ -13,6 +13,7 @@ from optparse import OptionParser
 
 import src.files as f
 from src.utils import get_comma_separated_floats, print_banner, print_inputs
+from src.settings import Settings
 from src.pmns import PMNS
 from src.solar import SolarModel, solar_flux_mass
 from src.earth import EarthDensity, Pearth
@@ -93,10 +94,10 @@ earth_density = EarthDensity(density_file)
 
 # Print program banner and inputs
 print_banner()
-print_inputs("earth", options, pmns, DeltamSq21, DeltamSq31, E, eta, H)
+print_inputs(Settings(pmns, DeltamSq21, DeltamSq31, E, eta, H, options))
+print("Running PEANUTS...")
 
 # Compute probability of survival after propagation through Earth 
-print("Running PEANUTS...")
 
 # Check if analytical solution was requested
 if options.analytical:

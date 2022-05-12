@@ -23,38 +23,56 @@ def print_banner():
 
   print(banner)
 
-def print_inputs(mode, options, pmns, md21, md31, E, etaorfraction, H=0):
+def print_inputs(settings):
   """
   Print input values and options
   """
 
-  if mode == "earth" :
-    inputs = "Computing the probability on Earth with values\n\n"\
-             "Neutrino " + ("flav" if options.flavour != None else "mass") + " eigenstate : " + (str(options.flavour) if options.flavour != None else str(options.mass)) + "\n"\
-             "theta12                  : " + str(pmns.theta12) + "\n"\
-             "theta13                  : " + str(pmns.theta13) + "\n"\
-             "theta23                  : " + str(pmns.theta23) + "\n"\
-             "delta                    : " + str(pmns.delta) + "\n"\
-             "Delta m_{21}^2           : " + str(md21) + " eV^2\n"\
-             "Delta m_{31}^2           : " + str(md31) + " eV^2\n"\
-             "Energy                   : " + str(E) + " MeV\n"\
-             "Nadir angle              : " + str(etaorfraction) + " rad\n"\
-             "Depth                    : " + str(H) + " m\n"\
-             "Evolution method         : " + ("analytical" if options.analytical else "numerical") + "\n"
+  inputs = ""
 
-  elif mode == "solar":
-    inputs = "Computing the probability on the surface of the Sun with values\n\n"\
-             "theta12                  : " + str(pmns.theta12) + "\n"\
-             "theta13                  : " + str(pmns.theta13) + "\n"\
-             "theta23                  : " + str(pmns.theta23) + "\n"\
-             "delta                    : " + str(pmns.delta) + "\n"\
-             "Delta m_{21}^2           : " + str(md21) + " eV^2\n"\
-             "Delta m_{31}^2           : " + str(md31) + " eV^2\n"\
-             "Energy                   : " + str(E) + " MeV\n"\
-             "Neutrino fraction        : " + etaorfraction + "\n"
+  energy = str(settings.energy[0])
+  if len(settings.energy) > 1:
+    energy += " - " + str(settings.energy[-1])
 
-  else:
+  if settings.solar:
+    inputs += "\n"\
+             "Computing the probability on the surface of the Sun with values\n\n"\
+             "theta12                  : " + str(settings.pmns.theta12) + "\n"\
+             "theta13                  : " + str(settings.pmns.theta13) + "\n"\
+             "theta23                  : " + str(settings.pmns.theta23) + "\n"\
+             "delta                    : " + str(settings.pmns.delta) + "\n"\
+             "Delta m_{21}^2           : " + str(settings.dm21) + " eV^2\n"\
+             "Delta m_{31}^2           : " + str(settings.dm31) + " eV^2\n"\
+             "Energy                   : " + energy + " MeV\n"\
+             "Neutrino fraction        : " + settings.fraction + "\n"
+    if settings.solar_file is not None:
+      inputs += "Solar model              : " + settings.solar_file + "\n"
+
+  if settings.earth :
+    inputs += "\n"\
+              "Computing the probability on Earth with values\n\n"
+    if not settings.solar:
+      inputs += \
+             "Neutrino " + settings.basis + " eigenstate : " + str(settings.nustate) + "\n"\
+             "theta12                  : " + str(settings.pmns.theta12) + "\n"\
+             "theta13                  : " + str(settings.pmns.theta13) + "\n"\
+             "theta23                  : " + str(settings.pmns.theta23) + "\n"\
+             "delta                    : " + str(settings.pmns.delta) + "\n"\
+             "Delta m_{21}^2           : " + str(settings.dm21) + " eV^2\n"\
+             "Delta m_{31}^2           : " + str(settings.dm31) + " eV^2\n"\
+             "Energy                   : " + energy + " MeV\n"
+
+    inputs += \
+             "Nadir angle              : " + str(settings.eta) + " rad\n"\
+             "Depth                    : " + str(settings.depth) + " m\n"\
+             "Evolution method         : " + settings.evolution + "\n"
+    if settings.density_file is not None:
+      inputs += "Earth density              : " + settings.density_file + "\n"
+
+
+  if not settings.solar and not settings.earth:
     print("Error: Unknown mode.")
+    exit()
 
   print(inputs)
 

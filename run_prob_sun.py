@@ -13,6 +13,7 @@ from optparse import OptionParser
 
 import src.files as f
 from src.utils import print_banner, print_inputs
+from src.settings import Settings
 from src.pmns import PMNS
 from src.solar import SolarModel, solar_flux_mass, Psolar
 
@@ -25,10 +26,10 @@ parser.add_option("-s", "--solar", help ="Add custom solar model", action='store
 if len(args) < 3 :
   print('Wrong number of arguments \n\
         \n\
-Usage: python '+mainfilename+'.py <in_file> <energy> <nu_fraction>\n\
+Usage: python '+mainfilename+'.py <in_file> <energy> <fraction>\n\
        <in_file>                   Input file\n\
        <energy>                    Energy\n\
-       <nu_fraction>               Neutrino fraction sample\n\
+       <fraction>                  Neutrino fraction sample\n\
 \n\
 Options:\n\
        -h, --help                    Show this help message and exit\n\
@@ -47,9 +48,9 @@ solar_model = SolarModel(solar_file)
 
 # Get arguments
 E = float(args[1])
-nu_fraction = args[2]
-if not solar_model.has_fraction(nu_fraction):
-   print("Error: The fraction ", nu_fraction, " does not exist in the solar model.")
+fraction = args[2]
+if not solar_model.has_fraction(fraction):
+   print("Error: The fraction ", fraction, " does not exist in the solar model.")
    exit()
 
 
@@ -66,11 +67,11 @@ DeltamSq31 = nu_params['dm31']
 
 # Print program banner and inputs
 print_banner()
-print_inputs("solar", options, pmns, DeltamSq21, DeltamSq31, E, nu_fraction)
+print_inputs(Settings(pmns, DeltamSq21, DeltamSq31, E, fraction, options))
+print("Running PEANUTS...")
 
 # Compute probability for the given sample fraction and energy
-print("Running PEANUTS...")
-prob = Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction[nu_fraction])
+prob = Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction[fraction])
 
 # Print results
 print()

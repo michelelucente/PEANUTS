@@ -8,12 +8,26 @@ Created on Mar 3 2022
 
 import pyslha # pyslha module for reading SLHA files, by Andy Buckley (https://arxiv.org/abs/1305.4194)
 import pandas as pd
+import yaml
+from decimal import Decimal
+
+from src.settings import Settings
+import os
+
 
 def read_csv(*args, **kwargs):
   """
   Function to read csv. Just a wrapper around the pandas version
   """
   return pd.read_csv(*args, **kwargs)
+
+def read_yaml(filepath):
+  """
+  Function to read from yaml files
+  """
+  settings = Settings(yaml.safe_load(open(filepath)))
+
+  return settings
 
 def read_slha(filepath):
   """
@@ -52,3 +66,51 @@ def read_slha(filepath):
                'delta'      : delta}
   
   return nu_params
+
+def output(settings, probs):
+
+  out = "# E [MeV]\t"
+  if settings.solar:
+    out += "Psolar (e) \t Psolar (mu) \t Psolar (tau)\t"
+  if settings.earth:
+    out += "Pearth (e) \t Pearth (mu) \t Pearth (tau)\t"
+  out += "\n"
+  
+  def dec(x):
+    return "{:.5E}".format(Decimal(x))
+
+  for i in range(len(settings.energy)):
+
+    out += str(dec(settings.energy[i])) + "\t" 
+
+    if settings.solar:
+      for prob in probs[i]["solar"]:
+        out += str(dec(prob)) + "\t"
+    if settings.earth:
+      for prob in probs[i]["earth"]:
+        out += str(dec(prob)) + "\t"
+
+    out += "\n"
+
+  if settings.output == "stdout":
+
+    print()
+    print(out)
+
+  else:
+
+    try:
+
+      path = os.path.dirname(os.path.realpath( __file__ ))
+      f = open(path + "/../" + settings.output, "w")
+      f.write(out)
+      f.close()
+
+      print("Output written to file ", settings.output)
+
+    except FileNotFoundError:
+      print("Error: output file not found.")
+      exit()
+
+
+

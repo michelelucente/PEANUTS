@@ -4,7 +4,7 @@
 Created on Feb 2022
 
 @author: Michele Lucente <lucente@physik.rwth-aachen.de>
-@author Tomas Gonzalo <gonzalo@physik.rwth-aachen.de>
+@author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
 import os

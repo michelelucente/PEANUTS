@@ -3,7 +3,7 @@
 """
 Created on Mar 3 2022
 
-@author Tomas Gonzalo <gonzalo@physik.rwth-aachen.de>
+@author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
 import pyslha # pyslha module for reading SLHA files, by Andy Buckley (https://arxiv.org/abs/1305.4194)

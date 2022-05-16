@@ -4,7 +4,7 @@
 Created on Feb 2022
 
 @author: Michele Lucente <lucente@physik.rwth-aachen.de>
-@author Tomas Gonzalo <gonzalo@physik.rwth-aachen.de>
+@author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
 import os
@@ -142,6 +142,32 @@ plt.savefig(plots_folder + "hep_SNO_comparison.pdf")
 
 plt.show()
 
+# Compare 8B energy spectrum with distorted flux
+B8_shape = f.read_csv(path + '/Data/8B_shape.csv', header=None, names=['Energy MeV', 'Fraction'])
+B8_shape.Fraction[B8_shape.Fraction < 0] = 0
+
+#B8_shape.plot(x='Energy MeV', y='Fraction', title='${}^8$B energy spectrum')
+#plt.show()
+
+survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['8B']) for E in B8_shape['Energy MeV']])
+distorted_shape = np.array([B8_shape.Fraction]).T * survival_prob
+
+labels = ["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"]
+
+plt.plot(B8_shape['Energy MeV'], B8_shape.Fraction, label='$\\nu_e$ undistorted', linestyle='dashed')
+
+for flavour in range(len(distorted_shape[0])):
+    plt.plot(B8_shape['Energy MeV'], [prob[flavour] for prob in distorted_shape], label=labels[flavour])
+
+#plt.yscale('log')
+#plt.xscale('log')
+    
+plt.xlabel('Energy [MeV]')
+plt.ylabel('Fraction')
+
+plt.legend()
+
+plt.show()
 
 
 # Test Earth density profiles
@@ -178,7 +204,7 @@ state = np.array([0,1,0])
 
 # Case 1: 0 <= eta <= pi/2
 eta = np.random.uniform(0, pi/2)
-E = np.random.uniform(1,20)
+ = np.random.uniform(1,20)
 
 sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="numerical", full_oscillation=True)
 
@@ -255,70 +281,32 @@ flavour_probabilities = Pearth(mass_weights, earth_density, pmns, DeltamSq21, De
 print("For E = %.2f and eta = %.2f pi the flavour probabilitites are %s" % (E, eta/pi, str(flavour_probabilities)) )
 
 
-# Test time average
+# Test exposure time average
+#############################
 from math import radians
-from src.time_average import IntegralDay
-from scipy import integrate
+from src.time_average import NadirExposure
 
-lat = [0, 45, 89]
-shells_eta = np.insert(np.arcsin(np.array([0.192, 0.546, 0.895, 0.937, 1]))/pi, 0, 0)
+# Get the values of eta for all the shells
+shells_eta = np.insert(earth_density.shells_eta(), 0, 0)
 colors = ['b', 'g', 'r', 'c', 'm']
 
-x = np.linspace(0, pi, 10**3)
-dist = [[IntegralDay(eta, radians(lam)) for eta in x] for lam in lat]
+# Compute nadir exposure for various latitude values
+lat = [0, 45, 89]
+exposure = [NadirExposure(radians(lam), normalized=True) for lam in lat]
 
 plt.xlabel("Nadir angle $\eta$ / $\pi$")
 plt.ylabel("Weight")
 plt.title("Annual nadir exposure for an experiment at various latitudes")
 ax = plt.gca()
 ax.set_xlim([0,1])
-#plt.vlines(np.arcsin(np.array([0.192, 0.546, 0.895, 0.937, 1]))/pi, ymin=0, ymax=5, linestyles='dashed')
 for i in range(len(shells_eta) - 1):
     plt.axvspan(shells_eta[i], shells_eta[i+1], alpha=0.1, color=colors[i])
 
 for lam in range(len(lat)):
-    plt.plot(x/pi, np.array(dist[lam])/integrate.trapezoid(x=x,y=dist[lam]), label="$\lambda$ = %.f°" % lat[lam])
+    plt.plot(exposure[lam][:,0]/pi, exposure[lam][:,1], label="$\lambda$ = %.f°" % lat[lam])
+
 plt.legend()
 
 plt.savefig(plots_folder + "eta_weights.pdf")
 plt.show()
 
-
-
-# Import 8B energy spectrum
-import pandas as pd
-
-B8_shape = pd.read_csv(path + '/Data/8B_shape.csv', header=None, names=['Energy MeV', 'Fraction'])
-B8_shape.Fraction[B8_shape.Fraction < 0] = 0
-print(integrate.trapezoid(x=B8_shape['Energy MeV'], y=B8_shape['Fraction']))
-
-
-B8_shape.plot(x='Energy MeV', y='Fraction', title='${}^8$B energy spectrum')
-plt.show()
-
-
-
-# Compute distorted flux
-radius_samples = solar_model.radius
-density = solar_model.density
-fraction = solar_model.fraction['8B']
-
-survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction) for E in B8_shape['Energy MeV']])
-distorted_shape = np.array([B8_shape.Fraction]).T * survival_prob
-
-labels = ["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"]
-
-plt.plot(B8_shape['Energy MeV'], B8_shape.Fraction, label='$\\nu_e$ undistorted', linestyle='dashed')
-
-for flavour in range(len(distorted_shape[0])):
-    plt.plot(B8_shape['Energy MeV'], [prob[flavour] for prob in distorted_shape], label=labels[flavour])
-
-#plt.yscale('log')
-#plt.xscale('log')
-    
-plt.xlabel('Energy [MeV]')
-plt.ylabel('Fraction')
-
-plt.legend()
-
-plt.show()

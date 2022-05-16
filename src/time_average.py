@@ -15,6 +15,7 @@ from cmath import cos as ccos
 from cmath import sqrt as csqrt
 from mpmath import fp, ellipf, sec, csc
 from interval import interval
+from scipy import integrate
 
 
 # Sometimes the function cmath.sqrt takes the "wrong" side of the branch cut, if its argument has vanishing 
@@ -109,7 +110,7 @@ def IntegralAngle (eta, lam, a1=0, a2=pi, eps=1e-5):
 
 def IntegralDay (eta, lam, d1=0, d2=365/2):
     """IntegralDay(eta, lam, d1, d2) computes the non-normalised exposure on the nadir angle eta for an 
-    experiment located at latidute lam, taking data from day d1 to day d2. 
+    experiment located at latitude lam (in radians), taking data from day d1 to day d2. 
     The time origin day = 0 is the northern hemisphere winter solstice midnight.
     The function accepts values of d1, d2 comprised between zero and 365."""
     
@@ -133,3 +134,21 @@ def IntegralDay (eta, lam, d1=0, d2=365/2):
     
     # Return the sum of the exposures
     return weight1 + weight2
+
+
+def NadirExposure(lam, d1=0, d2=365/2, ns=1000, normalized=False):
+    """NadirExposure(lam, d1, d2, ns) computes the exposure for ns nadir angle samples
+    for an experiment located at latitude lam (in radians), taking data from day d1 to day d2."""
+
+    # Generate ns samples of the nadir angle between 0 and pi
+    eta_samples = np.linspace(0, pi, 10**3)
+
+    # Compute exposure integrating in the given time ranges
+    exposure = np.array([IntegralDay(eta, lam, d1, d2) for eta in eta_samples])
+
+    # Normalize the distribution if requested
+    if normalized:
+        norm = integrate.trapezoid(x=eta_samples,y=exposure)
+        exposure = exposure/norm
+
+    return np.vstack((eta_samples, exposure)).T

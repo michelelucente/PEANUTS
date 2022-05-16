@@ -3,7 +3,7 @@
 """
 Created on My 11 2022
 
-@author Tomas Gonzalo <gonzalo@physik.rwth-aachen.de>
+@author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
 import types

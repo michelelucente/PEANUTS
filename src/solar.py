@@ -4,7 +4,7 @@
 Created on Feb 7 2022
 
 @author: Michele Lucente <lucente@physik.rwth-aachen.de>
-@author: Tomas Gonzalo <gonzalo@physik.rwth-aachen.de>
+@author: Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 # Import libraries
 import os
@@ -74,7 +74,7 @@ class SolarModel:
 
        return name in self.fraction.keys()
 
-# Compute flux of incoherent mass eigenstates for fixed densitiy value
+# Compute flux of incoherent mass eigenstates for fixed density value
 def Tei (th12, th13, DeltamSq21, DeltamSq31, E, ne):
     """Tei(th12, th13, DeltamSq21, DeltamSq31, E, ne) computes the weights composing an incoherent flux of
     neutrino mass eigenstates, for electron neutrinos produced in matter in the adiabatic approximation:

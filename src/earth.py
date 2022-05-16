@@ -4,7 +4,7 @@
 Created on Feb 10 2022
 
 @author: Michele Lucente <lucente@physik.rwth-aachen.de>
-@author: Tomas Gonzalo <gonzalo@physik.rwth-aachen.de>
+@author: Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
 import os
@@ -60,6 +60,18 @@ class EarthDensity:
 
     return [ [ [alpha_prime[i], beta_prime[i], gamma_prime[i]], xj[i] ] for i in range(len(alpha_prime))]
 
+  def shells(self):
+    """
+    Returns the value of the radius for each shell
+    """
+    return self.rj
+
+  def shells_eta(self):
+    """
+    Returns the value of the nadir angles corresponding to each shell
+    """
+    return np.arcsin(self.rj)/pi
+    
 
   def __call__(self, x, eta):
     """

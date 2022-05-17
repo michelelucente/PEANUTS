@@ -20,3 +20,5 @@ Earth:
   basis: "flavour"
   depth: 3000
   latitude: 45
+  #exposure_time: [0,365]
+  exposure_samples: 100

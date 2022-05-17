@@ -141,7 +141,7 @@ def NadirExposure(lam, d1=0, d2=365/2, ns=1000, normalized=False):
     for an experiment located at latitude lam (in radians), taking data from day d1 to day d2."""
 
     # Generate ns samples of the nadir angle between 0 and pi
-    eta_samples = np.linspace(0, pi, 10**3)
+    eta_samples = np.linspace(0, pi, ns)
 
     # Compute exposure integrating in the given time ranges
     exposure = np.array([IntegralDay(eta, lam, d1, d2) for eta in eta_samples])

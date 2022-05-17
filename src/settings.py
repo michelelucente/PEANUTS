@@ -93,12 +93,30 @@ class Settings:
           self.nustate = np.array(settings["Earth"]["state"])
           self.basis = settings["Earth"]["basis"]
 
-        if "eta" not in settings["Earth"] or "depth" not in settings["Earth"]:
-          print("Error: missing nadir angle (eta) or depth, please provide both.")
+        if "depth" not in settings["Earth"]:
+          print("Error: missing depth of experiment, please provide it.")
           exit()
         else:
-          self.eta = settings["Earth"]["eta"]
           self.depth = settings["Earth"]["depth"]
+
+        # Either a specific nadir angle, eta, or a latitude must be provided
+        if "eta" not in settings["Earth"] and "latitude" not in settings["Earth"]:
+          print("Error: missing nadir angle (eta) and latitude, please provide either.")
+          exit()
+        elif "eta" in settings["Earth"]:
+          self.eta = settings["Earth"]["eta"]
+          self.exposure = False
+        elif "latitude" in settings["Earth"]:
+          self.latitude = settings["Earth"]["latitude"]
+          self.exposure = True
+          if "exposure_time" in settings["Earth"]:
+            self.exposure_time = settings["Earth"]["exposure_time"]
+          else: 
+            self.exposure_time = [0,365/2]
+          if "exposure_samples" in settings["Earth"]:
+            self.exposure_samples = settings["Earth"]["exposure_samples"]
+          else:
+            self.exposure_samples = 1000
 
         self.density_file = settings["Earth"]["density"] if "density" in settings["Earth"] else None
         self.evolution = settings["Earth"]["evolution"] if "evolution" in settings["Earth"] else "analytical"

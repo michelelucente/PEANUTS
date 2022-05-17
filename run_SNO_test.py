@@ -204,7 +204,7 @@ state = np.array([0,1,0])
 
 # Case 1: 0 <= eta <= pi/2
 eta = np.random.uniform(0, pi/2)
- = np.random.uniform(1,20)
+E = np.random.uniform(1,20)
 
 sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="numerical", full_oscillation=True)
 

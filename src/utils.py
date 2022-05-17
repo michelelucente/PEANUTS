@@ -62,8 +62,13 @@ def print_inputs(settings):
              "Delta m_{31}^2           : " + str(settings.dm31) + " eV^2\n"\
              "Energy                   : " + energy + " MeV\n"
 
+    if not settings.exposure:
+      inputs += \
+             "Nadir angle              : " + str(settings.eta) + " rad\n"
+    else:
+      inputs += \
+             "Latitude                 : " + str(settings.latitude) + "\N{DEGREE SIGN}\n"
     inputs += \
-             "Nadir angle              : " + str(settings.eta) + " rad\n"\
              "Depth                    : " + str(settings.depth) + " m\n"\
              "Evolution method         : " + settings.evolution + "\n"
     if settings.density_file is not None:

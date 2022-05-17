@@ -10,12 +10,14 @@ Created on Feb 2022
 import os
 import numpy as np
 from optparse import OptionParser
+from math import pi, radians
 
 import src.files as f
 from src.utils import get_comma_separated_floats, print_banner, print_inputs
 from src.pmns import PMNS
 from src.solar import SolarModel, solar_flux_mass, Psolar
 from src.earth import EarthDensity, Pearth
+from src.time_average import NadirExposure
 
 mainfilename = 'run_peanuts'
 
@@ -87,8 +89,18 @@ for e in settings.energy:
       nustate = mass_weights
       basis = "mass"
 
-    # Compute probability of survival after propagation through Earth 
-    prob["earth"] = Pearth(nustate, earth_density, settings.pmns, settings.dm21, settings.dm31, e, settings.eta, settings.depth, mode=settings.evolution, basis=basis)
+    # If the latitude is provided compute exposure 
+    if settings.exposure:
+      exposure = NadirExposure(radians(settings.latitude), normalized=True, d1=settings.exposure_time[0], d2=settings.exposure_time[1], ns=settings.exposure_samples)
+
+      prob["earth"] = 0
+      deta = pi/settings.exposure_samples
+      for eta, exp in exposure:
+        prob["earth"] += Pearth(nustate, earth_density, settings.pmns, settings.dm21, settings.dm31, e, eta, settings.depth, mode=settings.evolution, basis=basis) * exp * deta
+
+    else:
+      # Compute probability of survival after propagation through Earth 
+      prob["earth"] = Pearth(nustate, earth_density, settings.pmns, settings.dm21, settings.dm31, e, settings.eta, settings.depth, mode=settings.evolution, basis=basis)
 
   # Append to list
   probs.append(prob)

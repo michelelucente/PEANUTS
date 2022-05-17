@@ -117,6 +117,9 @@ class Settings:
             self.exposure_samples = settings["Earth"]["exposure_samples"]
           else:
             self.exposure_samples = 1000
+        else:
+          print("Error: both nadir angle (eta) and latitude are provided, but only one should be.")
+          exit()
 
         self.density_file = settings["Earth"]["density"] if "density" in settings["Earth"] else None
         self.evolution = settings["Earth"]["evolution"] if "evolution" in settings["Earth"] else "analytical"

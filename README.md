@@ -1,2 +1,2 @@
-# solar-nu-flux
-A tool to compute the solar neutrino flux at Earth as function of mixing parameters
+# PEANUTS: Propagation and Evolution of Active NeUTrinoS
+A software for the automatic computation of solar neutrino flux and its propagation within Earth

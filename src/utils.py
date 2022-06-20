@@ -36,7 +36,16 @@ def print_inputs(settings):
 
   if settings.solar:
     inputs += "\n"\
-             "Computing the probability on the surface of the Sun with values\n\n"\
+              "Computing the "
+    if settings.probabilities:
+      inputs += "probabilities "
+      if settings.distorted_spectrum or settings.undistorted_spectrum:
+        inputs += "and the "
+    if settings.distorted_spectrum:
+      inputs += "distorted spectrum "
+    elif settings.undistorted_spectrum:
+      inputs += "undistorted spectrum "
+    inputs += "on the surface of the Sun with values\n\n"\
              "theta12                  : " + str(settings.pmns.theta12) + "\n"\
              "theta13                  : " + str(settings.pmns.theta13) + "\n"\
              "theta23                  : " + str(settings.pmns.theta23) + "\n"\

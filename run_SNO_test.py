@@ -110,8 +110,8 @@ ProbB8 = [Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_mode
 Probhep = [Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['hep']) for E in xrange]
 
 # Use SNO's example data files for comparison
-SNO_B8 = f.read_csv(path + "/Data/B8.csv", names=['energy', 'Pnuenue'])
-SNO_hep = f.read_csv(path + "/Data/HEP.csv", names=['energy', 'Pnuenue'])
+SNO_B8 = f.read_csv(path + "/Data/SNO_8B.csv", skiprows=4, names=['energy', 'Pnuenue'])
+SNO_hep = f.read_csv(path + "/Data/SNO_hep.csv", skiprows=4, names=['energy', 'Pnuenue'])
 
 labels = ["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"]
 
@@ -128,8 +128,6 @@ plt.savefig(plots_folder + "8B_SNO_cmparison.pdf")
 plt.show()
 
 
-
-
 for flavour in range(len(Probhep[0])):
     plt.plot(xrange, [prob[flavour] for prob in Probhep], label=labels[flavour])
 
@@ -143,31 +141,45 @@ plt.savefig(plots_folder + "hep_SNO_comparison.pdf")
 plt.show()
 
 # Compare 8B energy spectrum with distorted flux
-B8_shape = f.read_csv(path + '/Data/8B_shape.csv', header=None, names=['Energy MeV', 'Fraction'])
-B8_shape.Fraction[B8_shape.Fraction < 0] = 0
+B8_spectrum = solar_model.spectrum["8B"]
 
-#B8_shape.plot(x='Energy MeV', y='Fraction', title='${}^8$B energy spectrum')
-#plt.show()
-
-survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['8B']) for E in B8_shape['Energy MeV']])
-distorted_shape = np.array([B8_shape.Fraction]).T * survival_prob
+survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['8B']) for E in B8_spectrum.Energy])
+distorted_shape = np.array([B8_spectrum.Spectrum]).T * survival_prob
 
 labels = ["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"]
 
-plt.plot(B8_shape['Energy MeV'], B8_shape.Fraction, label='$\\nu_e$ undistorted', linestyle='dashed')
+plt.plot(B8_spectrum.Energy, B8_spectrum.Spectrum, label='$\\nu_e$ undistorted', linestyle='dashed')
 
 for flavour in range(len(distorted_shape[0])):
-    plt.plot(B8_shape['Energy MeV'], [prob[flavour] for prob in distorted_shape], label=labels[flavour])
+    plt.plot(B8_spectrum.Energy, [prob[flavour] for prob in distorted_shape], label=labels[flavour])
 
-#plt.yscale('log')
-#plt.xscale('log')
-    
 plt.xlabel('Energy [MeV]')
-plt.ylabel('Fraction')
+plt.ylabel('8B Spectrum')
 
 plt.legend()
 
 plt.show()
+
+# Compare hep energy spectrum with distorted flux
+hep_spectrum = solar_model.spectrum["hep"]
+
+survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['8B']) for E in hep_spectrum.Energy])
+distorted_shape = np.array([hep_spectrum.Spectrum]).T * survival_prob
+
+labels = ["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"]
+
+plt.plot(hep_spectrum.Energy, hep_spectrum.Spectrum, label='$\\nu_e$ undistorted', linestyle='dashed')
+
+for flavour in range(len(distorted_shape[0])):
+    plt.plot(hep_spectrum.Energy, [prob[flavour] for prob in distorted_shape], label=labels[flavour])
+
+plt.xlabel('Energy [MeV]')
+plt.ylabel('hep Spectrum')
+
+plt.legend()
+
+plt.show()
+
 
 
 # Test Earth density profiles

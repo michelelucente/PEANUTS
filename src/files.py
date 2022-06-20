@@ -67,35 +67,70 @@ def read_slha(filepath):
   
   return nu_params
 
-def output(settings, probs):
+def output(settings, outs):
 
-  out = "# E [MeV]\t"
-  if settings.solar:
-    out += "Psolar (e) \t Psolar (mu) \t Psolar (tau)\t"
-  if settings.earth:
-    out += "Pearth (e) \t Pearth (mu) \t Pearth (tau)\t"
-  out += "\n"
-  
   def dec(x):
     return "{:.5E}".format(Decimal(x))
 
-  for i in range(len(settings.energy)):
+  towrite = "" 
 
-    out += str(dec(settings.energy[i])) + "\t" 
+  if settings.flux:
+    towrite += "# Flux [cm^-2 s^-1]\t" + str(dec(outs[0]["flux"])) + "\n"
 
+  if settings.probabilities:
+    towrite += "\n# Probabilities\n"
+    towrite += "# E [MeV]\t"
     if settings.solar:
-      for prob in probs[i]["solar"]:
-        out += str(dec(prob)) + "\t"
+      towrite += "Psolar (e) \t Psolar (mu) \t Psolar (tau)\t"
     if settings.earth:
-      for prob in probs[i]["earth"]:
-        out += str(dec(prob)) + "\t"
+      towrite += "Pearth (e) \t Pearth (mu) \t Pearth (tau)\t"
+    towrite += "\n"
+  
+    for i in range(len(settings.energy)):
 
-    out += "\n"
+      towrite += str(dec(settings.energy[i])) + "\t" 
+
+      if settings.solar:
+
+        for out in outs[i]["solar"]:
+          towrite += str(dec(out)) + "\t"
+
+      if settings.earth:
+        for out in outs[i]["earth"]:
+          towrite += str(dec(out)) + "\t"
+
+      towrite += "\n"
+
+  if settings.undistorted_spectrum:
+    towrite += "\n# Spectrum (undistorted)\n"
+    towrite += "# E [MeV] \t Spec (e)\n"
+
+    for i in range(len(settings.energy)):
+
+      towrite += str(dec(settings.energy[i])) + "\t" 
+      towrite += str(dec(outs[i]['spectrum']))
+
+    towrite += "\n"
+
+
+  elif settings.distorted_spectrum:
+    towrite += "\n# Spectrum (distorted)\n"
+    towrite += "# E [MeV] \t Spec (e) \t Spec (mu) \t Spec (tau)\n"
+
+    for i in range(len(settings.energy)):
+
+     towrite += str(dec(settings.energy[i])) + "\t" 
+     for out in outs[i]["spectrum"]:
+       towrite += str(dec(out)) + "\t"
+
+    towrite += "\n"
+
+ 
 
   if settings.output == "stdout":
 
     print()
-    print(out)
+    print(towrite)
 
   else:
 
@@ -103,7 +138,7 @@ def output(settings, probs):
 
       path = os.path.dirname(os.path.realpath( __file__ ))
       f = open(path + "/../" + settings.output, "w")
-      f.write(out)
+      f.write(towrite)
       f.close()
 
       print("Output written to file ", settings.output)

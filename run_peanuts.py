@@ -48,7 +48,7 @@ print_inputs(settings)
 print("Running PEANUTS...")
 
 # List of probabilities
-probs = []
+outs = []
 
 # Initialize values
 if settings.solar:
@@ -70,12 +70,23 @@ if settings.earth:
 # Loop over energy values
 for e in settings.energy:
 
-  prob = {}
+  out = {}
 
   if settings.solar:
 
+    # Add flux if requested
+    if settings.flux:
+      out["flux"] = solar_model.flux(settings.fraction)
+
     # Compute probability for the given sample fraction and energy
-    prob["solar"] = Psolar(settings.pmns, settings.dm21, settings.dm31, e, solar_model.radius, solar_model.density, solar_model.fraction[settings.fraction])
+    if settings.probabilities:
+      out["solar"] = Psolar(settings.pmns, settings.dm21, settings.dm31, e, solar_model.radius, solar_model.density, solar_model.fraction[settings.fraction])
+
+    # Add undistorted or distorted spectrum if requested
+    if settings.undistorted_spectrum: 
+      out['spectrum'] = solar_model.spectrum(settings.fraction, energy=e)
+    elif settings.distorted_spectrum:
+      out['spectrum'] = solar_model.spectrum(settings.fraction, energy=e) * Psolar(settings.pmns, settings.dm21, settings.dm31, e, solar_model.radius, solar_model.density, solar_model.fraction[settings.fraction])
 
     # If the earth propbabilities are to be computed, we need the mass weights
     if settings.earth:
@@ -93,19 +104,19 @@ for e in settings.energy:
     if settings.exposure:
       exposure = NadirExposure(radians(settings.latitude), normalized=True, d1=settings.exposure_time[0], d2=settings.exposure_time[1], ns=settings.exposure_samples)
 
-      prob["earth"] = 0
+      out["earth"] = 0
       deta = pi/settings.exposure_samples
       for eta, exp in exposure:
-        prob["earth"] += Pearth(nustate, earth_density, settings.pmns, settings.dm21, settings.dm31, e, eta, settings.depth, mode=settings.evolution, basis=basis) * exp * deta
+        out["earth"] += Pearth(nustate, earth_density, settings.pmns, settings.dm21, settings.dm31, e, eta, settings.depth, mode=settings.evolution, basis=basis) * exp * deta
 
     else:
       # Compute probability of survival after propagation through Earth 
-      prob["earth"] = Pearth(nustate, earth_density, settings.pmns, settings.dm21, settings.dm31, e, settings.eta, settings.depth, mode=settings.evolution, basis=basis)
+      out["earth"] = Pearth(nustate, earth_density, settings.pmns, settings.dm21, settings.dm31, e, settings.eta, settings.depth, mode=settings.evolution, basis=basis)
 
   # Append to list
-  probs.append(prob)
+  outs.append(out)
 
 # Print results
-f.output(settings, probs)
+f.output(settings, outs)
 
 

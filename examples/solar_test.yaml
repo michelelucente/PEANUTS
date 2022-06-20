@@ -3,7 +3,7 @@
 # @author: Michele Lucente <lucente@physik.rwth-aachen.de>
 # @author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 
-Energy: 20
+Energy: 15
 
 Neutrinos: 
 
@@ -17,3 +17,5 @@ Neutrinos:
 Solar:
 
   fraction: "hep"
+  flux: true
+  spectrum: "distorted"

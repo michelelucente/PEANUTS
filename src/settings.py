@@ -82,6 +82,21 @@ class Settings:
 
         self.solar_file = settings["Solar"]["solar_model"] if "solar_model" in settings["Solar"] else None
 
+        self.probabilities = settings["Solar"]["probabilities"] if "probabilities" in settings["Solar"] else True
+
+        self.flux = settings["Solar"]["flux"] if "flux" in settings["Solar"] else False
+        
+        self.undistorted_spectrum = False
+        self.distorted_spectrum =  False
+        if "spectrum" in settings["Solar"]:
+          if settings["Solar"]["spectrum"] == "undistorted":
+            self.undistorted_spectrum = True
+          elif settings["Solar"]["spectrum"] == "distorted":
+            self.distorted_spectrum = True
+          else:
+            print("Error: unknown option for spectrum, select undistorted or distorted")
+            exit()
+
       # Extract earth parameters
       if "Earth" in settings:
 

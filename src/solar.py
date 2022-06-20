@@ -11,6 +11,7 @@ import os
 import numpy as np
 from math import cos, sin
 from scipy import integrate
+from scipy.interpolate import interp1d
 from src.matter_mixing import th13_M, th12_M
 from src.pmns import PMNS
 
@@ -21,7 +22,7 @@ class SolarModel:
     Class containing the info of the solar model
     """
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, spectrum_files={}):
         """
         Constructor of the solar model. 
         Reads the solar model file and fills useful variables
@@ -30,8 +31,14 @@ class SolarModel:
         # Set file name
         path = os.path.dirname(os.path.realpath( __file__ ))
         self.filename = path + "/../Data/bs2005agsopflux.csv" if filename == None else filename
-          
-        # Import data from solar model
+
+        # Import fluxes
+        self.fluxes = f.read_csv(self.filename,
+                                 usecols=[2,8],
+                                 names = ['8B', 'hep'],
+                                 sep=" ", skiprows=6, nrows=1, header=None)
+
+        # Import fraction data from solar model
         # TODO: This assumes that any solar model file is the same format, make it more general
         self.model = f.read_csv(self.filename, 
                                 usecols=[1, 3, 7, 13],
@@ -43,6 +50,13 @@ class SolarModel:
         self.density =  10**self.model['density_log_10']
         self.fraction = {'8B' : self.model['8B fraction'],
                          'hep': self.model['hep fraction']}
+
+        # Import spectral shapes
+        spectrum_files["8B"] = path + "/../Data/8B_shape.csv" if "8B" not in spectrum_files else spectrum_files['8B']
+        spectrum_files["hep"] = path + "/../Data/hep_shape.csv" if "hep" not in spectrum_files else spectrum_files['hep']
+        self.spectra = {}
+        for fraction, spectrum_file in spectrum_files.items():
+          self.spectra[fraction] = f.read_csv(spectrum_file, usecols=[0, 1], names = ["Energy", "Spectrum"], skiprows=3, header=None)
 
     def radius(self):
         """
@@ -73,6 +87,27 @@ class SolarModel:
        """
 
        return name in self.fraction.keys()
+
+    def flux(self,name):
+       """
+       Returns the cumulative fluxes for each channel
+       """
+
+       return self.fluxes[name][0]
+
+    def spectrum(self, name, energy=None):
+       """
+       Returns the energy spectrum for each channel
+       """
+
+       if energy == None:
+         return self.spectra[name]
+       else:
+         if energy < min(self.spectra[name].Energy) or energy > max(self.spectra[name].Energy):
+           print("Error: selected energy is outside the valid range of the energy spectrum")
+           exit()
+         spec = interp1d(self.spectra[name].Energy, self.spectra[name].Spectrum)
+         return float(spec(energy))
 
 # Compute flux of incoherent mass eigenstates for fixed density value
 def Tei (th12, th13, DeltamSq21, DeltamSq31, E, ne):

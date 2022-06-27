@@ -16,6 +16,7 @@ from cmath import sqrt as csqrt
 from mpmath import fp, ellipf, sec, csc
 from interval import interval
 from scipy import integrate
+from scipy.interpolate import interp1d
 import src.files as f
 
 
@@ -160,7 +161,8 @@ def NadirExposure(lam, d1=0, d2=365/2, ns=1000, normalized=False, from_file=None
         exposure = raw_exposure["Exposure"].reverse()
       # CosZenith = cos(pi - Nadir), CosZenith = [-1,1]
       if angle == "CosZenith":
-        exposure = raw_exposure["Exposure"]
+        exposure_interp = interp1d(np.linspace(-1,1,ns), raw_exposure["Exposure"], kind='cubic')
+        exposure = [exposure_interp(-cos(eta_samples[i]))*sin(eta_samples[i]) for i in range(ns)]
 
     else:
       # Compute exposure integrating in the given time ranges

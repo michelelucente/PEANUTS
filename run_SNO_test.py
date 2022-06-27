@@ -303,7 +303,7 @@ shells_eta = np.insert(earth_density.shells_eta(), 0, 0)
 colors = ['b', 'g', 'r', 'c', 'm']
 
 # Compute nadir exposure for various latitude values
-lat = [0, 45, 89]
+lat = [0, 46, 89]
 exposure = [NadirExposure(radians(lam), normalized=True, ns=480) for lam in lat]
 
 plt.xlabel("Nadir angle $\eta$ / $\pi$")

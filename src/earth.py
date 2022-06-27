@@ -40,9 +40,9 @@ class EarthDensity:
 
   def parameters(self, eta):
     """
-    Returns the values of the density parameters for the shells crossed by the path 
-    with nadir angle = eta as a list of lists, where each element [[a, b, c], x_i] refers to a 
-    Earth shell  (from inner to outer layers) having density profile n_e(x) = a + b x^2 + c x^4, 
+    Returns the values of the density parameters for the shells crossed by the path
+    with nadir angle = eta as a list of lists, where each element [[a, b, c], x_i] refers to a
+    Earth shell  (from inner to outer layers) having density profile n_e(x) = a + b x^2 + c x^4,
     with shell external boundary at x == x_i.
     """
 
@@ -71,15 +71,15 @@ class EarthDensity:
     Returns the value of the nadir angles corresponding to each shell
     """
     return np.arcsin(self.rj)/pi
-    
+
 
   def __call__(self, x, eta):
     """
-    Computes the value of Earth electron density in units of mol/cm^3 for trajectory coordinate 
+    Computes the value of Earth electron density in units of mol/cm^3 for trajectory coordinate
     x and nadir angle eta;
     """
 
-    # The density profile is symmetric with respect to x=0 
+    # The density profile is symmetric with respect to x=0
     x = np.abs(x)
 
     # If x > cos(eta) the trajectory coordinate is beyond Earth surface, thus density is zero.
@@ -116,7 +116,7 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
   U = pmns.U
   r23 = pmns.R23(pmns.theta23)
   delta = pmns.Delta(pmns.delta)
- 
+
   Hk = multi_dot([U, np.diag(k(np.array([0, DeltamSq21, DeltamSq31]), E)), U.transpose()])
 
   h = H/R_E
@@ -128,7 +128,7 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
 
   params = density.parameters(eta_prime)
   x1, x2 = (-params[-1][1], x_d) if 0 <= eta < pi/2 else (0, Deltax)
-  
+
   def model(t, y):
     nue, numu, nutau = y
     dnudt = - 1j * np.dot(multi_dot([r23, delta.conjugate(), Hk + np.diag([
@@ -137,11 +137,11 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
     return dnudt
 
   num_evol = []
-    
+
   x = np.linspace(x1, x2, 10**3)
-    
+
   successful_integration = True
-    
+
   for col in range(3):
     if successful_integration:
         nu0 = np.identity(3)[:, col]
@@ -158,10 +158,13 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
         sol.insert(0, np.array(nu0))
 
         num_evol.append(sol)
-            
-    
+
+  if len(num_evol) < 3:
+    print("Error: numerical integration failed")
+    exit()
+
   num_solution = [np.column_stack((num_evol[0][k], num_evol[1][k], num_evol[2][k])) for k in range(len(x))]
-    
+
   if basis == "flavour":
       evolution = [np.array(np.square(np.abs(np.dot(num_solution[i].transpose(), nustate))) ) for i in range(len(x))]
   elif basis == "mass":
@@ -169,7 +172,7 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
   else:
       print("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")
       exit()
- 
+
   if full_oscillation:
     return evolution, x
   else:
@@ -201,7 +204,7 @@ def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H,
 
 def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="analytical", basis="flavour", full_oscillation=False):
   """
-  Pearth(nustate, density, pmns, DeltamSq21, DeltamSq21, E, eta, H), computes with a given mode 
+  Pearth(nustate, density, pmns, DeltamSq21, DeltamSq21, E, eta, H), computes with a given mode
   the probability of survival of an incident electron neutrino spectrum
   - nustate is the array of weights of the incoherent neutrino flux
   - density is the Earth density object

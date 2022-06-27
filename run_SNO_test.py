@@ -141,7 +141,7 @@ plt.savefig(plots_folder + "hep_SNO_comparison.pdf")
 plt.show()
 
 # Compare 8B energy spectrum with distorted flux
-B8_spectrum = solar_model.spectrum["8B"]
+B8_spectrum = solar_model.spectrum("8B")
 
 survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['8B']) for E in B8_spectrum.Energy])
 distorted_shape = np.array([B8_spectrum.Spectrum]).T * survival_prob
@@ -161,7 +161,7 @@ plt.legend()
 plt.show()
 
 # Compare hep energy spectrum with distorted flux
-hep_spectrum = solar_model.spectrum["hep"]
+hep_spectrum = solar_model.spectrum("hep")
 
 survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['8B']) for E in hep_spectrum.Energy])
 distorted_shape = np.array([hep_spectrum.Spectrum]).T * survival_prob
@@ -200,7 +200,7 @@ for i in range(len(density)):
     plt.plot(x,density[i], label = "$\eta$ = %s" %labels[i])
 plt.legend()
 plt.savefig(plots_folder + "earth_density.pdf")
-    
+
 plt.show()
 
 
@@ -304,7 +304,7 @@ colors = ['b', 'g', 'r', 'c', 'm']
 
 # Compute nadir exposure for various latitude values
 lat = [0, 45, 89]
-exposure = [NadirExposure(radians(lam), normalized=True) for lam in lat]
+exposure = [NadirExposure(radians(lam), normalized=True, ns=480) for lam in lat]
 
 plt.xlabel("Nadir angle $\eta$ / $\pi$")
 plt.ylabel("Weight")
@@ -316,6 +316,10 @@ for i in range(len(shells_eta) - 1):
 
 for lam in range(len(lat)):
     plt.plot(exposure[lam][:,0]/pi, exposure[lam][:,1], label="$\lambda$ = %.f°" % lat[lam])
+
+# SNO actual exposure
+SNO_exposure = NadirExposure(46, from_file=path+'/Data/SnoCosZenith.dat', angle="CosZenith", normalized=True, ns=480)
+plt.plot(exposure[lam][:,0]/pi, SNO_exposure[:,1], label="SNO exposure")
 
 plt.legend()
 

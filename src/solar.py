@@ -9,6 +9,7 @@ Created on Feb 7 2022
 # Import libraries
 import os
 import numpy as np
+import numba as nb
 from math import cos, sin
 from scipy import integrate
 from scipy.interpolate import interp1d
@@ -46,10 +47,10 @@ class SolarModel:
                                 sep=" ", skiprows=27, header=None)
 
         # Set useful variables
-        self.radius = self.model['radius']
-        self.density =  10**self.model['density_log_10']
-        self.fraction = {'8B' : self.model['8B fraction'],
-                         'hep': self.model['hep fraction']}
+        self.rad = self.model['radius']
+        self.dens =  10**self.model['density_log_10']
+        self.frac = {'8B' : self.model['8B fraction'],
+                     'hep': self.model['hep fraction']}
 
         # Import spectral shapes
         spectrum_files["8B"] = path + "/../Data/8B_shape.csv" if "8B" not in spectrum_files else spectrum_files['8B']
@@ -63,14 +64,14 @@ class SolarModel:
         Returns the radius column of the solar model
         """
 
-        return self.radius
+        return self.rad.to_numpy()
 
     def density(self):
         """
         Returns the density column of the solar model
         """
 
-        return self.density
+        return self.dens.to_numpy()
 
 
 
@@ -79,7 +80,7 @@ class SolarModel:
         Returns the fraction of neutrinos for the requested column
         """
 
-        return self.fraction[name]
+        return self.frac[name].to_numpy()
 
     def has_fraction(self, name):
        """
@@ -124,13 +125,12 @@ See Eq. (6.11) in FiuzadeBarros:2011qna for its derivation."""
     th12m = th12_M(th12, th13, DeltamSq21, E, ne)
 
     # Compute and return the weights
-    c13M = cos(th13m)
-    s13M = sin(th13m)
-    c12M = cos(th12m)
-    s12M = sin(th12m)
+    c13M = np.cos(th13m)
+    s13M = np.sin(th13m)
+    c12M = np.cos(th12m)
+    s12M = np.sin(th12m)
 
-    return ((c13M * c12M)**2, (c13M * s12M)**2, s13M**2)
-
+    return np.array(((c13M * c12M)**2, (c13M * s12M)**2, s13M**2))
 
 
 # Compute flux of inchoerent mass eigenstates integrated over production point in the Sun
@@ -146,11 +146,12 @@ def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, dens
     - fraction is the relative fraction of neutrinos produced in the considered reaction,
     sampled at radius_samples."""
 
-    IntegratedFraction = integrate.trapezoid(y=fraction, x=radius_samples)
-    Tei_radius = np.array([Tei(th12, th13, DeltamSq21, DeltamSq31, E, ne_r) for ne_r in density])
 
+    IntegratedFraction = integrate.trapezoid(y=fraction, x=radius_samples)
+
+    temp = Tei(th12, th13, DeltamSq21, DeltamSq31, E, density) * fraction
     [Te1, Te2, Te3] = [
-        integrate.trapezoid(y=([Tei_radius[k][i] for k in range(len(Tei_radius))] * fraction), x = radius_samples) / IntegratedFraction
+        integrate.trapezoid(y=temp[i], x = radius_samples) / IntegratedFraction
         for i in range(3)]
 
     return [Te1, Te2, Te3]

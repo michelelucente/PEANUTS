@@ -61,7 +61,7 @@ solar_model = SolarModel(solar_file)
 
 # Plot solar model
 
-plt.plot(solar_model.radius, solar_model.density)
+plt.plot(solar_model.radius(), solar_model.density())
 plt.yscale("log")
 plt.xlabel("r")
 plt.ylabel("$n_e(r)$ [mol/cm${}^3$]")
@@ -73,8 +73,8 @@ plt.show()
 
 
 
-plt.plot(solar_model.radius, solar_model.fraction['8B'])
-plt.plot(solar_model.radius, solar_model.fraction['hep'])
+plt.plot(solar_model.radius(), solar_model.fraction('8B'))
+plt.plot(solar_model.radius(), solar_model.fraction('hep'))
 plt.xlabel('r')
 plt.ylabel('Neutrino fraction')
 plt.legend(labels=['${}^8$B', 'hep'])
@@ -106,8 +106,8 @@ E = 10
 
 # Compute probability for the sample fractions '8B' and 'hep' in the energy ragnge E=[1,20]
 xrange = np.arange(1,20,0.1)
-ProbB8 = [Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['8B']) for E in xrange]
-Probhep = [Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['hep']) for E in xrange]
+ProbB8 = [Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius(), solar_model.density(), solar_model.fraction('8B')) for E in xrange]
+Probhep = [Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius(), solar_model.density(), solar_model.fraction('hep')) for E in xrange]
 
 # Use SNO's example data files for comparison
 SNO_B8 = f.read_csv(path + "/Data/SNO_8B.csv", skiprows=4, names=['energy', 'Pnuenue'])
@@ -143,7 +143,7 @@ plt.show()
 # Compare 8B energy spectrum with distorted flux
 B8_spectrum = solar_model.spectrum("8B")
 
-survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['8B']) for E in B8_spectrum.Energy])
+survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius(), solar_model.density(), solar_model.fraction('8B')) for E in B8_spectrum.Energy])
 distorted_shape = np.array([B8_spectrum.Spectrum]).T * survival_prob
 
 labels = ["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"]
@@ -163,7 +163,7 @@ plt.show()
 # Compare hep energy spectrum with distorted flux
 hep_spectrum = solar_model.spectrum("hep")
 
-survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction['8B']) for E in hep_spectrum.Energy])
+survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius(), solar_model.density(), solar_model.fraction('8B')) for E in hep_spectrum.Energy])
 distorted_shape = np.array([hep_spectrum.Spectrum]).T * survival_prob
 
 labels = ["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"]
@@ -281,9 +281,9 @@ eta = np.random.uniform(0, pi)
 
 H = 2e3
 
-radius_samples = solar_model.radius
-density = solar_model.density
-fraction = solar_model.fraction['8B']
+radius_samples = solar_model.radius()
+density = solar_model.density()
+fraction = solar_model.fraction('8B')
 
 
 mass_weights = solar_flux_mass(th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction)

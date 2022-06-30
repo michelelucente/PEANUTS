@@ -71,7 +71,7 @@ print_inputs(Settings(pmns, DeltamSq21, DeltamSq31, E, fraction, options))
 print("Running PEANUTS...")
 
 # Compute probability for the given sample fraction and energy
-prob = Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius, solar_model.density, solar_model.fraction[fraction])
+prob = Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius(), solar_model.density(), solar_model.fraction(fraction))
 
 # Print results
 print()

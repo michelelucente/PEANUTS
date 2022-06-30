@@ -80,18 +80,18 @@ for e in settings.energy:
 
     # Compute probability for the given sample fraction and energy
     if settings.probabilities:
-      out["solar"] = Psolar(settings.pmns, settings.dm21, settings.dm31, e, solar_model.radius, solar_model.density, solar_model.fraction[settings.fraction])
+      out["solar"] = Psolar(settings.pmns, settings.dm21, settings.dm31, e, solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
 
     # Add undistorted or distorted spectrum if requested
-    if settings.undistorted_spectrum: 
+    if settings.undistorted_spectrum:
       out['spectrum'] = solar_model.spectrum(settings.fraction, energy=e)
     elif settings.distorted_spectrum:
-      out['spectrum'] = solar_model.spectrum(settings.fraction, energy=e) * Psolar(settings.pmns, settings.dm21, settings.dm31, e, solar_model.radius, solar_model.density, solar_model.fraction[settings.fraction])
+      out['spectrum'] = solar_model.spectrum(settings.fraction, energy=e) * Psolar(settings.pmns, settings.dm21, settings.dm31, e, solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
 
     # If the earth propbabilities are to be computed, we need the mass weights
     if settings.earth:
-      mass_weights = solar_flux_mass(settings.pmns.theta12, settings.pmns.theta13, settings.dm21, settings.dm31, e, 
-                                     solar_model.radius, solar_model.density, solar_model.fraction[settings.fraction])
+      mass_weights = solar_flux_mass(settings.pmns.theta12, settings.pmns.theta13, settings.dm21, settings.dm31, e,
+                                     solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
 
   if settings.earth:
 
@@ -100,7 +100,7 @@ for e in settings.energy:
       nustate = mass_weights
       basis = "mass"
 
-    # If the latitude is provided compute exposure 
+    # If the latitude is provided compute exposure
     if settings.exposure:
       exposure = NadirExposure(radians(settings.latitude), normalized=True, d1=settings.exposure_time[0], d2=settings.exposure_time[1], ns=settings.exposure_samples)
 
@@ -110,7 +110,7 @@ for e in settings.energy:
         out["earth"] += Pearth(nustate, earth_density, settings.pmns, settings.dm21, settings.dm31, e, eta, settings.depth, mode=settings.evolution, basis=basis) * exp * deta
 
     else:
-      # Compute probability of survival after propagation through Earth 
+      # Compute probability of survival after propagation through Earth
       out["earth"] = Pearth(nustate, earth_density, settings.pmns, settings.dm21, settings.dm31, e, settings.eta, settings.depth, mode=settings.evolution, basis=basis)
 
   # Append to list

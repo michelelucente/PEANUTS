@@ -147,7 +147,6 @@ survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.ra
 distorted_shape = np.array([B8_spectrum.Spectrum]).T * survival_prob
 
 labels = ["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"]
-
 plt.plot(B8_spectrum.Energy, B8_spectrum.Spectrum, label='$\\nu_e$ undistorted', linestyle='dashed')
 
 for flavour in range(len(distorted_shape[0])):

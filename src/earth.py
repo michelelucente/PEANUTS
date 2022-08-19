@@ -193,10 +193,11 @@ def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H,
   - H is the detector depth below the surface of the Earth
   """
 
+  evol = FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H)
   if basis == "flavour":
-      return np.array(np.square(np.abs(np.dot(FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H).transpose(), nustate))))[0]
+      return np.array(np.square(np.abs(np.dot(evol.transpose(), nustate))))
   elif basis == "mass":
-      return np.array(np.dot(np.square(np.abs(np.dot(FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H).transpose(), pmns.pmns))),nustate))[0]
+      return np.array(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns))),nustate))
 
   else:
       print("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")

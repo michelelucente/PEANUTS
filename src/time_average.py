@@ -144,6 +144,7 @@ def NadirExposure(lam, d1=0, d2=365/2, ns=1000, normalized=False, from_file=None
 
     # Generate ns samples of the nadir angle between 0 and pi
     eta_samples = np.linspace(0, pi, ns)
+    deta = eta_samples[1]-eta_samples[0]
 
     # Get exposure from file
     if from_file is not None:
@@ -161,8 +162,11 @@ def NadirExposure(lam, d1=0, d2=365/2, ns=1000, normalized=False, from_file=None
         exposure = raw_exposure["Exposure"].reverse()
       # CosZenith = cos(pi - Nadir), CosZenith = [-1,1]
       if angle == "CosZenith":
-        exposure_interp = interp1d(np.linspace(-1,1,ns), raw_exposure["Exposure"], kind='cubic')
-        exposure = [exposure_interp(-cos(eta_samples[i]))*sin(eta_samples[i]) for i in range(ns)]
+        cz_samples = np.linspace(-1,1,ns)
+        dcz = cz_samples[1]-cz_samples[0]
+        exposure_interp = interp1d(cz_samples, raw_exposure["Exposure"], kind='cubic')
+        exposure = [exposure_interp(-cos(eta_samples[i]))*sin(eta_samples[i])*deta/dcz for i in range(ns)]
+        exposure = [exp if exp > 0 else 0 for exp in exposure]
 
     else:
       # Compute exposure integrating in the given time ranges

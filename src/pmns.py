@@ -7,11 +7,21 @@ Created on Feb 23 2022
 @author: Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 import numpy as np
+import numba as nb
+from numba.experimental import jitclass
 
 from math import cos, sin
 from cmath import exp
 from numpy.linalg import multi_dot
 
+pmns = [('theta12', nb.float64),
+        ('theta13', nb.float64),
+        ('theta23', nb.float64),
+        ('delta', nb.float64),
+        ('pmns', nb.complex128[:,::1]),
+        ('U', nb.complex128[:,::1])]
+
+@jitclass(pmns)
 class PMNS:
 
   def __init__(self,th12,th13,th23,d):
@@ -20,53 +30,62 @@ class PMNS:
     self.theta13 = th13
     self.theta23 = th23
     self.delta = d
-  
+
     # Fill PMNS matrix
     r13 = self.R13(th13)
     r12 = self.R12(th12)
     r23 = self.R23(th23)
     delta = self.Delta(d)
-  
-    self.pmns = multi_dot([r23, delta, r13, delta.conjugate(), r12])
+
+    #self.pmns = multi_dot([r23, delta, r13, delta.conjugate(), r12])
+    np.dot(np.dot(np.dot(r23, delta), np.dot(r13, delta.conjugate())), r12)
+    self.pmns = np.dot(np.dot(np.dot(r23, delta), np.dot(r13, delta.conjugate())), r12)
 
     self.U = np.dot(r13, r12)
 
 
-  # These are the orthogonal/unitary matrices factorising the PMNS matrix, 
+  # These are the orthogonal/unitary matrices factorising the PMNS matrix,
   # U_{PMNS} = R_{23} \Delta R_{13} \Delta^* R_{12}
   def R23(self,th):
-      return np.matrix([
-          [1, 0, 0],
-          [0, cos(th), sin(th)],
-          [0, -sin(th), cos(th)]
-      ])
+      #return np.matrix([
+      return np.array([
+          [1., 0., 0.],
+          [0., cos(th), sin(th)],
+          [0., -sin(th), cos(th)]
+      ], dtype=nb.complex128)
 
   def R13(self,th):
-      return np.matrix([
-          [cos(th), 0, sin(th)],
-          [0, 1, 0],
-          [-sin(th), 0, cos(th)]
-      ])
+      #return np.matrix([
+      return np.array([
+          [cos(th), 0., sin(th)],
+          [0., 1., 0.],
+          [-sin(th), 0., cos(th)]
+      ], dtype=nb.complex128)
 
   def R12(self,th):
-      return np.matrix([
-          [cos(th), sin(th), 0],
-          [-sin(th), cos(th), 0],
-          [0, 0, 1]
-      ])
+      #return np.matrix([
+      return np.array([
+          [cos(th), sin(th), 0.],
+          [-sin(th), cos(th), 0.],
+          [0., 0., 1.]
+      ], dtype=nb.complex128)
 
   def Delta(self,d):
-      return np.matrix([
-          [1, 0, 0],
-          [0, 1, 0],
-          [0, 0, exp(1j*d)]
-      ])
+      #return np.array([[0.,0.,0.],[0., 0., exp(1j*d)]])
+      delta = np.array([[1.,0.,0.],[0.,1.,0.],[0., 0., 1.]], dtype=nb.complex128)
+      delta[2][2] = exp(1j*d)
+      return delta
+#      return np.array([
+#          [1., 0., 0.],
+#          [0., 1., 0.],
+#          [0., 0., exp(1j*d)]
+#      ])
 
   def __get_item__(self, i):
       return self.pmns[i]
 
   def transpose(self):
       return self.pmns.transpose()
-  
+
   def conjugate(self):
       return self.pmns.conjugate()

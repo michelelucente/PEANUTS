@@ -35,8 +35,8 @@ class SolarModel:
 
         # Import fluxes
         self.fluxes = f.read_csv(self.filename,
-                                 usecols=[2,8],
-                                 names = ['8B', 'hep'],
+                                 usecols=[3,5],
+                                 names = ['hep', '8B'],
                                  sep=" ", skiprows=6, nrows=1, header=None)
 
         # Import fraction data from solar model
@@ -91,10 +91,10 @@ class SolarModel:
 
     def flux(self,name):
        """
-       Returns the cumulative fluxes for each channel
+       Returns the cumulative fluxes for each channel in cm^-2 s^-1
        """
 
-       return self.fluxes[name][0]
+       return self.fluxes[name][0]*1e10
 
     def spectrum(self, name, energy=None):
        """
@@ -179,4 +179,4 @@ def Psolar (pmns, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction):
     P_i_to_a = np.square(np.abs(pmns.conjugate()))
 
     # Multiply probabilities by weights, and return the result
-    return np.array(np.dot(P_i_to_a, Tei))[0]
+    return np.array(np.dot(P_i_to_a, Tei))

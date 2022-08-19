@@ -17,7 +17,7 @@ def Vk(Deltam2, E, ne):
     - E is the neutrino energy, in units of MeV;
     - ne is the electron matter density, in units of mol/cm^3;
 See also Eq.s 4.17, 4.18 in 1802.05781."""
-    return (3.868e-7)/(2.533) * (ne / (Deltam2 / E))
+    return (3.868e-7)/(2.533) * (ne * E / Deltam2)
 
 
 

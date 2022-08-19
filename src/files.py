@@ -64,7 +64,7 @@ def read_slha(filepath):
                'theta23'    : theta23,
                'theta13'    : theta13,
                'delta'      : delta}
-  
+
   return nu_params
 
 def output(settings, outs):
@@ -72,7 +72,7 @@ def output(settings, outs):
   def dec(x):
     return "{:.5E}".format(Decimal(x))
 
-  towrite = "" 
+  towrite = ""
 
   if settings.flux:
     towrite += "# Flux [cm^-2 s^-1]\t" + str(dec(outs[0]["flux"])) + "\n"
@@ -85,10 +85,10 @@ def output(settings, outs):
     if settings.earth:
       towrite += "Pearth (e) \t Pearth (mu) \t Pearth (tau)\t"
     towrite += "\n"
-  
+
     for i in range(len(settings.energy)):
 
-      towrite += str(dec(settings.energy[i])) + "\t" 
+      towrite += str(dec(settings.energy[i])) + "\t"
 
       if settings.solar:
 
@@ -107,7 +107,7 @@ def output(settings, outs):
 
     for i in range(len(settings.energy)):
 
-      towrite += str(dec(settings.energy[i])) + "\t" 
+      towrite += str(dec(settings.energy[i])) + "\t"
       towrite += str(dec(outs[i]['spectrum']))
 
     towrite += "\n"
@@ -119,13 +119,13 @@ def output(settings, outs):
 
     for i in range(len(settings.energy)):
 
-     towrite += str(dec(settings.energy[i])) + "\t" 
+     towrite += str(dec(settings.energy[i])) + "\t"
      for out in outs[i]["spectrum"]:
        towrite += str(dec(out)) + "\t"
 
     towrite += "\n"
 
- 
+
 
   if settings.output == "stdout":
 

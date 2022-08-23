@@ -147,11 +147,11 @@ def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, dens
     sampled at radius_samples."""
 
 
-    IntegratedFraction = integrate.trapezoid(y=fraction, x=radius_samples)
+    IntegratedFraction = integrate.trapz(y=fraction, x=radius_samples)
 
     temp = Tei(th12, th13, DeltamSq21, DeltamSq31, E, density) * fraction
     [Te1, Te2, Te3] = [
-        integrate.trapezoid(y=temp[i], x = radius_samples) / IntegratedFraction
+        integrate.trapz(y=temp[i], x = radius_samples) / IntegratedFraction
         for i in range(3)]
 
     return [Te1, Te2, Te3]

@@ -174,7 +174,7 @@ def NadirExposure(lam, d1=0, d2=365/2, ns=1000, normalized=False, from_file=None
 
     # Normalize the distribution if requested
     if normalized:
-        norm = integrate.trapezoid(x=eta_samples,y=exposure)
+        norm = integrate.trapz(x=eta_samples,y=exposure)
         exposure = exposure/norm
 
     return np.vstack((eta_samples, exposure)).T

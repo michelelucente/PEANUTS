@@ -33,18 +33,35 @@ class SolarModel:
         path = os.path.dirname(os.path.realpath( __file__ ))
         self.filename = path + "/../Data/bs2005agsopflux.csv" if filename == None else filename
 
+        # Format for the various spectra are layered differently
+        fluxrow = 0
+        fractionrow = 0
+        if "bs2005agsop" in self.filename:
+          fluxcols = [3, 5]
+          fluxrow = 6
+          fractioncols = [1, 3, 7, 13]
+          fractionrow = 27
+        elif "bp00" in self.filename:
+          fluxcols=[3,5]
+          fluxrow = 25
+          fractioncols = [0, 2, 6, 12]
+          fractionrow = 29
+        else:
+            print("Error: Unknown solar model file")
+            exit()
+
+
         # Import fluxes
         self.fluxes = f.read_csv(self.filename,
-                                 usecols=[3,5],
+                                 usecols = fluxcols,
                                  names = ['hep', '8B'],
-                                 sep=" ", skiprows=6, nrows=1, header=None)
+                                 sep=" ", skiprows=fluxrow, nrows=1, header=None)
 
         # Import fraction data from solar model
-        # TODO: This assumes that any solar model file is the same format, make it more general
         self.model = f.read_csv(self.filename,
-                                usecols=[1, 3, 7, 13],
+                                usecols = fractioncols,
                                 names = ['radius', 'density_log_10', '8B fraction', 'hep fraction'],
-                                sep=" ", skiprows=27, header=None)
+                                sep=" ", skiprows=fractionrow, header=None)
 
         # Set useful variables
         self.rad = self.model['radius']

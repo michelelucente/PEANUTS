@@ -1,0 +1,31 @@
+# Test file for solar flux and earth regeneration probabilities
+
+# @author: Michele Lucente <lucente@physik.rwth-aachen.de>
+# @author Tomas Gonzalo <tomas.gonzalo@kit.edu>
+
+Energy: [4,15,0.5]
+
+#Neutrinos: "examples/example_slha.slha2"
+Neutrinos:
+  dm21: 7.42e-05
+  dm31: 2.51e-03
+  theta12: 5.83638e-01
+  theta23: 8.5521e-01
+  theta13: 1.49575e-01
+  delta: 3.40339
+
+Solar:
+
+  fraction: "8B"
+
+Earth:
+
+  depth: 1730
+  latitude: 46
+  exposure_angle: "CosZenith"
+  exposure_file: "./Data/SnoCosZenithDay.dat"
+  exposure_samples: 240
+  exposure_normalized: True
+
+Output: "stdout"
+#Output: "out.dat"

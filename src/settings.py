@@ -69,23 +69,23 @@ class Settings:
           print("Error: slha file " + slha_file + " not found.")
           exit()
 
-           
 
-      # Extract solar parameters       
+
+      # Extract solar parameters
       if "Solar" in settings:
 
         if "fraction" not in settings["Solar"]:
           print("Error: missing solar neutrino fraction.")
           exit()
         else:
-          self.fraction = settings["Solar"]["fraction"] 
+          self.fraction = settings["Solar"]["fraction"]
 
         self.solar_file = settings["Solar"]["solar_model"] if "solar_model" in settings["Solar"] else None
 
         self.probabilities = settings["Solar"]["probabilities"] if "probabilities" in settings["Solar"] else True
 
         self.flux = settings["Solar"]["flux"] if "flux" in settings["Solar"] else False
-        
+
         self.undistorted_spectrum = False
         self.distorted_spectrum =  False
         if "spectrum" in settings["Solar"]:
@@ -124,14 +124,11 @@ class Settings:
         elif "latitude" in settings["Earth"]:
           self.latitude = settings["Earth"]["latitude"]
           self.exposure = True
-          if "exposure_time" in settings["Earth"]:
-            self.exposure_time = settings["Earth"]["exposure_time"]
-          else: 
-            self.exposure_time = [0,365/2]
-          if "exposure_samples" in settings["Earth"]:
-            self.exposure_samples = settings["Earth"]["exposure_samples"]
-          else:
-            self.exposure_samples = 1000
+          self.exposure_normalized = settings["Earth"]["exposure_normalized"] if "exposure_normalized" in settings["Earth"] else False
+          self.exposure_time = settings["Earth"]["exposure_time"] if "exposure_time" in settings["Earth"] else [0,365/2]
+          self.exposure_samples = settings["Earth"]["exposure_samples"] if "exposure_samples" in settings["Earth"] else 1000
+          self.exposure_file = settings["Earth"]["exposure_file"] if "exposure_file" in settings["Earth"] else None
+          self.exposure_angle = settings["Earth"]["exposure_angle"] if "exposure_angle" in settings["Earth"] else "Nadir"
         else:
           print("Error: both nadir angle (eta) and latitude are provided, but only one should be.")
           exit()
@@ -178,7 +175,7 @@ class Settings:
       self.energy = [args[3]]
       self.fraction = args[4]
       self.solar_file = args[5].solar if args[5].solar != "" else None
-     
+
     # If there are exactly 7 arguments, we are in earth mode
     # args = (pmns, dm21, dm31, E, eta, H, options)
     elif len(args) == 7:

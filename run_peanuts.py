@@ -102,7 +102,9 @@ for e in settings.energy:
 
     # If the latitude is provided compute exposure
     if settings.exposure:
-      exposure = NadirExposure(radians(settings.latitude), normalized=True, d1=settings.exposure_time[0], d2=settings.exposure_time[1], ns=settings.exposure_samples)
+      exposure = NadirExposure(radians(settings.latitude), normalized=settings.exposure_normalized,
+                               d1=settings.exposure_time[0], d2=settings.exposure_time[1], ns=settings.exposure_samples,
+                               from_file=settings.exposure_file, angle=settings.exposure_angle)
 
       out["earth"] = 0
       deta = pi/settings.exposure_samples

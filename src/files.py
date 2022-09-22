@@ -6,7 +6,14 @@ Created on Mar 3 2022
 @author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
-import pyslha # pyslha module for reading SLHA files, by Andy Buckley (https://arxiv.org/abs/1305.4194)
+with_slha = True
+try:
+  import pyslha # pyslha module for reading SLHA files, by Andy Buckley (https://arxiv.org/abs/1305.4194)
+except:
+  print("Warning!: Python module pyslha not found, disabling slha reading/writing routines")
+  with_slha = False
+
+
 import pandas as pd
 import yaml
 from decimal import Decimal
@@ -33,6 +40,11 @@ def read_slha(filepath):
   """
   Function to read from slha files
   """
+
+  if not write_slha:
+    print("Error!: Tried to use pyslha but module is not installed")
+    exit()
+
 
   slha = pyslha.read(filepath)
   blocks = [''.join(k) for k in slha.blocks.keys()]

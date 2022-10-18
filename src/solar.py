@@ -36,7 +36,7 @@ class SolarModel:
         # Format for the various spectra are layered differently
         fluxrow = 0
         fractionrow = 0
-        if "bs2005agsop" in self.filename:
+        if "bs2005" in self.filename:
           fluxcols = [3, 5]
           fluxrow = 6
           fractioncols = [1, 3, 7, 13]
@@ -51,17 +51,22 @@ class SolarModel:
             exit()
 
 
-        # Import fluxes
-        self.fluxes = f.read_csv(self.filename,
-                                 usecols = fluxcols,
-                                 names = ['hep', '8B'],
-                                 sep=" ", skiprows=fluxrow, nrows=1, header=None)
+        try:
+          # Import fluxes
+          self.fluxes = f.read_csv(self.filename,
+                                   usecols = fluxcols,
+                                   names = ['hep', '8B'],
+                                   sep=" ", skiprows=fluxrow, nrows=1, header=None)
 
-        # Import fraction data from solar model
-        self.model = f.read_csv(self.filename,
-                                usecols = fractioncols,
-                                names = ['radius', 'density_log_10', '8B fraction', 'hep fraction'],
-                                sep=" ", skiprows=fractionrow, header=None)
+          # Import fraction data from solar model
+          self.model = f.read_csv(self.filename,
+                                  usecols = fractioncols,
+                                  names = ['radius', 'density_log_10', '8B fraction', 'hep fraction'],
+                                  sep=" ", skiprows=fractionrow, header=None)
+
+        except:
+          print("Error! The solar model file provided does not exists or it is corrupted")
+          exit()
 
         # Set useful variables
         self.rad = self.model['radius']
@@ -70,11 +75,14 @@ class SolarModel:
                      'hep': self.model['hep fraction']}
 
         # Import spectral shapes
-        spectrum_files["8B"] = path + "/../Data/8B_shape.csv" if "8B" not in spectrum_files else spectrum_files['8B']
+        spectrum_files["8B"] = path + "/../Data/8B_shape_Ortiz_et_al.csv" if "8B" not in spectrum_files else spectrum_files['8B']
         spectrum_files["hep"] = path + "/../Data/hep_shape.csv" if "hep" not in spectrum_files else spectrum_files['hep']
         self.spectra = {}
         for fraction, spectrum_file in spectrum_files.items():
           self.spectra[fraction] = f.read_csv(spectrum_file, usecols=[0, 1], names = ["Energy", "Spectrum"], skiprows=3, header=None)
+          norm = 1000 if "Winter_et_al" in spectrum_file else 1
+          self.spectra[fraction]['Spectrum'] /= norm
+
 
     def radius(self):
         """

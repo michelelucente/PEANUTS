@@ -65,7 +65,7 @@ class SolarModel:
                                   sep=" ", skiprows=fractionrow, header=None)
 
         except:
-          print("Error! The solar model file provided does not exists or it is corrupted")
+          print("Error! The solar model file provided does not exist or it is corrupted")
           exit()
 
         # Set useful variables

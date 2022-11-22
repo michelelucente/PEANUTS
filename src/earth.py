@@ -8,7 +8,10 @@ Created on Feb 10 2022
 """
 
 import os
+import time
 import numpy as np
+import numba as nb
+from numba.experimental import jitclass
 from numpy.linalg import multi_dot
 from math import sin, cos, sqrt, pi, asin
 from scipy.integrate import complex_ode
@@ -17,7 +20,15 @@ import src.files as f
 from src.potentials import k, MatterPotential, R_E
 from src.evolutor import FullEvolutor
 
+earthdensity =  [
+  ('density_file', nb.types.string),
+  ('rj', nb.float64[:]),
+  ('alpha', nb.float64[:]),
+  ('beta', nb.float64[:]),
+  ('gamma', nb.float64[:])
+]
 
+@jitclass(earthdensity)
 class EarthDensity:
   """
   See hep-ph/9702343 for the definition of trajectory coordinate and Earth density parametrisation.
@@ -29,19 +40,26 @@ class EarthDensity:
     """
 
     # TODO: This is specific for the example file, make general
-    path = os.path.dirname(os.path.realpath( __file__ ))
-    self.density_file = path + "/../Data/Earth_Density.csv" if density_file == None else density_file
-    earth_density = f.read_csv(self.density_file, names=["rj", "alpha", "beta", "gamma"], skiprows=3)
+    with nb.objmode(density_file='string', rj='float64[:]', alpha='float64[:]', beta='float64[:]', gamma='float64[:]'):
+      path = os.path.dirname(os.path.realpath( __file__ ))
+      density_file = path + "/../Data/Earth_Density.csv" if density_file == None else density_file
+      earth_density = f.read_csv(density_file, names=["rj", "alpha", "beta", "gamma"], skiprows=3)
 
-    self.rj = earth_density.rj.to_numpy()
-    self.alpha = earth_density.alpha.to_numpy()
-    self.beta = earth_density.beta.to_numpy()
-    self.gamma = earth_density.gamma.to_numpy()
+      rj = earth_density.rj.to_numpy()
+      alpha = earth_density.alpha.to_numpy()
+      beta = earth_density.beta.to_numpy()
+      gamma = earth_density.gamma.to_numpy()
+
+    self.density_file = density_file
+    self.rj = rj
+    self.alpha = alpha
+    self.beta = beta
+    self.gamma = gamma
 
   def parameters(self, eta):
     """
     Returns the values of the density parameters for the shells crossed by the path
-    with nadir angle = eta as a list of lists, where each element [[a, b, c], x_i] refers to a
+    with nadir angle = eta as a list of lists, where each element [a, b, c, x_i] refers to a
     Earth shell  (from inner to outer layers) having density profile n_e(x) = a + b x^2 + c x^4,
     with shell external boundary at x == x_i.
     """
@@ -51,14 +69,14 @@ class EarthDensity:
     idx_shells = np.searchsorted(self.rj, sin(eta))
 
     # Keep only the parameters for the shells crossed by the path with nadir angle eta
-    alpha_prime = self.alpha[idx_shells::] + self.beta[idx_shells::] * sin(eta)**2 + self.gamma[idx_shells::] * sin(eta)**4
+    alpha_prime = self.alpha[idx_shells::] + self.beta[idx_shells::] * sin(eta)**2 + self.gamma[idx_shells::] * np.sin(eta)**4
     beta_prime = self.beta[idx_shells::] + 2 * self.gamma[idx_shells::] * sin(eta)**2
     gamma_prime = self.gamma[idx_shells::]
 
     # Compute the value of the trajectory coordinates xj at each shell crossing
     xj = np.sqrt( (self.rj[idx_shells::])**2 - sin(eta)**2 )
 
-    return [ [ [alpha_prime[i], beta_prime[i], gamma_prime[i]], xj[i] ] for i in range(len(alpha_prime))]
+    return np.stack((alpha_prime, beta_prime, gamma_prime, xj), axis=1)
 
   def shells(self):
     """
@@ -73,7 +91,7 @@ class EarthDensity:
     return np.arcsin(self.rj)/pi
 
 
-  def __call__(self, x, eta):
+  def call(self, x, eta):
     """
     Computes the value of Earth electron density in units of mol/cm^3 for trajectory coordinate
     x and nadir angle eta;
@@ -88,10 +106,10 @@ class EarthDensity:
 
     # Get the parameters
     param = self.parameters(eta)
-    alpha_prime = [x[0][0] for x in param]
-    beta_prime = [x[0][1] for x in param]
-    gamma_prime = [x[0][2] for x in param]
-    xj = [x[1] for x in param]
+    alpha_prime = [x[0] for x in param]
+    beta_prime = [x[1] for x in param]
+    gamma_prime = [x[2] for x in param]
+    xj = [x[3] for x in param]
 
     # The index "idx" determines within which shell xj[idx] the point x is
     idx = np.searchsorted(xj, x)
@@ -127,7 +145,7 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
   eta_prime = asin(r_d * sin(eta))
 
   params = density.parameters(eta_prime)
-  x1, x2 = (-params[-1][1], x_d) if 0 <= eta < pi/2 else (0, Deltax)
+  x1, x2 = (-params[-1][3], x_d) if 0 <= eta < pi/2 else (0, Deltax)
 
   def model(t, y):
     nue, numu, nutau = y

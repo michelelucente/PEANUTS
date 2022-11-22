@@ -7,9 +7,9 @@ Created on Feb 23 2022
 @author: Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
+import time
 import numpy as np
 import numba as nb
-from numpy.linalg import multi_dot
 from math import sin, asin, cos, sqrt, pi
 from cmath import exp
 
@@ -67,7 +67,7 @@ See hep-ph/9702343 for the definition of the perturbative expansion of the evolu
 
     # Matrices M_a, not depending on x
     M = np.zeros((len(lam),3,3), dtype=nb.complex128)
-    for i in range(len(lam)):
+    for i in nb.prange(len(lam)):
       M[i] = (1 / (3*lam[i]**2 + c1_loc)) * ((lam[i]**2 + c1_loc) * id3 + lam[i] * T + np.dot(T,T))
 
     # 0th order evolutor (i.e. for constant matter density), following Eq. (46) in hep-ph/9910546
@@ -82,20 +82,14 @@ See hep-ph/9702343 for the definition of the perturbative expansion of the evolu
         for idx_b in range(3) :
           u1 += np.dot(np.dot(M[idx_a], np.diag(np.array([-1j * MatterPotential(Iab(lam[idx_a] + tr/3, lam[idx_b] + tr/3, atilde, b, c, x2, x1)), 0, 0]))), M[idx_b])
 
-    #    u1 = np.sum([multi_dot([M[idx_a], np.diag([-1j * MatterPotential(Iab(lam[idx_a] + tr/3, lam[idx_b] + tr/3,
-    #                                                                         atilde, b, c, x2, x1)), 0, 0]),
-    #                        M[idx_b]]) for idx_a in range(3) for idx_b in range(3)], 0)
-    # If density profile is constant the 1st order correction is identically zero
-    #else:
-    #    u1 = 0
-
     u = u0 + u1
+
     # Return the full evolutor
     return u
 
 
-
-def FullEvolutor (density, m1Sq, m2Sq, m3Sq, pmns, E, eta, H):
+@nb.njit
+def FullEvolutor(density, m1Sq, m2Sq, m3Sq, pmns, E, eta, H):
     """FullEvolutor(density, m1Sq, m2Sq, m3Sq, pmns, E, eta, H) computes the full evolutor for an ultrarelativistic
     neutrino crossing the Earth:
     - density is the Earth density object
@@ -110,7 +104,7 @@ def FullEvolutor (density, m1Sq, m2Sq, m3Sq, pmns, E, eta, H):
     # If the detector is on the surface and neutrinos are coming from above the horizon, there is no
     # matter effect
     if H == 0 and (pi/2 <= eta <= pi):
-        return np.identity(3)
+        return (1+0.j)*np.identity(3)
 
     # Detector depth normalised to Earth radius
     h = H / R_E
@@ -133,46 +127,47 @@ def FullEvolutor (density, m1Sq, m2Sq, m3Sq, pmns, E, eta, H):
         # x_d = sqrt(r_d**2 - sin(eta)**2) -- wrong old definition
         x_d = r_d * cos(eta)
 
-        # params is a list of lists, each element [[a, b, c], x_i] contains the parameters of the density
+        # params is a list of lists, each element [a, b, c, x_i] contains the parameters of the density
         # profile n_e(x) = a + b x^2 + c x^4 along the crossed shell, with each shell ending at x == x_i
         params = density.parameters(eta_prime)
+        params2 = np.flipud(params)
 
         # Compute the evolutors for the path from Earth entry point to trajectory mid-point at x == 0
-        evolutors_full_path = [Upert(m1Sq, m2Sq, m3Sq, pmns, E, params[i][1], params[i-1][1] if i > 0 else 0,
-                           params[i][0][0], params[i][0][1], params[i][0][2]) for i in reversed(range(len(params)))]
+        evolutors_full_path = [Upert(m1Sq, m2Sq, m3Sq, pmns, E, params2[i][3], params2[i+1][3] if i < len(params2)-1 else 0, params2[i][0], params2[i][1], params2[i][2]) for i in range(len(params))]
 
         # Multiply the single evolutors
-        evolutor_half_full = multi_dot(evolutors_full_path) if len(evolutors_full_path) > 1 else evolutors_full_path[0]
+        evolutor_half_full = evolutors_full_path[0]
+        for i in range(len(evolutors_full_path)-1):
+          evolutor_half_full = np.dot(evolutor_half_full, evolutors_full_path[i+1])
 
         # Compute the evolutors for the path from the trajectory mid-point at x == 0 to the detector point x_d
         # Only the evolutor for the most external shell needs to be computed
         evolutors_to_detectors = evolutors_full_path.copy()
 
-        evolutors_to_detectors[0] = Upert(m1Sq, m2Sq, m3Sq, pmns, E, x_d, params[-2][1] if len(params) > 1 else 0,
-                           params[-1][0][0], params[-1][0][1], params[-1][0][2])
+        evolutors_to_detectors[0] = Upert(m1Sq, m2Sq, m3Sq, pmns, E, x_d, params[-2][3] if len(params) > 1 else 0, params[-1][0], params[-1][1], params[-1][2])
 
         # Multiply the single evolutors
-        evolutor_half_detector = multi_dot(evolutors_to_detectors) if len(evolutors_to_detectors) > 1 else evolutors_to_detectors[0]
+        evolutor_half_detector = evolutors_to_detectors[0]
+        for i in range(len(evolutors_to_detectors)-1):
+          evolutor_half_detector = np.dot(evolutor_half_detector, evolutors_to_detectors[i+1])
 
         # Combine the two half-paths evolutors and include the factorised dependence on th23 and d to
         # obtain the full evolutor
-        evolutor = multi_dot([r23, delta.conjugate(), evolutor_half_detector, evolutor_half_full.transpose(),
-                              delta, r23.transpose()])
+        evolutor =  np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(evolutor_half_detector, evolutor_half_full.transpose())), np.dot(delta, r23.transpose()))
         return evolutor
 
     # If pi/2 <= eta <= pi we approximate the density to the constant value taken at r = 1 - h/2
     elif pi/2 <= eta <= pi:
+
         #n_1 = EarthDensity(x = 1 - h / 2) TODO: eta = 0?
-        n_1 = density(1 - h/2, 0)
+        n_1 = density.call(1 - h/2, 0)
 
         # Deltax is the lenght of the crossed path
         Deltax = r_d * cos(eta) + sqrt(1 - r_d**2 * sin(eta)**2)
 
         # Compute the evolutor for constant density n_1 and traveled distance Deltax,
         # and include the factorised dependence on th23 and d to obtain the full evolutor
-        evolutor = multi_dot([r23, delta.conjugate(),
-                              Upert(m1Sq, m2Sq, m3Sq, pmns, E, Deltax, 0, n_1, 0, 0),
-                              delta, r23.transpose()])
+        evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(m1Sq, m2Sq, m3Sq, pmns, E, Deltax, 0, n_1, 0, 0), delta)), r23.transpose())
         return evolutor
 
     else:

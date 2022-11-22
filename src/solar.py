@@ -8,6 +8,7 @@ Created on Feb 7 2022
 """
 # Import libraries
 import os
+import time
 import numpy as np
 import numba as nb
 from math import cos, sin
@@ -136,6 +137,7 @@ class SolarModel:
          return float(spec(energy))
 
 # Compute flux of incoherent mass eigenstates for fixed density value
+@nb.njit
 def Tei (th12, th13, DeltamSq21, DeltamSq31, E, ne):
     """Tei(th12, th13, DeltamSq21, DeltamSq31, E, ne) computes the weights composing an incoherent flux of
     neutrino mass eigenstates, for electron neutrinos produced in matter in the adiabatic approximation:
@@ -155,10 +157,11 @@ See Eq. (6.11) in FiuzadeBarros:2011qna for its derivation."""
     c12M = np.cos(th12m)
     s12M = np.sin(th12m)
 
-    return np.array(((c13M * c12M)**2, (c13M * s12M)**2, s13M**2))
+    return [(c13M * c12M)**2, (c13M * s12M)**2, s13M**2]
 
 
 # Compute flux of inchoerent mass eigenstates integrated over production point in the Sun
+@nb.njit
 def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction):
     """solar_flux_mass(th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction) computes
     the weights of mass eigenstates composing the incoherent flux of solar neutrinos in the adiabatic
@@ -171,15 +174,15 @@ def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, dens
     - fraction is the relative fraction of neutrinos produced in the considered reaction,
     sampled at radius_samples."""
 
+    IntegratedFraction = np.trapz(y=fraction, x=radius_samples)
 
-    IntegratedFraction = integrate.trapz(y=fraction, x=radius_samples)
+    temp = Tei(th12, th13, DeltamSq21, DeltamSq31, E, density)
+    temp = [temp[i]*fraction for i in range(len(temp))]
 
-    temp = Tei(th12, th13, DeltamSq21, DeltamSq31, E, density) * fraction
-    [Te1, Te2, Te3] = [
-        integrate.trapz(y=temp[i], x = radius_samples) / IntegratedFraction
-        for i in range(3)]
+    Te = [np.trapz(y=temp[i], x = radius_samples) / IntegratedFraction
+          for i in range(3)]
 
-    return [Te1, Te2, Te3]
+    return Te
 
 # Compute the flavour probabilities for the solar neutrino flux
 def Psolar (pmns, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction):

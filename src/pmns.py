@@ -12,7 +12,6 @@ from numba.experimental import jitclass
 
 from math import cos, sin
 from cmath import exp
-from numpy.linalg import multi_dot
 
 pmns = [('theta12', nb.float64),
         ('theta13', nb.float64),
@@ -37,7 +36,6 @@ class PMNS:
     r23 = self.R23(th23)
     delta = self.Delta(d)
 
-    #self.pmns = multi_dot([r23, delta, r13, delta.conjugate(), r12])
     np.dot(np.dot(np.dot(r23, delta), np.dot(r13, delta.conjugate())), r12)
     self.pmns = np.dot(np.dot(np.dot(r23, delta), np.dot(r13, delta.conjugate())), r12)
 

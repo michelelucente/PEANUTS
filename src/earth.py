@@ -197,7 +197,7 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
     return evolution[-1]
 
 
-
+@nb.njit
 def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis="flavour"):
   """
   Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H) computes
@@ -213,13 +213,12 @@ def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H,
 
   evol = FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H)
   if basis == "flavour":
-      return np.array(np.square(np.abs(np.dot(evol.transpose(), nustate))))
+      return np.square(np.abs(np.dot(evol.transpose(), nustate.astype(nb.complex128))))
   elif basis == "mass":
-      return np.array(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns))),nustate))
+      return np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns))), nustate)
 
   else:
-      print("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")
-      exit()
+      raise Exception("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")
 
 
 def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="analytical", basis="flavour", full_oscillation=False):

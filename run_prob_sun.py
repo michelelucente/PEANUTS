@@ -23,13 +23,18 @@ parser = OptionParser()
 parser.add_option("-v", "--verbose", help = "Print debug output", action='store_true', dest='verbose', default=False)
 parser.add_option("-s", "--solar", help ="Add custom solar model", action='store', dest="solar", default="")
 (options, args) = parser.parse_args()
-if len(args) < 3 :
+if len(args) < 3 or len(args) > 8 or (len(args) > 3 and len(args) < 8):
   print('Wrong number of arguments \n\
         \n\
-Usage: python '+mainfilename+'.py <in_file> <energy> <fraction>\n\
-       <in_file>                   Input file\n\
+Usage: python '+mainfilename+'.py <energy> <fraction> <in_file/th12> [<th13> <th23> <delta> <md21> <md31>]\n\
        <energy>                    Energy\n\
        <fraction>                  Neutrino fraction sample\n\
+       <in_file/th12>              Input file or mixing angle theta_12\n\
+       <th13>                      Mixing angle theta_13\n\
+       <th23>                      Mixing angle theta_23\n\
+       <delta>                     CP phase delta\n\
+       <md21>                      Mass splitting m^2_{21}\n\
+       <md31>                      Mass splitting m^2_{31}\n\
 \n\
 Options:\n\
        -h, --help                    Show this help message and exit\n\
@@ -38,32 +43,53 @@ Options:\n\
 
   exit()
 
-# Read the input files
+# Read the solar model file
 path = os.path.dirname(os.path.realpath( __file__ ))
-slha_file = args[0]
 solar_file = path + '/Data/bs2005agsopflux.csv' if options.solar == "" else options.solar
 
 # Import data from solar model
 solar_model = SolarModel(solar_file)
 
 # Get arguments
-E = float(args[1])
-fraction = args[2]
+E = float(args[0])
+fraction = args[1]
 if not solar_model.has_fraction(fraction):
    print("Error: The fraction ", fraction, " does not exist in the solar model.")
    exit()
 
+# If there are only 3 arguments, the last one is a slha file
+if len(args) == 3:
 
-# Read example slha file and fill PMNS matrix
-nu_params = f.read_slha(slha_file)
-th12 = nu_params['theta12']
-th13 = nu_params['theta13']
-th23 = nu_params['theta23']
-d = nu_params['delta']
-pmns = PMNS(th12, th13, th23, d)
+  # If pyslha has not been imported throw error
+  if not f.with_slha:
+    print("Error: The module `pyslha` is needed to use SLHA input, please install it.")
+    exit()
 
-DeltamSq21 = nu_params['dm21']
-DeltamSq31 = nu_params['dm31']
+  # Read slha file
+  slha_file = args[2]
+
+  # Read example slha file and fill PMNS matrix
+  nu_params = f.read_slha(slha_file)
+  th12 = nu_params['theta12']
+  th13 = nu_params['theta13']
+  th23 = nu_params['theta23']
+  d = nu_params['delta']
+  pmns = PMNS(th12, th13, th23, d)
+
+  DeltamSq21 = nu_params['dm21']
+  DeltamSq31 = nu_params['dm31']
+
+# Otherwise, the parameters are given as arguments
+else:
+
+  th12 = float(args[2])
+  th13 = float(args[3])
+  th23 = float(args[4])
+  d = float(args[5])
+  pmns = PMNS(th12, th13, th23, d)
+
+  DeltamSq21 = float(args[6])
+  DeltamSq31 = float(args[7])
 
 # Print program banner and inputs
 print_banner()

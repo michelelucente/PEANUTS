@@ -175,6 +175,9 @@ class Settings:
       self.energy = [args[3]]
       self.fraction = args[4]
       self.solar_file = args[5].solar if args[5].solar != "" else None
+      self.probabilities = True
+      self.undistorted_spectrum = False
+      self.distorted_spectrum =  False
 
     # If there are exactly 7 arguments, we are in earth mode
     # args = (pmns, dm21, dm31, E, eta, H, options)

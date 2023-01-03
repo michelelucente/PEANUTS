@@ -113,7 +113,7 @@ class SolarModel:
        Returns whether the solar model contains the given neutrino sample fraction
        """
 
-       return name in self.fraction.keys()
+       return name in self.frac.keys()
 
     def flux(self,name):
        """

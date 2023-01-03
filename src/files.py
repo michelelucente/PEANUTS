@@ -41,7 +41,7 @@ def read_slha(filepath):
   Function to read from slha files
   """
 
-  if not write_slha:
+  if not with_slha:
     print("Error!: Tried to use pyslha but module is not installed")
     exit()
 

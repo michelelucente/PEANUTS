@@ -22,14 +22,15 @@ mainfilename = 'run_prob_sun'
 parser = OptionParser()
 parser.add_option("-v", "--verbose", help = "Print debug output", action='store_true', dest='verbose', default=False)
 parser.add_option("-s", "--solar", help ="Add custom solar model", action='store', dest="solar", default="")
+parser.add_option("-i", "--in_slha", help="SLHA input file", action='store', dest='in_slha', default="")
 (options, args) = parser.parse_args()
-if len(args) < 3 or len(args) > 8 or (len(args) > 3 and len(args) < 8):
+if len(args) < 2 or (options.in_slha == "" and len(args) != 8):
   print('Wrong number of arguments \n\
         \n\
-Usage: python '+mainfilename+'.py <energy> <fraction> <in_file/th12> [<th13> <th23> <delta> <md21> <md31>]\n\
+Usage: python '+mainfilename+'.py <energy> <fraction> [<th12> <th13> <th23> <delta> <md21> <md31>]\n\
        <energy>                    Energy\n\
        <fraction>                  Neutrino fraction sample\n\
-       <in_file/th12>              Input file or mixing angle theta_12\n\
+       <th12>                      Mixing angle theta_12\n\
        <th13>                      Mixing angle theta_13\n\
        <th23>                      Mixing angle theta_23\n\
        <delta>                     CP phase delta\n\
@@ -37,9 +38,10 @@ Usage: python '+mainfilename+'.py <energy> <fraction> <in_file/th12> [<th13> <th
        <md31>                      Mass splitting m^2_{31}\n\
 \n\
 Options:\n\
-       -h, --help                    Show this help message and exit\n\
-       -v, --verbose                 Print debug output\n\
-       -s, --solar                   Add custom solar model')
+       -h, --help                  Show this help message and exit\n\
+       -v, --verbose               Print debug output\n\
+       -s, --solar <solar_file>    Add custom solar model\n\
+       -i, --in_slha <slha_file>   SLHA input file for neutrino parameters')
 
   exit()
 
@@ -57,8 +59,8 @@ if not solar_model.has_fraction(fraction):
    print("Error: The fraction ", fraction, " does not exist in the solar model.")
    exit()
 
-# If there are only 3 arguments, the last one is a slha file
-if len(args) == 3:
+# If the -i/--in_slha option is given and there are only 3 arguments, the last one is a slha file
+if options.in_slha != "":
 
   # If pyslha has not been imported throw error
   if not f.with_slha:
@@ -66,7 +68,7 @@ if len(args) == 3:
     exit()
 
   # Read slha file
-  slha_file = args[2]
+  slha_file = options.in_slha
 
   # Read example slha file and fill PMNS matrix
   nu_params = f.read_slha(slha_file)

@@ -204,4 +204,5 @@ class Settings:
       self.density_file = args[6].density if args[6].density != "" else None
       self.evolution = "analytical" if args[6].analytical else "numerical"
 
+      self.exposure = False
 

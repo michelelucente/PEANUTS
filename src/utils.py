@@ -15,7 +15,7 @@ def print_banner():
             "================================\n\n"\
             "Created by:\n"\
             "   Michele Lucente (lucente@physik.rwth-aachen.de)\n"\
-            "   Tomas Gonzalo   (gonzalo@physik.rwht-aachen.de)\n\n"\
+            "   Tomas Gonzalo   (tomas.gonzalo@kit.edu)\n\n"\
             "PEANUTS 1.0 is open source and under the terms of the GPL-3 license.\n\n"\
             "Documentation and details for PEANUTS can be found at\n"\
             "T. Gonzalo and M. Lucente, arXiv:xxxx.xxxx\n\n"\

@@ -141,7 +141,7 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
   r_d = 1 - h
   x_d = r_d * cos(eta)
   Deltax = r_d * cos(eta) + sqrt(1 - r_d**2 * sin(eta)**2)
-  n_1 = density(1-h/2,0)
+  n_1 = density.call(1-h/2,0)
   eta_prime = asin(r_d * sin(eta))
 
   params = density.parameters(eta_prime)
@@ -150,7 +150,7 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
   def model(t, y):
     nue, numu, nutau = y
     dnudt = - 1j * np.dot(multi_dot([r23, delta.conjugate(), Hk + np.diag([
-        MatterPotential(density(t, eta=eta_prime) if 0 <= eta < pi/2 else n_1)
+        MatterPotential(density.call(t, eta_prime) if 0 <= eta < pi/2 else n_1)
         ,0,0]), delta, r23.transpose()]), [nue, numu, nutau])
     return dnudt
 
@@ -166,7 +166,7 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
 
         nu = complex_ode(model)
 
-        nu.set_integrator("Isoda")
+        nu.set_integrator("lsoda")
         nu.set_initial_value(nu0, x1)
 
         sol = [nu.integrate(xi) for xi in x[1::]]
@@ -186,7 +186,7 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
   if basis == "flavour":
       evolution = [np.array(np.square(np.abs(np.dot(num_solution[i].transpose(), nustate))) ) for i in range(len(x))]
   elif basis == "mass":
-      evolution = [np.array(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns))),nustate))[0] for i in range(len(x))]
+      evolution = [np.array(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns))), nustate)) for i in range(len(x))]
   else:
       print("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")
       exit()
@@ -215,7 +215,7 @@ def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H,
   if basis == "flavour":
       return np.square(np.abs(np.dot(evol.transpose(), nustate.astype(nb.complex128))))
   elif basis == "mass":
-      return np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns))), nustate)
+      return np.real(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns)).astype(nb.complex128)), nustate.astype(nb.complex128)))
 
   else:
       raise Exception("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")

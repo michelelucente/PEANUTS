@@ -59,7 +59,7 @@ if not solar_model.has_fraction(fraction):
    print("Error: The fraction ", fraction, " does not exist in the solar model.")
    exit()
 
-# If the -i/--in_slha option is given and there are only 3 arguments, the last one is a slha file
+# If the -i/--in_slha option is given, read the slha file
 if options.in_slha != "":
 
   # If pyslha has not been imported throw error

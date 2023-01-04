@@ -27,7 +27,7 @@ parser.add_option("-i", "--in_slha", help="SLHA input file", action='store', des
 if len(args) < 2 or (options.in_slha == "" and len(args) != 8):
   print('Wrong number of arguments \n\
         \n\
-Usage: python '+mainfilename+'.py <energy> <fraction> [<th12> <th13> <th23> <delta> <md21> <md31>]\n\
+Usage: ./'+mainfilename+'.py <energy> <fraction> [<th12> <th13> <th23> <delta> <md21> <md31>]\n\
        <energy>                    Energy\n\
        <fraction>                  Neutrino fraction sample\n\
        <th12>                      Mixing angle theta_12\n\
@@ -106,4 +106,4 @@ print()
 print("Probability to oscillate to an electron neutrino : ", prob[0])
 print("Probability to oscillate to a muon neutrino      : ", prob[1])
 print("Probability to oscillate to a tau neutrino       : ", prob[2])
-
+print()

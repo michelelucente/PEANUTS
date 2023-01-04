@@ -107,6 +107,7 @@ class Settings:
         elif "Solar" not in settings:
           self.nustate = np.array(settings["Earth"]["state"])
           self.basis = settings["Earth"]["basis"]
+          self.probabilities = True
 
         if "depth" not in settings["Earth"]:
           print("Error: missing depth of experiment, please provide it.")

@@ -86,7 +86,7 @@ def output(settings, outs):
 
   towrite = ""
 
-  if settings.flux:
+  if settings.solar and settings.flux:
     towrite += "# Flux [cm^-2 s^-1]\t" + str(dec(outs[0]["flux"])) + "\n"
 
   if settings.probabilities:
@@ -113,7 +113,7 @@ def output(settings, outs):
 
       towrite += "\n"
 
-  if settings.undistorted_spectrum:
+  if settings.solar and settings.undistorted_spectrum:
     towrite += "\n# Spectrum (undistorted)\n"
     towrite += "# E [MeV] \t Spec (e)\n"
 
@@ -125,7 +125,7 @@ def output(settings, outs):
     towrite += "\n"
 
 
-  elif settings.distorted_spectrum:
+  elif settings.solar and settings.distorted_spectrum:
     towrite += "\n# Spectrum (distorted)\n"
     towrite += "# E [MeV] \t Spec (e) \t Spec (mu) \t Spec (tau)\n"
 

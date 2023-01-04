@@ -32,7 +32,7 @@ parser.add_option("-i", "--in_slha", help="SLHA input file", action='store', des
 if len(args) < 3 or (options.in_slha == "" and len(args) != 9):
   print('Wrong number of arguments \n\
         \n\
-Usage: python '+mainfilename+'.py -f/-m <eigenstate> <energy> <eta> <depth> [<th12> <th13> <th23> <delta> <md21> <md31>]\n\
+Usage: ./'+mainfilename+'.py -f/-m <eigenstate> <energy> <eta> <depth> [<th12> <th13> <th23> <delta> <md21> <md31>]\n\
        <eigenstate>                Flavour (-f/--flavour) or mass (-m/--mass) input eigenstate\n\
        <energy>                    Energy of neutrinos\n\
        <eta>                       Nadir angle of the incident neutrinos\n\
@@ -141,3 +141,4 @@ print()
 print("Probability to oscillate to an electron neutrino : ", prob[0])
 print("Probability to oscillate to a muon neutrino      : ", prob[1])
 print("Probability to oscillate to a tau neutrino       : ", prob[2])
+print()

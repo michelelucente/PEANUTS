@@ -182,7 +182,7 @@ def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, dens
     Te = [np.trapz(y=temp[i], x = radius_samples) / IntegratedFraction
           for i in range(3)]
 
-    return Te
+    return np.array(Te)
 
 # Compute the flavour probabilities for the solar neutrino flux
 def Psolar (pmns, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction):

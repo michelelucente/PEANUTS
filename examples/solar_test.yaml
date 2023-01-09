@@ -5,7 +5,7 @@
 
 Energy: 15
 
-Neutrinos: 
+Neutrinos:
 
   dm21: 7.42e-05
   dm31: 2.51e-03
@@ -19,3 +19,4 @@ Solar:
   fraction: "hep"
   flux: true
   spectrum: "distorted"
+  spectra: {"8B": "Data/8B_shape_Winter_et_al.csv"}

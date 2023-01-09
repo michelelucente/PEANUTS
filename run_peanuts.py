@@ -53,8 +53,8 @@ outs = []
 # Initialize values
 if settings.solar:
 
-  # Import data from solar model
-  solar_model = SolarModel(settings.solar_file)
+  # Import data from solar model and spectrum files
+  solar_model = SolarModel(settings.solar_file, spectrum_files=settings.spectra if settings.spectra is not None else {})
 
 if settings.earth:
 
@@ -86,9 +86,9 @@ for param in settings.scan:
 
     # Add undistorted or distorted spectrum if requested
     if settings.undistorted_spectrum:
-      out['spectrum'] = solar_model.spectrum(settings.fraction, energy=e)
+      out['spectrum'] = solar_model.spectrum(settings.fraction, energy=param.energy)
     elif settings.distorted_spectrum:
-      out['spectrum'] = solar_model.spectrum(settings.fraction, energy=e) * Psolar(pmns, param.dm21, param.dm31, param.energy, solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
+      out['spectrum'] = solar_model.spectrum(settings.fraction, energy=param.energy) * Psolar(pmns, param.dm21, param.dm31, param.energy, solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
 
     # If the earth propbabilities are to be computed, we need the mass weights
     if settings.earth:

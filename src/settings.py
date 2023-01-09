@@ -71,7 +71,7 @@ class Scan:
         N = int( (parammax-parammin)/step)+1
       else:
         # If step is not given, assume 10 iterations
-        N = 2
+        N = 10
         step = (parammax-parammin)/(N-1)
       values = [parammin + i*step for i in range(0,N)]
 
@@ -173,6 +173,8 @@ class Settings:
           self.fraction = settings["Solar"]["fraction"]
 
         self.solar_file = settings["Solar"]["solar_model"] if "solar_model" in settings["Solar"] else None
+
+        self.spectra = settings["Solar"]["spectra"] if "spectra" in settings["Solar"] else None
 
         self.probabilities = settings["Solar"]["probabilities"] if "probabilities" in settings["Solar"] else True
 

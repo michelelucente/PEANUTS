@@ -157,10 +157,13 @@ def output(settings, outs):
     towrite += "\n# Spectrum (undistorted)\n"
     towrite += "# E [MeV] \t Spec (e)\n"
 
-    for i in range(len(settings.energy)):
-
-      towrite += str(dec(settings.energy[i])) + "\t"
-      towrite += str(dec(outs[i]['spectrum']))
+    if "energy" in settings.scan.labels:
+      for i, param in settings.scan.enumerate():
+        towrite += str(dec(param.energy)) + "\t"
+        towrite += str(dec(outs[i]['spectrum']))
+    else:
+      towrite += str(dec(settings.energy)) + "\t"
+      towrite += str(dec(outs[0]['spectrum']))
 
     towrite += "\n"
 
@@ -169,11 +172,15 @@ def output(settings, outs):
     towrite += "\n# Spectrum (distorted)\n"
     towrite += "# E [MeV] \t Spec (e) \t Spec (mu) \t Spec (tau)\n"
 
-    for i in range(len(settings.energy)):
-
-     towrite += str(dec(settings.energy[i])) + "\t"
-     for out in outs[i]["spectrum"]:
-       towrite += str(dec(out)) + "\t"
+    if "energy" in settings.scan.labels:
+      for i, param in settings.scan.enumerate():
+        towrite += str(dec(param.energy)) + "\t"
+        for out in outs[i]["spectrum"]:
+          towrite += str(dec(out)) + "\t"
+    else:
+      towrite += str(dec(settings.energy)) + "\t"
+      for out in outs[0]["spectrum"]:
+        towrite += str(dec(out)) + "\t"
 
     towrite += "\n"
 

@@ -7,8 +7,93 @@ Created on My 11 2022
 """
 
 import numpy as np
+import copy
 
 from src.pmns import PMNS
+
+class Param:
+
+  def __init__(self, label, value):
+
+    self.nparams = 1
+    setattr(self,label, value)
+
+  def add(self, label, value):
+    self.nparams += 1
+    setattr(self,label, value)
+
+  def __repr__(self):
+    ret = "["
+    for attr in dir(self):
+      if not attr.startswith("__") and not attr == "add" and not attr == "nparams":
+        ret  += attr + " : " + str(getattr(self, attr)) + ", "
+    ret = ret[:-2]+"]"
+    return ret
+
+class Scan:
+
+  def __init__(self):
+
+    self.params = list()
+    self.labels = list()
+    self._index = 0
+
+  def __iter__(self):
+    return self
+
+  def __next__(self):
+    if self._index < len(self.params):
+      self._index += 1
+      return self.params[self._index-1]
+    else:
+      raise StopIteration
+
+  def __len__(self):
+    return len(self.params)
+
+  def enumerate(self):
+    return enumerate(self.params)
+
+  def add(self, label, param):
+
+    if isinstance(param, list):
+      # Assume it is given as [min, max] or [min, max, step]
+      if len(param) < 2 or len(param) > 3:
+        print("Error: Parameter", label, "should be given as single number or as range [min, max, (step)].")
+        exit()
+
+      self.labels.append(label)
+
+      parammin = float(param[0])
+      parammax = float(param[1])
+      if len(param) == 3:
+        step = float(param[2])
+        N = int( (parammax-parammin)/step)+1
+      else:
+        # If step is not given, assume 10 iterations
+        N = 2
+        step = (parammax-parammin)/(N-1)
+      values = [parammin + i*step for i in range(0,N)]
+
+      if len(self.params):
+        newparams = list()
+        for par in self.params:
+          for val in values:
+            newparam = copy.copy(par)
+            newparam.add(label,val)
+            newparams.append(newparam)
+        self.params = newparams
+      else:
+        for val in values:
+          self.params.append(Param(label,val))
+
+    else:
+      if len(self.params):
+        for par in self.params:
+          par.add(label, param)
+      else:
+        self.params.append(Param(label,param))
+
 
 class Settings:
 
@@ -16,6 +101,7 @@ class Settings:
 
     self.solar = False
     self.earth = False
+    self.scan = Scan()
 
     # If there is only one argument, it is a settings dictionary
     if len(args) == 1:
@@ -46,10 +132,17 @@ class Settings:
         else:
           self.dm21 = settings["Neutrinos"]["dm21"]
           self.dm31 = settings["Neutrinos"]["dm31"]
-          self.pmns = PMNS(settings["Neutrinos"]["theta12"],\
-                           settings["Neutrinos"]["theta13"],\
-                           settings["Neutrinos"]["theta23"],\
-                           settings["Neutrinos"]["delta"])
+          self.theta12 = settings["Neutrinos"]["theta12"]
+          self.theta13 = settings["Neutrinos"]["theta13"]
+          self.theta23 = settings["Neutrinos"]["theta23"]
+          self.delta = settings["Neutrinos"]["delta"]
+
+          self.scan.add("dm21", self.dm21)
+          self.scan.add("dm31", self.dm31)
+          self.scan.add("theta12", self.theta12)
+          self.scan.add("theta13", self.theta13)
+          self.scan.add("theta23", self.theta23)
+          self.scan.add("delta", self.delta)
       else:
 
         import src.files as f
@@ -121,6 +214,7 @@ class Settings:
         elif "eta" in settings["Earth"]:
           self.eta = settings["Earth"]["eta"]
           self.exposure = False
+          self.scan.add("eta", self.eta)
         elif "latitude" in settings["Earth"]:
           self.latitude = settings["Earth"]["latitude"]
           self.exposure = True
@@ -140,23 +234,9 @@ class Settings:
       if "Energy" not in settings:
         print("Error: missing energy, please provide value or range.")
         exit()
-      elif isinstance(settings["Energy"], list):
-        # Assume it is given as [min, max] or [min, max, step]
-        if len(settings["Energy"]) < 2 or len(settings["Energy"]) > 3:
-          print("Error: Energy should be given as single number or as range [Emin, Emax, (Estep).")
-          exit()
-        Emin = settings["Energy"][0]
-        Emax = settings["Energy"][1]
-        if len(settings["Energy"]) == 3:
-          Estep = settings["Energy"][2]
-          N = int( (Emax-Emin)/Estep)+1
-        else:
-          # If step is not given, assume 10 iterations
-          N = 10
-          Estep = (Emax-Emin)/(N-1)
-        self.energy = [Emin + i*Estep for i in range(0,N)]
       else:
-        self.energy = [settings["Energy"]]
+        self.energy = settings["Energy"]
+        self.scan.add("energy", self.energy)
 
       # Select printing mode, default is stdout
       if "Output" in settings:

@@ -10,12 +10,17 @@ with_slha = True
 try:
   import pyslha # pyslha module for reading SLHA files, by Andy Buckley (https://arxiv.org/abs/1305.4194)
 except:
-  print("Warning!: Python module pyslha not found, disabling slha reading/writing routines")
+  print("Warning!: Python module pyslha not found, disabling slha reading routines")
   with_slha = False
 
+with_yaml = True
+try:
+  import yaml
+except:
+  print("Warning!: Python module pyyaml not found, disabling yaml reading routines")
+  with_yaml = False
 
 import pandas as pd
-import yaml
 from decimal import Decimal
 
 from src.settings import Settings
@@ -32,6 +37,11 @@ def read_yaml(filepath):
   """
   Function to read from yaml files
   """
+
+  if not with_yaml:
+    print("Error!: Tried to read a yaml file, but module pyyaml is not installed")
+    exit()
+
   settings = Settings(yaml.safe_load(open(filepath)))
 
   return settings
@@ -90,17 +100,47 @@ def output(settings, outs):
     towrite += "# Flux [cm^-2 s^-1]\t" + str(dec(outs[0]["flux"])) + "\n"
 
   if settings.probabilities:
-    towrite += "\n# Probabilities\n"
-    towrite += "# E [MeV]\t"
+    towrite += "\n# Probabilities\n# "
+    if "energy" in settings.scan.labels:
+      towrite += "E [MeV]\t"
+    if "eta" in settings.scan.labels:
+      towrite += "Nadir angle\t"
+    if "theta12" in settings.scan.labels:
+      towrite += "theta_{12}\t"
+    if "theta13" in settings.scan.labels:
+      towrite += "theta_{13}\t"
+    if "theta23" in settings.scan.labels:
+      towrite += "theta_{23}\t"
+    if "delta" in settings.scan.labels:
+      towrite += "delta_CP\t"
+    if "dm21" in settings.scan.labels:
+      towrite += "Dm21^2 [eV^2]\t"
+    if "dm31" in settings.scan.labels:
+      towrite += "Dm31^2 [eV^2]\t"
+
     if settings.solar:
       towrite += "Psolar (e) \t Psolar (mu) \t Psolar (tau)\t"
     if settings.earth:
       towrite += "Pearth (e) \t Pearth (mu) \t Pearth (tau)\t"
     towrite += "\n"
 
-    for i in range(len(settings.energy)):
-
-      towrite += str(dec(settings.energy[i])) + "\t"
+    for i, param in settings.scan.enumerate():
+      if "energy" in settings.scan.labels:
+        towrite += str(dec(param.energy)) + "\t"
+      if "eta" in settings.scan.labels:
+        towrite += str(dec(param.eta)) + "\t"
+      if "theta12" in settings.scan.labels:
+        towrite += str(dec(param.theta12)) + "\t"
+      if "theta13" in settings.scan.labels:
+        towrite += str(dec(param.theta13)) + "\t"
+      if "theta23" in settings.scan.labels:
+        towrite += str(dec(param.theta23)) + "\t"
+      if "delta" in settings.scan.labels:
+        towrite += str(dec(param.delta)) + "\t"
+      if "dm21" in settings.scan.labels:
+        towrite += str(dec(param.dm21)) + "\t"
+      if "dm31" in settings.scan.labels:
+        towrite += str(dec(param.dm31)) + "\t"
 
       if settings.solar:
 

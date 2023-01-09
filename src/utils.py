@@ -30,10 +30,6 @@ def print_inputs(settings):
 
   inputs = ""
 
-  energy = str(settings.energy[0])
-  if len(settings.energy) > 1:
-    energy += " - " + str(settings.energy[-1])
-
   if settings.solar:
     inputs += "\n"\
               "Computing the "
@@ -46,13 +42,13 @@ def print_inputs(settings):
     elif settings.undistorted_spectrum:
       inputs += "undistorted spectrum "
     inputs += "on the surface of the Sun with values\n\n"\
-             "theta12                  : " + str(settings.pmns.theta12) + "\n"\
-             "theta13                  : " + str(settings.pmns.theta13) + "\n"\
-             "theta23                  : " + str(settings.pmns.theta23) + "\n"\
-             "delta                    : " + str(settings.pmns.delta) + "\n"\
+             "theta_{12}               : " + str(settings.theta12) + "\n"\
+             "theta_{13}               : " + str(settings.theta13) + "\n"\
+             "theta_{23}               : " + str(settings.theta23) + "\n"\
+             "delta_CP                 : " + str(settings.delta) + "\n"\
              "Delta m_{21}^2           : " + str(settings.dm21) + " eV^2\n"\
              "Delta m_{31}^2           : " + str(settings.dm31) + " eV^2\n"\
-             "Energy                   : " + energy + " MeV\n"\
+             "Energy                   : " + str(settings.energy) + " MeV\n"\
              "Neutrino fraction        : " + settings.fraction + "\n"
     if settings.solar_file is not None:
       inputs += "Solar model              : " + settings.solar_file + "\n"
@@ -63,13 +59,13 @@ def print_inputs(settings):
     if not settings.solar:
       inputs += \
              "Neutrino " + settings.basis + " eigenstate : " + str(settings.nustate) + "\n"\
-             "theta12                  : " + str(settings.pmns.theta12) + "\n"\
-             "theta13                  : " + str(settings.pmns.theta13) + "\n"\
-             "theta23                  : " + str(settings.pmns.theta23) + "\n"\
-             "delta                    : " + str(settings.pmns.delta) + "\n"\
+             "theta_{12}               : " + str(settings.theta12) + "\n"\
+             "theta_{13}               : " + str(settings.theta13) + "\n"\
+             "theta_{23}               : " + str(settings.theta23) + "\n"\
+             "delta_CP                 : " + str(settings.delta) + "\n"\
              "Delta m_{21}^2           : " + str(settings.dm21) + " eV^2\n"\
              "Delta m_{31}^2           : " + str(settings.dm31) + " eV^2\n"\
-             "Energy                   : " + energy + " MeV\n"
+             "Energy                   : " + str(settings.energy) + " MeV\n"
 
     if not settings.exposure:
       inputs += \

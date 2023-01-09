@@ -189,7 +189,7 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
   if basis == "flavour":
       evolution = [np.array(np.square(np.abs(np.dot(num_solution[i].transpose(), nustate))) ) for i in range(len(x))]
   elif basis == "mass":
-      evolution = [np.array(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns))), nustate)) for i in range(len(x))]
+      evolution = [np.array(np.real(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns))), nustate))) for i in range(len(x))]
   else:
       print("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")
       exit()

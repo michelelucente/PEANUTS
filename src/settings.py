@@ -252,9 +252,13 @@ class Settings:
 
       self.solar = True
       self.pmns = args[0]
+      self.theta12 = self.pmns.theta12
+      self.theta13 = self.pmns.theta13
+      self.theta23 = self.pmns.theta23
+      self.delta = self.pmns.delta
       self.dm21 = args[1]
       self.dm31 = args[2]
-      self.energy = [args[3]]
+      self.energy = args[3]
       self.fraction = args[4]
       self.solar_file = args[5].solar if args[5].solar != "" else None
       self.probabilities = True
@@ -267,9 +271,13 @@ class Settings:
 
       self.earth = True
       self.pmns = args[0]
+      self.theta12 = self.pmns.theta12
+      self.theta13 = self.pmns.theta13
+      self.theta23 = self.pmns.theta23
+      self.delta = self.pmns.delta
       self.dm21 = args[1]
       self.dm31 = args[2]
-      self.energy = [args[3]]
+      self.energy = args[3]
       self.eta = args[4]
       self.depth = args[5]
 

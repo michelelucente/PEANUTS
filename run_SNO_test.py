@@ -12,6 +12,7 @@ import numpy as np
 from math import sqrt
 from numpy import arctan, arcsin
 from optparse import OptionParser
+from scipy.interpolate import interp1d
 
 import src.files as f
 from src.pmns import PMNS
@@ -23,34 +24,34 @@ parser = OptionParser()
 parser.add_option("-v", "--verbose", help = "Print debug output", action='store_true', dest='verbose', default=False)
 parser.add_option("-s", "--solar", help ="Add custom solar model", action='store', dest="solar", default="")
 parser.add_option("-d", "--density", help ="Add custom earth density profile", action='store', dest="density", default="")
+parser.add_option("-f", "--file", help="Input slha file", action='store', dest="slha_file", default="")
 (options, args) = parser.parse_args()
-if len(args) < 1 :
+if len(args) > 0 :
   print('Wrong number of arguments \n\
         \n\
-Usage: python '+mainfilename+'.py <in_file>\n\
-       <in_file>                   Input file\n\
+Usage: python '+mainfilename+'.py [options]\n\
 \n\
 Options:\n\
        -h, --help                    Show this help message and exit\n\
        -v, --verbose                 Print debug output\n\
        -s, --solar                   Add custom solar model\n\
-       -d, --density                 Add custom earth density profile')
+       -d, --density                 Add custom earth density profile\n\
+       -f, --file                    Input slha file')
 
   exit()
 
 # Read the input files
 path = os.path.dirname(os.path.realpath( __file__ ))
-slha_file = args[0]
 solar_file = path + '/Data/bs2005agsopflux.csv' if options.solar == "" else options.solar
 density_file = path + '/Data/Earth_Density.csv' if options.density == '' else options.density
 
 
 # Define paths to save plots
 import matplotlib.pyplot as plt
-from pathlib import Path
-project_folder = str(Path(Path.cwd()))
+project_folder = os.path.dirname(os.path.realpath( __file__ ))
 plots_folder = project_folder + "/figs/"
-
+if not os.path.exists(plots_folder):
+  os.makedirs(plots_folder)
 
 
 # Test Sun survival probabilities
@@ -84,24 +85,29 @@ plt.savefig(plots_folder + "reaction_fraction.pdf")
 plt.show()
 
 
-# Read example slha file and fill PMNS matrix
-nu_params = f.read_slha(slha_file)
-th12 = nu_params['theta12']
-th13 = nu_params['theta13']
-th23 = nu_params['theta23']
-d = nu_params['delta']
-pmns = PMNS(th12, th13, th23, d)
+# Read example slha file if providedand fill PMNS matrix
+if options.slha_file != "":
+  nu_params = f.read_slha(slha_file)
+  th12 = nu_params['theta12']
+  th13 = nu_params['theta13']
+  th23 = nu_params['theta23']
+  d = nu_params['delta']
+  pmns = PMNS(th12, th13, th23, d)
 
-DeltamSq21 = nu_params['dm21']
-DeltamSq31 = nu_params['dm31']
+  DeltamSq21 = nu_params['dm21']
+  DeltamSq31 = nu_params['dm31']
 
-# Values to compare with SNO, uncomment for exact comparison
-#th12 = arctan(sqrt(0.469))
-#th13 = arcsin(sqrt(0.01))
-#DeltamSq21 = 7.9e-5
-#DeltamSq31 = 2.46e-3
-#pmns = PMNS(th12, th13, th13, d)
+else:
+  # Values to compare with SNO, if no slha is provided
+  th12 = arctan(sqrt(0.469))
+  th13 = arcsin(sqrt(0.01))
+  th23 = 0.85521
+  d = 3.4034
+  DeltamSq21 = 7.9e-5
+  DeltamSq31 = 2.46e-3
+  pmns = PMNS(th12, th13, th13, d)
 
+# Energy
 E = 10
 
 # Compute probability for the sample fractions '8B' and 'hep' in the energy ragnge E=[1,20]
@@ -144,38 +150,45 @@ plt.show()
 B8_spectrum = solar_model.spectrum("8B")
 
 survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius(), solar_model.density(), solar_model.fraction('8B')) for E in B8_spectrum.Energy])
+SNO_interp = interp1d(SNO_B8.energy, SNO_B8.Pnuenue, kind='cubic', fill_value='extrapolate')
+SNO_survival_prob = np.array([SNO_interp(E) for E in B8_spectrum.Energy])
 distorted_shape = np.array([B8_spectrum.Spectrum]).T * survival_prob
+SNO_distorted_shape = np.array([B8_spectrum.Spectrum]).T * np.array([SNO_survival_prob]).T
 
 labels = ["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"]
-plt.plot(B8_spectrum.Energy, B8_spectrum.Spectrum, label='$\\nu_e$ undistorted', linestyle='dashed')
 
 for flavour in range(len(distorted_shape[0])):
     plt.plot(B8_spectrum.Energy, [prob[flavour] for prob in distorted_shape], label=labels[flavour])
-
+plt.plot(B8_spectrum.Energy, SNO_distorted_shape, label="SNO $\\nu_e$", linestyle='dashed')
+plt.plot(B8_spectrum.Energy, B8_spectrum.Spectrum, label='$\\nu_e$ undistorted', linestyle='dotted')
 plt.xlabel('Energy [MeV]')
 plt.ylabel('8B Spectrum')
-
 plt.legend()
+plt.savefig(plots_folder + "8B_SNO_comparison_spectrum.pdf")
 
 plt.show()
 
 # Compare hep energy spectrum with distorted flux
 hep_spectrum = solar_model.spectrum("hep")
 
-survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius(), solar_model.density(), solar_model.fraction('8B')) for E in hep_spectrum.Energy])
+survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius(), solar_model.density(), solar_model.fraction('hep')) for E in hep_spectrum.Energy])
+SNO_interp = interp1d(SNO_hep.energy, SNO_hep.Pnuenue, kind='cubic', fill_value='extrapolate')
+SNO_survival_prob = np.array([SNO_interp(E) for E in hep_spectrum.Energy])
 distorted_shape = np.array([hep_spectrum.Spectrum]).T * survival_prob
+SNO_distorted_shape = np.array([hep_spectrum.Spectrum]).T * np.array([SNO_survival_prob]).T
+
 
 labels = ["$\\nu_e$", "$\\nu_\mu$", "$\\nu_\\tau$"]
 
-plt.plot(hep_spectrum.Energy, hep_spectrum.Spectrum, label='$\\nu_e$ undistorted', linestyle='dashed')
 
 for flavour in range(len(distorted_shape[0])):
     plt.plot(hep_spectrum.Energy, [prob[flavour] for prob in distorted_shape], label=labels[flavour])
-
+plt.plot(hep_spectrum.Energy, SNO_distorted_shape, label="SNO $\\nu_e$", linestyle='dashed')
+plt.plot(hep_spectrum.Energy, hep_spectrum.Spectrum, label='$\\nu_e$ undistorted', linestyle='dashed')
 plt.xlabel('Energy [MeV]')
 plt.ylabel('hep Spectrum')
-
 plt.legend()
+plt.savefig(plots_folder + "hep_SNO_comparison_spectrum.pdf")
 
 plt.show()
 
@@ -191,7 +204,7 @@ eta = [0, pi/6, pi/4, pi/3]
 labels = ["0", "pi/6", "pi/4", "pi/3"]
 
 earth_density = EarthDensity(density_file)
-density = [ [earth_density(r, n) for r in x] for n in eta]
+density = [ [earth_density.call(r, n) for r in x] for n in eta]
 
 plt.xlabel("x")
 plt.ylabel("Density [mol/cm${}^3$]")

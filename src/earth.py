@@ -19,6 +19,7 @@ from scipy.integrate import complex_ode
 import src.files as f
 from src.potentials import k, MatterPotential, R_E
 from src.evolutor import FullEvolutor
+from src.time_average import NadirExposure
 
 earthdensity =  [
   ('density_file', nb.types.string),
@@ -106,10 +107,10 @@ class EarthDensity:
 
     # Get the parameters
     param = self.parameters(eta)
-    alpha_prime = [x[0] for x in param]
-    beta_prime = [x[1] for x in param]
-    gamma_prime = [x[2] for x in param]
-    xj = [x[3] for x in param]
+    alpha_prime = [y[0] for y in param]
+    beta_prime = [y[1] for y in param]
+    gamma_prime = [y[2] for y in param]
+    xj = [y[3] for y in param]
 
     # The index "idx" determines within which shell xj[idx] the point x is
     idx = np.searchsorted(xj, x)
@@ -121,13 +122,15 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
   """
   Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H) computes
   numerically the probability of survival of an incident electron neutrino spectrum
-  - nustate is the array of weights of the incoherent neutrino flux
-  - density is the Earth density object
-  - pmns is the PMNS matrix
-  - DeltamSq21, Deltamq31 are the mass squared differences
-  - E is the neutrino energy
-  - eta is the nadir angle
-  - H is the detector depth below the surface of the Earth
+  - nustate: the array of weights of the incoherent neutrino flux
+  - density: the Earth density object
+  - pmns: the PMNS matrix
+  - DeltamSq21, Deltamq31: the mass squared differences
+  - E: the neutrino energy
+  - eta: the nadir angle
+  - H: the detector depth below the surface of the Earth
+  - basis: the basis of the neutrino eigenstate (def. flavour)
+  - full_oscillation: return full oscillation along path (def. False))
   """
 
   # Extract from pmns matrix
@@ -200,15 +203,16 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, 
 @nb.njit
 def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis="flavour"):
   """
-  Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H) computes
+  Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis) computes
   analytically the probability of survival of an incident electron neutrino spectrum
-  - nustate is the array of weights of the incoherent neutrino flux
-  - density is the Earth density object
-  - pmns is the PMNS matrix
-  - DeltamSq21, Deltamq31 are the mass squared differences
-  - E is the neutrino energy
-  - eta is the nadir angle
-  - H is the detector depth below the surface of the Earth
+  - nustate: the array of weights of the incoherent neutrino flux
+  - density: the Earth density object
+  - pmns: the PMNS matrix
+  - DeltamSq21, Deltamq31: the mass squared differences
+  - E: the neutrino energy
+  - eta: the nadir angle
+  - H: the detector depth below the surface of the Earth
+  - basis: the basis of the neutrino eigenstate (def. flavour)
   """
 
   evol = FullEvolutor(density, 0, DeltamSq21, DeltamSq31, pmns, E, eta, H)
@@ -223,15 +227,18 @@ def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H,
 
 def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="analytical", basis="flavour", full_oscillation=False):
   """
-  Pearth(nustate, density, pmns, DeltamSq21, DeltamSq21, E, eta, H), computes with a given mode
+  Pearth(nustate, density, pmns, DeltamSq21, DeltamSq21, E, eta, H, mode, basis, full_oscillation), computes with a given mode
   the probability of survival of an incident electron neutrino spectrum
-  - nustate is the array of weights of the incoherent neutrino flux
-  - density is the Earth density object
-  - pmns is the PMNS matrix
-  - DeltamSq21, Deltamq31 are the mass squared differences
-  - E is the neutrino energy
-  - eta is the nadir angle
-  - H is the detector depth below the surface of the Earth
+  - nustate: array of weights of the incoherent neutrino flux
+  - density: the Earth density object
+  - pmns: the PMNS matrix
+  - DeltamSq21, Deltamq31: the mass squared differences
+  - E: the neutrino energy
+  - eta: the nadir angle
+  - H:  the detector depth below the surface of the Earth
+  - mode: either analytical or numerical computation of the evolutor (def. analytical)
+  - basis: the basis of the neutrino eigenstate (def. flavour)
+  - full_oscillation: return full oscillation along path (def. False))
   """
 
   # Make sure nustate has the write format
@@ -243,6 +250,9 @@ def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="anal
   #  exit()
 
   if mode == "analytical":
+    if full_oscillation:
+      print("Warning: full oscillation only available in numerical mode. Result will be only final probability values")
+
     return Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis=basis)
 
   elif mode == "numerical":
@@ -250,4 +260,37 @@ def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="anal
 
   else:
     raise Exception("Error: Unkown mode for the computation of evoulutor")
+
+
+def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq31, E, lam, H, mode="analytical", basis="flavour", full_oscillation=False, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir"):
+  """
+  Pearth(nustate, density, pmns, DeltamSq21, DeltamSq21, E, lam, H, mode, basis, full_oscillation, d1, d2, ns, normalized, from_file, angle),
+  computes the probability of survival of an incident electron neutrino spectrum integrated over the spectrum
+  - nustate: array of weights of the incoherent neutrino flux
+  - density: the Earth density object
+  - pmns: the PMNS matrix
+  - DeltamSq21, Deltamq31: the mass squared differences
+  - E: the neutrino energy
+  - lam: the latitude of the experiment
+  - H:  the detector depth below the surface of the Earth
+  - mode: either analytical or numerical computation of the evolutor (def. analytical)
+  - basis: the basis of the neutrino eigenstate (def. flavour)
+  - full_oscillation: return full oscillation along path (def. False))
+  - d1: lower limit of day interval
+  - d2: upper limit of day interval
+  - ns: number of nadir angle samples
+  - normalized: normalization of exposure
+  - from_file: file with experiments exposure
+  - angle: angle of samples is exposure file
+  """
+
+  exposure = NadirExposure(lam, normalized=normalized, d1=d1, d2=d2, ns=ns, from_file=from_file, angle=angle)
+
+  prob = 0
+  deta = pi/ns
+  for eta, exp in exposure:
+    prob += Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode=mode, basis=basis, full_oscillation=full_oscillation) * exp * deta
+
+  return prob
+
 

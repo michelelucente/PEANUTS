@@ -16,7 +16,7 @@ import src.files as f
 from src.utils import get_comma_separated_floats, print_banner, print_inputs
 from src.pmns import PMNS
 from src.solar import SolarModel, solar_flux_mass, Psolar
-from src.earth import EarthDensity, Pearth
+from src.earth import EarthDensity, Pearth, Pearth_integrated
 from src.time_average import NadirExposure
 
 mainfilename = 'run_peanuts'
@@ -100,16 +100,12 @@ for e in settings.energy:
       nustate = mass_weights
       basis = "mass"
 
-    # If the latitude is provided compute exposure
+    # If the latitude is provided compute probability integrated over exposure
     if settings.exposure:
-      exposure = NadirExposure(radians(settings.latitude), normalized=settings.exposure_normalized,
-                               d1=settings.exposure_time[0], d2=settings.exposure_time[1], ns=settings.exposure_samples,
-                               from_file=settings.exposure_file, angle=settings.exposure_angle)
-
-      out["earth"] = 0
-      deta = pi/settings.exposure_samples
-      for eta, exp in exposure:
-        out["earth"] += Pearth(nustate, earth_density, settings.pmns, settings.dm21, settings.dm31, e, eta, settings.depth, mode=settings.evolution, basis=basis) * exp * deta
+      out["earth"] = Pearth_integrated(nustate, earth_density, settings.pmns, settings.dm21, settings.dm31, e, radians(settings.latitude), settings.depth, mode=settings.evolution, basis=basis,
+                                       normalized=settings.exposure_normalized,
+                                       d1=settings.exposure_time[0], d2=settings.exposure_time[1], ns=settings.exposure_samples,
+                                       from_file=settings.exposure_file, angle=settings.exposure_angle)
 
     else:
       # Compute probability of survival after propagation through Earth

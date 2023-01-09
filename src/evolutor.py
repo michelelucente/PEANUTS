@@ -17,8 +17,8 @@ from src.potentials import k, MatterPotential, R_E
 from src.integration import c0, c1, lambdas, Iab
 
 @nb.njit
-def Upert (m1Sq, m2Sq, m3Sq, pmns, E, x2=1, x1=0, a=0, b=0, c=0):
-    """Upert(m1Sq, m2Sq, m3Sq, pmns, E,  x2=1, x1=0, a=0, b=0, c=0, order = 1) computes the evolutor
+def Upert (m1Sq, m2Sq, m3Sq, pmns, E, x2, x1, a, b, c):
+    """Upert(m1Sq, m2Sq, m3Sq, pmns, E,  x2, x1, a, b, c) computes the evolutor
     for an ultrarelativistic neutrino state in flavour basis, for a reduced mixing matrix U = R_{13} R_{12}
     (the dependence on th_{23} and CP-violating phase \delta_{CP} can be factorised) for a density profile
     parametrised by a 4th degree even poliomial in the trajectory coordinate, to 1st order corrections around

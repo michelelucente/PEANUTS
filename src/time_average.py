@@ -110,7 +110,7 @@ def IntegralAngle (eta, lam, a1=0, a2=pi, eps=1e-5):
 
 
 
-def IntegralDay (eta, lam, d1=0, d2=365/2):
+def IntegralDay (eta, lam, d1=0, d2=365):
     """IntegralDay(eta, lam, d1, d2) computes the non-normalised exposure on the nadir angle eta for an
     experiment located at latitude lam (in radians), taking data from day d1 to day d2.
     The time origin day = 0 is the northern hemisphere winter solstice midnight.
@@ -138,7 +138,7 @@ def IntegralDay (eta, lam, d1=0, d2=365/2):
     return weight1 + weight2
 
 
-def NadirExposure(lam, d1=0, d2=365/2, ns=1000, normalized=False, from_file=None, angle="Nadir"):
+def NadirExposure(lam, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir"):
     """NadirExposure(lam, d1, d2, ns) computes the exposure for ns nadir angle samples
     for an experiment located at latitude lam (in radians), taking data from day d1 to day d2."""
 

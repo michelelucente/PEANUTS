@@ -6,7 +6,6 @@ Created on My 11 2022
 @author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
-import types
 import numpy as np
 
 from src.pmns import PMNS

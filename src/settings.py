@@ -221,7 +221,7 @@ class Settings:
           self.latitude = settings["Earth"]["latitude"]
           self.exposure = True
           self.exposure_normalized = settings["Earth"]["exposure_normalized"] if "exposure_normalized" in settings["Earth"] else False
-          self.exposure_time = settings["Earth"]["exposure_time"] if "exposure_time" in settings["Earth"] else [0,365/2]
+          self.exposure_time = settings["Earth"]["exposure_time"] if "exposure_time" in settings["Earth"] else [0,365]
           self.exposure_samples = settings["Earth"]["exposure_samples"] if "exposure_samples" in settings["Earth"] else 1000
           self.exposure_file = settings["Earth"]["exposure_file"] if "exposure_file" in settings["Earth"] else None
           self.exposure_angle = settings["Earth"]["exposure_angle"] if "exposure_angle" in settings["Earth"] else "Nadir"

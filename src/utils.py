@@ -72,7 +72,15 @@ def print_inputs(settings):
              "Nadir angle              : " + str(settings.eta) + " rad\n"
     else:
       inputs += \
-             "Latitude                 : " + str(settings.latitude) + "\N{DEGREE SIGN}\n"
+             "Latitude                 : " + str(settings.latitude) + "\N{DEGREE SIGN}\n"\
+             "Exposure normalized      : " + str(settings.exposure_normalized) + "\n"\
+             "Exposure time            : " + str(settings.exposure_time) + "\n"\
+             "Exposure samples         : " + str(settings.exposure_samples) + "\n"
+      if settings.exposure_file is not None:
+        inputs += \
+             "Exposure file            : " + settings.exposure_file + "\n"\
+             "Exposure angle           : " + settings.exposure_angle + "\n"
+
     inputs += \
              "Depth                    : " + str(settings.depth) + " m\n"\
              "Evolution method         : " + settings.evolution + "\n"

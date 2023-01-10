@@ -262,7 +262,7 @@ def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="anal
     raise Exception("Error: Unkown mode for the computation of evoulutor")
 
 
-def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq31, E, lam, H, mode="analytical", basis="flavour", full_oscillation=False, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir"):
+def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq31, E, lam, H, mode="analytical", basis="flavour", full_oscillation=False, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir",daynight=None):
   """
   Pearth(nustate, density, pmns, DeltamSq21, DeltamSq21, E, lam, H, mode, basis, full_oscillation, d1, d2, ns, normalized, from_file, angle),
   computes the probability of survival of an incident electron neutrino spectrum integrated over the spectrum
@@ -286,10 +286,16 @@ def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq31, E, lam, H,
 
   exposure = NadirExposure(lam, normalized=normalized, d1=d1, d2=d2, ns=ns, from_file=from_file, angle=angle)
 
+  day = True if daynight != "night" else False
+  night = True if daynight != "day" else False
+
   prob = 0
   deta = pi/ns
   for eta, exp in exposure:
-    prob += Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode=mode, basis=basis, full_oscillation=full_oscillation) * exp * deta
+    if eta < pi/2 and night:
+      prob += Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode=mode, basis=basis, full_oscillation=full_oscillation) * exp * deta
+    elif eta >= pi/2 and day:
+      prob += Pearth(nustate, density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode=mode, basis=basis, full_oscillation=full_oscillation) * exp * deta
 
   return prob
 

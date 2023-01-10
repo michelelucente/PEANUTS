@@ -224,7 +224,8 @@ from src.earth import Pearth
 H = 2e3 # meters
 
 # Sample neutrino state, muon flavour
-state = np.array([0,1,0])
+#state = np.array([1,0,0])
+state = np.array([0.34,0.33,0.33])
 
 # Case 1: 0 <= eta <= pi/2
 eta = np.random.uniform(0, pi/2)

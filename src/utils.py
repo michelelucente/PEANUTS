@@ -71,8 +71,10 @@ def print_inputs(settings):
       inputs += \
              "Nadir angle              : " + str(settings.eta) + " rad\n"
     else:
+      if settings.latitude != -1:
+        inputs += \
+             "Latitude                 : " + str(settings.latitude) + "\N{DEGREE SIGN}\n"
       inputs += \
-             "Latitude                 : " + str(settings.latitude) + "\N{DEGREE SIGN}\n"\
              "Exposure normalized      : " + str(settings.exposure_normalized) + "\n"\
              "Exposure time            : " + str(settings.exposure_time) + "\n"\
              "Exposure samples         : " + str(settings.exposure_samples) + "\n"
@@ -85,7 +87,7 @@ def print_inputs(settings):
              "Depth                    : " + str(settings.depth) + " m\n"\
              "Evolution method         : " + settings.evolution + "\n"
     if settings.density_file is not None:
-      inputs += "Earth density              : " + settings.density_file + "\n"
+      inputs += "Earth density         : " + settings.density_file + "\n"
 
 
   if not settings.solar and not settings.earth:

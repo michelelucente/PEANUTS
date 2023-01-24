@@ -17,24 +17,30 @@ from src.potentials import k, MatterPotential, R_E
 from src.integration import c0, c1, lambdas, Iab
 
 @nb.njit
-def Upert (m1Sq, m2Sq, m3Sq, pmns, E, x2, x1, a, b, c):
-    """Upert(m1Sq, m2Sq, m3Sq, pmns, E,  x2, x1, a, b, c) computes the evolutor
+def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c):
+    """
+    Upert(DeltamSq21, DeltamSq3l, pmns, E,  x2, x1, a, b, c) computes the evolutor
     for an ultrarelativistic neutrino state in flavour basis, for a reduced mixing matrix U = R_{13} R_{12}
     (the dependence on th_{23} and CP-violating phase \delta_{CP} can be factorised) for a density profile
     parametrised by a 4th degree even poliomial in the trajectory coordinate, to 1st order corrections around
     the mean density value:
-    - miSq are the squared masses (or mass differences) in units of eV^2;
+    - DeltamSq21: the solar mass splitting
+    - DeltamSq3l: the atmospheric mass splitting (l=1 for NO, l=2 for IO)
     - pmns is the PMNS matrix;
     - E is the neutrino energy, in units of MeV;
     - x1 (x2) is the starting (ending) point in the path;
     - a, b, c parametrise the density profile on the path, n_e(x) = a + b x^2 + c x^4.
-See hep-ph/9702343 for the definition of the perturbative expansion of the evolutor in a 2-flavours case."""
+    See hep-ph/9702343 for the definition of the perturbative expansion of the evolutor in a 2-flavours case.
+    """
 
     # 3d identity matrix of complex numbers
     id3 = np.eye(3, dtype=nb.complex128)
 
     # Kinetic terms of the Hamiltonian
-    ki = k(np.array([m1Sq, m2Sq, m3Sq], dtype=nb.complex128), E)
+    if DeltamSq3l > 0: # NO, l = 1
+      ki = k(np.array([0, DeltamSq21, DeltamSq3l], dtype=nb.complex128), E)
+    else: # IO, l = 2
+      ki = k(np.array([-DeltamSq21, 0, DeltamSq3l], dtype=nb.complex128), E)
 
     # Average matter density along the path
     naverage = (a * (x2 - x1) + b * (x2**3 - x1**3)/3 + c * (x2**5 - x1**5)/5) / (x2 - x1)
@@ -59,8 +65,8 @@ See hep-ph/9702343 for the definition of the perturbative expansion of the evolu
     T = H - tr/3 * id3
 
     # Coefficients of the characteristic equation for T
-    c0_loc = c0(m1Sq, m2Sq, m3Sq, pmns.theta12, pmns.theta13, E, naverage)
-    c1_loc = c1(m1Sq, m2Sq, m3Sq, pmns.theta12, pmns.theta13, E, naverage)
+    c0_loc = c0(ki, pmns.theta12, pmns.theta13, naverage)
+    c1_loc = c1(ki, pmns.theta12, pmns.theta13, naverage)
 
     # Roots of the characteristic equation for T
     lam = lambdas(c0_loc, c1_loc)
@@ -89,11 +95,13 @@ See hep-ph/9702343 for the definition of the perturbative expansion of the evolu
 
 
 @nb.njit
-def FullEvolutor(density, m1Sq, m2Sq, m3Sq, pmns, E, eta, H):
-    """FullEvolutor(density, m1Sq, m2Sq, m3Sq, pmns, E, eta, H) computes the full evolutor for an ultrarelativistic
+def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H):
+    """
+    FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H) computes the full evolutor for an ultrarelativistic
     neutrino crossing the Earth:
     - density is the Earth density object
-    - miSq are the squared masses (or mass differences) in units of eV^2;
+    - DeltamSq21: the solar mass splitting
+    - DeltamSq3l: the atmospheric mass splitting (l=1 for NO, l=2 for IO)
     - pmns is the PMNS matrix
     - E is the neutrino energy, in units of MeV;
     - d is the CP-violating PMNS phase;
@@ -133,7 +141,7 @@ def FullEvolutor(density, m1Sq, m2Sq, m3Sq, pmns, E, eta, H):
         params2 = np.flipud(params)
 
         # Compute the evolutors for the path from Earth entry point to trajectory mid-point at x == 0
-        evolutors_full_path = [Upert(m1Sq, m2Sq, m3Sq, pmns, E, params2[i][3], params2[i+1][3] if i < len(params2)-1 else 0, params2[i][0], params2[i][1], params2[i][2]) for i in range(len(params))]
+        evolutors_full_path = [Upert(DeltamSq21, DeltamSq3l,pmns, E, params2[i][3], params2[i+1][3] if i < len(params2)-1 else 0, params2[i][0], params2[i][1], params2[i][2]) for i in range(len(params))]
 
         # Multiply the single evolutors
         evolutor_half_full = evolutors_full_path[0]
@@ -144,7 +152,7 @@ def FullEvolutor(density, m1Sq, m2Sq, m3Sq, pmns, E, eta, H):
         # Only the evolutor for the most external shell needs to be computed
         evolutors_to_detectors = evolutors_full_path.copy()
 
-        evolutors_to_detectors[0] = Upert(m1Sq, m2Sq, m3Sq, pmns, E, x_d, params[-2][3] if len(params) > 1 else 0, params[-1][0], params[-1][1], params[-1][2])
+        evolutors_to_detectors[0] = Upert(DeltamSq21, DeltamSq3l, pmns, E, x_d, params[-2][3] if len(params) > 1 else 0, params[-1][0], params[-1][1], params[-1][2])
 
         # Multiply the single evolutors
         evolutor_half_detector = evolutors_to_detectors[0]
@@ -167,7 +175,7 @@ def FullEvolutor(density, m1Sq, m2Sq, m3Sq, pmns, E, eta, H):
 
         # Compute the evolutor for constant density n_1 and traveled distance Deltax,
         # and include the factorised dependence on th23 and d to obtain the full evolutor
-        evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(m1Sq, m2Sq, m3Sq, pmns, E, Deltax, 0, n_1, 0, 0), delta)), r23.transpose())
+        evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, Deltax, 0, n_1, 0, 0), delta)), r23.transpose())
         return evolutor
 
     else:

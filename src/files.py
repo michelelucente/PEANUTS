@@ -6,6 +6,8 @@ Created on Mar 3 2022
 @author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
+import numpy as np
+
 with_slha = True
 try:
   import pyslha # pyslha module for reading SLHA files, by Andy Buckley (https://arxiv.org/abs/1305.4194)
@@ -122,6 +124,8 @@ def output(settings, outs):
       towrite += "Psolar (e) \t Psolar (mu) \t Psolar (tau)\t"
     if settings.earth:
       towrite += "Pearth (e) \t Pearth (mu) \t Pearth (tau)\t"
+      if settings.evolved_state:
+        towrite += "Evolved state\t"
     towrite += "\n"
 
     for i, param in settings.scan.enumerate():
@@ -150,6 +154,8 @@ def output(settings, outs):
       if settings.earth:
         for out in outs[i]["earth"]:
           towrite += str(dec(out)) + "\t"
+        if settings.evolved_state:
+          towrite += str([np.around(out,5) for out in outs[i]["evolved_state"]]) + "\t"
 
       towrite += "\n"
 
@@ -183,7 +189,6 @@ def output(settings, outs):
         towrite += str(dec(out)) + "\t"
 
     towrite += "\n"
-
 
 
   if settings.output == "stdout":

@@ -209,28 +209,31 @@ class Settings:
         else:
           self.depth = settings["Earth"]["depth"]
 
-        # Either a specific nadir angle, eta, or a latitude must be provided
-        if "eta" not in settings["Earth"] and "latitude" not in settings["Earth"]:
-          print("Error: missing nadir angle (eta) and latitude, please provide either.")
+        # Either a specific nadir angle, eta, or a latitude or exposure file must be provided
+        if "eta" not in settings["Earth"] and "latitude" not in settings["Earth"] and not "exposure_file" in settings["Earth"]:
+          print("Error: please provide a nadir angle (eta), a latitude or exposure file path.")
           exit()
         elif "eta" in settings["Earth"]:
           self.eta = settings["Earth"]["eta"]
           self.exposure = False
           self.scan.add("eta", self.eta)
-        elif "latitude" in settings["Earth"]:
-          self.latitude = settings["Earth"]["latitude"]
+        elif "latitude" in settings["Earth"] or "exposure_file" in settings["Earth"]:
+          if("latitude" in settings["Earth"] and "exposure_file" in settings["Earth"]):
+            print("Warning: both latitude and exposure file provided, latitude value will be ignored")
           self.exposure = True
+          self.latitude = settings["Earth"]["latitude"] if "latitude" in settings["Earth"] and "exposure_file" not in settings["Earth"] else -1
           self.exposure_normalized = settings["Earth"]["exposure_normalized"] if "exposure_normalized" in settings["Earth"] else False
           self.exposure_time = settings["Earth"]["exposure_time"] if "exposure_time" in settings["Earth"] else [0,365]
           self.exposure_samples = settings["Earth"]["exposure_samples"] if "exposure_samples" in settings["Earth"] else 1000
           self.exposure_file = settings["Earth"]["exposure_file"] if "exposure_file" in settings["Earth"] else None
           self.exposure_angle = settings["Earth"]["exposure_angle"] if "exposure_angle" in settings["Earth"] else "Nadir"
         else:
-          print("Error: both nadir angle (eta) and latitude are provided, but only one should be.")
+          print("Error: a nadir angle (eta) and exposure option (latitude or file) were found, please provide only one of them.")
           exit()
 
         self.density_file = settings["Earth"]["density"] if "density" in settings["Earth"] else None
         self.evolution = settings["Earth"]["evolution"] if "evolution" in settings["Earth"] else "analytical"
+        self.evolved_state = settings["Earth"]["evolved_state"] if "evolved_state" in settings["Earth"] else False
 
       # Extract energy
       if "Energy" not in settings:

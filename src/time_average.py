@@ -4,6 +4,7 @@
 Created on Thu Mar 10 14:39:40 2022
 
 @author: Michele Lucente <lucente@physik.rwth-aachen.de>
+@author: Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
 import numpy as np
@@ -32,17 +33,19 @@ def safe_csqrt(z):
         return csqrt(x + z*1j)
 
 
-
 def IndefiniteIntegralDay (T, eta, lam):
-    """IndefiniteIntegralDay(T, eta, lam) computes the indefinite integral
+    """
+    IndefiniteIntegralDay(T, eta, lam) computes the indefinite integral
     \int dT [ (1/sqrt(1 - T^2)) * (sec(lam) sin(eta)) / sqrt(1 + sec(lam) (-sec(lam) (cos(eta)^2 + T^2 sin(i)^2) +
      2 cos(eta) T sin(i) ctan(lam))) ].
      This is required in the change of variables from hourly and daily times (\tau_h, \tau_d) to nadir angle eta,
      when computing the eta exposure for a detector within a definite amount of time:
-     - T must be interpreted as cos(\tau_d);
-     - eta is the nadir angle;
-     - lam is the detector latitude.
-See Appendix C in hep-ph/9702343 for a more extensive discussion."""
+     - T:  must be interpreted as cos(\tau_d);
+     - eta: the nadir angle;
+     - lam: the detector latitude.
+    See Appendix C in hep-ph/9702343 for a more extensive discussion.
+    """
+
     # Earth rotation axis inclination
     i = 0.4091
 
@@ -60,17 +63,20 @@ See Appendix C in hep-ph/9702343 for a more extensive discussion."""
 
 
 def IntegralAngle (eta, lam, a1=0, a2=pi, eps=1e-5):
-    """IntegralAngle(eta, lam, a1, a2, eps) computes the definite integral
-        \int_cos(a2)^cos(a1) dT [ (1/sqrt(1 - T^2)) * (sec(lam) sin(eta)) /
-        sqrt(1 + sec(lam) (-sec(lam) (cos(eta)^2 + T^2 sin(i)^2) + 2 cos(eta) T sin(i) ctan(lam))) ].
-        This is required when computing the eta exposure for a detector over a finite amount of time.
-        The time is expressed in radians of the Earth orbit, with origin at the winter solstice.
-        Only half-orbit needs to be considered due to symmetry:
-        - eta is the nadir angle;
-        - lam is the detector latitude;
-        - a1, a2 are the starting the ending angles of the time interval. They must be comprised between 0 and pi;
-        - eps is a small quantity needed to regularise the integral, which is locally divergent at extreme values
-        of allowed integration range."""
+    """
+    IntegralAngle(eta, lam, a1, a2, eps) computes the definite integral
+    \int_cos(a2)^cos(a1) dT [ (1/sqrt(1 - T^2)) * (sec(lam) sin(eta)) /
+    sqrt(1 + sec(lam) (-sec(lam) (cos(eta)^2 + T^2 sin(i)^2) + 2 cos(eta) T sin(i) ctan(lam))) ].
+    This is required when computing the eta exposure for a detector over a finite amount of time.
+    The time is expressed in radians of the Earth orbit, with origin at the winter solstice.
+    Only half-orbit needs to be considered due to symmetry:
+    - eta: the nadir angle;
+    - lam: the detector latitude;
+    - a1, a2: the starting the ending angles of the time interval. They must be comprised between 0 and pi;
+    - eps: a small quantity needed to regularise the integral, which is locally divergent at extreme values
+      of allowed integration range.
+    """
+
     # Earth rotation axis inclination
     i = 0.4091
 
@@ -111,10 +117,16 @@ def IntegralAngle (eta, lam, a1=0, a2=pi, eps=1e-5):
 
 
 def IntegralDay (eta, lam, d1=0, d2=365):
-    """IntegralDay(eta, lam, d1, d2) computes the non-normalised exposure on the nadir angle eta for an
+    """
+    IntegralDay(eta, lam, d1, d2) computes the non-normalised exposure on the nadir angle eta for an
     experiment located at latitude lam (in radians), taking data from day d1 to day d2.
     The time origin day = 0 is the northern hemisphere winter solstice midnight.
-    The function accepts values of d1, d2 comprised between zero and 365."""
+    The function accepts values of d1, d2 comprised between zero and 365.
+    - eta: the nadir angle;
+    - lam: the detector latitude;
+    - d1: lower limit of day interval
+    - d2: upper limit of day interval
+    """
 
     # Check correct range of input times
     if (not 0 <= d1 <= 365) or (not 0 <= d2 <= 365) or (d1 > d2):
@@ -138,9 +150,18 @@ def IntegralDay (eta, lam, d1=0, d2=365):
     return weight1 + weight2
 
 
-def NadirExposure(lam, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir"):
-    """NadirExposure(lam, d1, d2, ns) computes the exposure for ns nadir angle samples
-    for an experiment located at latitude lam (in radians), taking data from day d1 to day d2."""
+def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir"):
+    """
+    NadirExposure(lam, d1, d2, ns) computes the exposure for ns nadir angle samples
+    for an experiment located at latitude lam (in radians), taking data from day d1 to day d2.
+    - lam: the latitude of the experiment (def. -1)
+    - d1: lower limit of day interval
+    - d2: upper limit of day interval
+    - ns: number of nadir angle samples
+    - normalized: normalization of exposure
+    - from_file: file with experiments exposure
+    - angle: angle of samples is exposure file
+    """
 
     # Generate ns samples of the nadir angle between 0 and pi
     eta_samples = np.linspace(0, pi, ns)
@@ -168,9 +189,14 @@ def NadirExposure(lam, d1=0, d2=365, ns=1000, normalized=False, from_file=None, 
         exposure = [exposure_interp(-cos(eta_samples[i]))*sin(eta_samples[i])*deta/dcz for i in range(ns)]
         exposure = [exp if exp > 0 else 0 for exp in exposure]
 
-    else:
+    elif lam >= 0:
       # Compute exposure integrating in the given time ranges
       exposure = np.array([IntegralDay(eta, lam, d1, d2) for eta in eta_samples])
+
+    else:
+      # If there is not file, there must be a latitude
+      print("Error: to compute the integrated probability either the latitude or a exposure file is needed, please provide either.")
+      exit()
 
     # Normalize the distribution if requested
     if normalized:

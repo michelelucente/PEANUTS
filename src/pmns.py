@@ -45,7 +45,6 @@ class PMNS:
   # These are the orthogonal/unitary matrices factorising the PMNS matrix,
   # U_{PMNS} = R_{23} \Delta R_{13} \Delta^* R_{12}
   def R23(self,th):
-      #return np.matrix([
       return np.array([
           [1., 0., 0.],
           [0., cos(th), sin(th)],
@@ -53,7 +52,6 @@ class PMNS:
       ], dtype=nb.complex128)
 
   def R13(self,th):
-      #return np.matrix([
       return np.array([
           [cos(th), 0., sin(th)],
           [0., 1., 0.],
@@ -61,7 +59,6 @@ class PMNS:
       ], dtype=nb.complex128)
 
   def R12(self,th):
-      #return np.matrix([
       return np.array([
           [cos(th), sin(th), 0.],
           [-sin(th), cos(th), 0.],
@@ -69,15 +66,9 @@ class PMNS:
       ], dtype=nb.complex128)
 
   def Delta(self,d):
-      #return np.array([[0.,0.,0.],[0., 0., exp(1j*d)]])
       delta = np.array([[1.,0.,0.],[0.,1.,0.],[0., 0., 1.]], dtype=nb.complex128)
       delta[2][2] = exp(1j*d)
       return delta
-#      return np.array([
-#          [1., 0., 0.],
-#          [0., 1., 0.],
-#          [0., 0., exp(1j*d)]
-#      ])
 
   def __get_item__(self, i):
       return self.pmns[i]

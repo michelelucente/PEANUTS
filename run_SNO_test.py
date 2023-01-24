@@ -201,7 +201,7 @@ from src.earth import EarthDensity
 
 x = np.arange(0,1,0.001)
 eta = [0, pi/6, pi/4, pi/3]
-labels = ["0", "pi/6", "pi/4", "pi/3"]
+labels = ["0", "$\pi$/6", "$\pi$/4", "$\pi$/3"]
 
 earth_density = EarthDensity(density_file)
 density = [ [earth_density.call(r, n) for r in x] for n in eta]
@@ -224,14 +224,17 @@ from src.earth import Pearth
 H = 2e3 # meters
 
 # Sample neutrino state, muon flavour
-#state = np.array([1,0,0])
-state = np.array([0.34,0.33,0.33])
+state = pmns.pmns[:,1]
 
 # Case 1: 0 <= eta <= pi/2
-eta = np.random.uniform(0, pi/2)
-E = np.random.uniform(1,20)
+eta = 0
+E = 10 # MeV
 
-sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="numerical", full_oscillation=True)
+# Uncomment to randomise values of eta and E
+#eta = np.random.uniform(0, pi/2)
+#E = np.random.uniform(1,20)
+
+sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis="flavour", mode="numerical", full_oscillation=True)
 
 One_num = sol[-1]
 One_num = np.array([One_num])
@@ -256,8 +259,12 @@ plt.show()
 
 
 # Case 2: pi/2 <= eta <= pi
-eta = np.random.uniform(pi/2, pi)
-E = np.random.uniform(1,20)
+eta = pi/2
+E = 10 # MeV
+
+# Uncomment to randomise values of eta and E
+#eta = np.random.uniform(pi/2, pi)
+#E = np.random.uniform(1,20)
 
 sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="numerical", full_oscillation=True)
 
@@ -317,7 +324,7 @@ colors = ['b', 'g', 'r', 'c', 'm']
 
 # Compute nadir exposure for various latitude values
 lat = [0, 46, 89]
-exposure = [NadirExposure(radians(lam), normalized=True, ns=480) for lam in lat]
+exposure = [NadirExposure(lam=radians(lam), normalized=True, ns=480) for lam in lat]
 
 plt.xlabel("Nadir angle $\eta$ / $\pi$")
 plt.ylabel("Weight")
@@ -331,7 +338,7 @@ for lam in range(len(lat)):
     plt.plot(exposure[lam][:,0]/pi, exposure[lam][:,1], label="$\lambda$ = %.f°" % lat[lam])
 
 # SNO actual exposure
-SNO_exposure = NadirExposure(46, from_file=path+'/Data/SnoCosZenith.dat', angle="CosZenith", normalized=True, ns=480)
+SNO_exposure = NadirExposure(from_file=path+'/Data/SnoCosZenith.dat', angle="CosZenith", normalized=True, ns=480)
 plt.plot(exposure[lam][:,0]/pi, SNO_exposure[:,1], label="SNO exposure")
 
 plt.legend()

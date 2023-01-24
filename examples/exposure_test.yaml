@@ -5,7 +5,7 @@
 
 Energy: 20
 
-Neutrinos: 
+Neutrinos:
 
   dm21: 7.42e-05
   dm31: 2.51e-03
@@ -14,11 +14,17 @@ Neutrinos:
   theta13: 1.49575e-01
   delta: 3.40339
 
+Solar:
+
+  fraction: "8B"
+
 Earth:
 
-  state: [0.4, 0.2, 0.6]
-  basis: "flavour"
   depth: 3000
   latitude: 45
   #exposure_time: [0,365]
   exposure_samples: 100
+  exposure_normalized: true
+  #exposure_file: "Data/SnoCosZenith.dat"
+  #exposure_samples: 480
+  #exposure_angle: "CosZenith"

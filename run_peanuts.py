@@ -16,7 +16,7 @@ import src.files as f
 from src.utils import get_comma_separated_floats, print_banner, print_inputs
 from src.pmns import PMNS
 from src.solar import SolarModel, solar_flux_mass, Psolar
-from src.earth import EarthDensity, Pearth, Pearth_integrated
+from src.earth import EarthDensity, Pearth, Pearth_integrated, evolved_state
 from src.time_average import NadirExposure
 
 mainfilename = 'run_peanuts'
@@ -104,14 +104,22 @@ for param in settings.scan:
 
     # If the latitude is provided compute probability integrated over exposure
     if settings.exposure:
-      out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm31, param.energy, radians(settings.latitude), settings.depth, mode=settings.evolution, basis=basis,
-                                       normalized=settings.exposure_normalized,
-                                       d1=settings.exposure_time[0], d2=settings.exposure_time[1], ns=settings.exposure_samples,
+      out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm31, param.energy, settings.depth, mode=settings.evolution,
+                                       lam=radians(settings.latitude), d1=settings.exposure_time[0], d2=settings.exposure_time[1],
+                                       normalized=settings.exposure_normalized, ns=settings.exposure_samples,
                                        from_file=settings.exposure_file, angle=settings.exposure_angle)
 
     else:
       # Compute probability of survival after propagation through Earth
       out["earth"] = Pearth(nustate, earth_density, pmns, param.dm21, param.dm31, param.energy, param.eta, settings.depth, mode=settings.evolution, basis=basis)
+
+    # If the evolved state is requested, compute that too
+    if settings.evolved_state:
+      if basis == "mass":
+        print("Warning: The evolved state can only be computed from a neutrino state in the flavour basis, so it will not be provided")
+        settings.evolved_state = False
+      else:
+        out["evolved_state"] = evolved_state(nustate, earth_density, pmns, param.dm21, param.dm31, param.energy, param.eta, settings.depth, mode=settings.evolution)
 
   # Append to list
   outs.append(out)

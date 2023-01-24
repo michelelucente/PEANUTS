@@ -135,8 +135,11 @@ def numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, H):
   r23 = pmns.R23(pmns.theta23)
   delta = pmns.Delta(pmns.delta)
 
-  # TODO: Change for IO
-  Hk = multi_dot([U, np.diag(k(np.array([0, DeltamSq21, DeltamSq3l]), E)), U.transpose()])
+  if DeltamSq3l > 0: # NO, l = 1
+    ki = k(np.array([0, DeltamSq21, DeltamSq3l]), E)
+  else: # IO, l = 2
+    ki = k(np.array([-DeltamSq21, 0, DeltamSq3l]), E)
+  Hk = multi_dot([U, np.diag(ki), U.transpose()])
 
   h = H/R_E
   r_d = 1 - h

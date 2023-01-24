@@ -118,27 +118,27 @@ class Settings:
 
       # Extract neutrino parameters
       if "Neutrinos" not in settings:
-        print("Error: missing neutrino information, please provide dm21, dm31, theta12, theta13, theta23 and delta")
+        print("Error: missing neutrino information, please provide dm21, dm3l, theta12, theta13, theta23 and delta")
         exit()
       elif isinstance(settings["Neutrinos"], dict):
         if "dm21" not in settings["Neutrinos"] or\
-           "dm31" not in settings["Neutrinos"] or\
+           "dm3l" not in settings["Neutrinos"] or\
            "theta12" not in settings["Neutrinos"] or\
            "theta13" not in settings["Neutrinos"] or\
            "theta23" not in settings["Neutrinos"] or\
            "delta" not in settings["Neutrinos"] :
-          print("Error: missing neutrino information, please provide dm21, dm31, theta12, theta13, theta23 and delta")
+          print("Error: missing neutrino information, please provide dm21, dm3l, theta12, theta13, theta23 and delta")
           exit()
         else:
           self.dm21 = settings["Neutrinos"]["dm21"]
-          self.dm31 = settings["Neutrinos"]["dm31"]
+          self.dm3l = settings["Neutrinos"]["dm3l"]
           self.theta12 = settings["Neutrinos"]["theta12"]
           self.theta13 = settings["Neutrinos"]["theta13"]
           self.theta23 = settings["Neutrinos"]["theta23"]
           self.delta = settings["Neutrinos"]["delta"]
 
           self.scan.add("dm21", self.dm21)
-          self.scan.add("dm31", self.dm31)
+          self.scan.add("dm3l", self.dm3l)
           self.scan.add("theta12", self.theta12)
           self.scan.add("theta13", self.theta13)
           self.scan.add("theta23", self.theta23)
@@ -156,7 +156,7 @@ class Settings:
           d = nu_params['delta']
           self.pmns = PMNS(th12, th13, th23, d)
           self.dm21 = nu_params['dm21']
-          self.dm31 = nu_params['dm31']
+          self.dm3l = nu_params['dm3l']
         except FileNotFoundError:
           print("Error: slha file " + slha_file + " not found.")
           exit()
@@ -250,7 +250,7 @@ class Settings:
         self.output = "stdout"
 
     # If there are exactly 6 arguments, we are in solar mode
-    # args = (pmns, dm21, dm31, E, fraction, options)
+    # args = (pmns, dm21, dm3l, E, fraction, options)
     elif len(args) == 6:
 
       self.solar = True
@@ -260,7 +260,7 @@ class Settings:
       self.theta23 = self.pmns.theta23
       self.delta = self.pmns.delta
       self.dm21 = args[1]
-      self.dm31 = args[2]
+      self.dm3l = args[2]
       self.energy = args[3]
       self.fraction = args[4]
       self.solar_file = args[5].solar if args[5].solar != "" else None
@@ -269,7 +269,7 @@ class Settings:
       self.distorted_spectrum =  False
 
     # If there are exactly 7 arguments, we are in earth mode
-    # args = (pmns, dm21, dm31, E, eta, H, options)
+    # args = (pmns, dm21, dm3l, E, eta, H, options)
     elif len(args) == 7:
 
       self.earth = True
@@ -279,7 +279,7 @@ class Settings:
       self.theta23 = self.pmns.theta23
       self.delta = self.pmns.delta
       self.dm21 = args[1]
-      self.dm31 = args[2]
+      self.dm3l = args[2]
       self.energy = args[3]
       self.eta = args[4]
       self.depth = args[5]

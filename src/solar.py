@@ -138,19 +138,19 @@ class SolarModel:
 
 # Compute flux of incoherent mass eigenstates for fixed density value
 @nb.njit
-def Tei (th12, th13, DeltamSq21, DeltamSq31, E, ne):
+def Tei (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
     """
-    Tei(th12, th13, DeltamSq21, DeltamSq31, E, ne) computes the weights composing an incoherent flux of
+    Tei(th12, th13, DeltamSq21, DeltamSq3l, E, ne) computes the weights composing an incoherent flux of
     neutrino mass eigenstates, for electron neutrinos produced in matter in the adiabatic approximation:
     - thij: the PMNS mixing angles;
-    - DeltamSq21. DeltamSq31: the squared mass differences in units of eV^2;
+    - DeltamSq21. DeltamSq3l: the squared mass differences in units of eV^2;
     - E: the neutrino energy, in units of MeV;
     - ne: the electron density at production point, in units of mol/cm^3.
     See Eq. (6.11) in FiuzadeBarros:2011qna for its derivation.
     """
 
     # Compute the mixing angles at neutrino production point
-    th13m = th13_M(th13, DeltamSq31, E, ne)
+    th13m = th13_M(th13, DeltamSq3l, E, ne)
     th12m = th12_M(th12, th13, DeltamSq21, E, ne)
 
     # Compute and return the weights
@@ -164,9 +164,9 @@ def Tei (th12, th13, DeltamSq21, DeltamSq31, E, ne):
 
 # Compute flux of inchoerent mass eigenstates integrated over production point in the Sun
 @nb.njit
-def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction):
+def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction):
     """
-    solar_flux_mass(th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction) computes
+    solar_flux_mass(th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction) computes
     the weights of mass eigenstates composing the incoherent flux of solar neutrinos in the adiabatic
     approximation:
     - thij: the PMNS mixing angles;
@@ -180,7 +180,7 @@ def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, dens
 
     IntegratedFraction = np.trapz(y=fraction, x=radius_samples)
 
-    temp = Tei(th12, th13, DeltamSq21, DeltamSq31, E, density)
+    temp = Tei(th12, th13, DeltamSq21, DeltamSq3l, E, density)
     temp = [temp[i]*fraction for i in range(len(temp))]
 
     Te = [np.trapz(y=temp[i], x = radius_samples) / IntegratedFraction
@@ -189,14 +189,14 @@ def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, dens
     return np.array(Te)
 
 # Compute the flavour probabilities for the solar neutrino flux
-def Psolar (pmns, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction):
+def Psolar (pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction):
     """
-    Psolar(pmns, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction) computes the
+    Psolar(pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction) computes the
     flavour probabilities of observing a solar neutrino as a given flavour.
     The function returns a list for the probabilities [P(electron), P(muon), P(tau)].
     The neutrino has energy E and is produced in a specific reaction:
     - pmns: the PMNs matrix
-    - DeltamSq21, DeltamSq31: the vacuum squared mass differences in units of eV^2;
+    - DeltamSq21, DeltamSq3l: the vacuum squared mass differences in units of eV^2;
     - E: the neutrino energy, in units of MeV;
     - radius_samples: a list of solar relative radius values where density and fraction are sampled;
     - density: the list of electron densities at radii radius_samples, in units of mol/cm^3;
@@ -205,7 +205,7 @@ def Psolar (pmns, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction):
     """
 
     # Compute the weights in the uncoherent solar flux of mass eigenstates
-    Tei = np.array(solar_flux_mass(pmns.theta12, pmns.theta13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction))
+    Tei = np.array(solar_flux_mass(pmns.theta12, pmns.theta13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction))
 
     # Compute the probabilities that a mass eigenstate is observed as a given flavour
     #P_i_to_a = np.square(np.abs(PMNS(th12, th13, th23, -d))) # TODO: Why negative -d? ANSWER: because the mass eigenstates are given by

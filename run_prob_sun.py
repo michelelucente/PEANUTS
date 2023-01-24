@@ -27,7 +27,7 @@ parser.add_option("-i", "--in_slha", help="SLHA input file", action='store', des
 if len(args) < 2 or (options.in_slha == "" and len(args) != 8):
   print('Wrong number of arguments \n\
         \n\
-Usage: ./'+mainfilename+'.py <energy> <fraction> [<th12> <th13> <th23> <delta> <md21> <md31>]\n\
+Usage: ./'+mainfilename+'.py <energy> <fraction> [<th12> <th13> <th23> <delta> <md21> <md3l>]\n\
        <energy>                    Energy\n\
        <fraction>                  Neutrino fraction sample\n\
        <th12>                      Mixing angle theta_12\n\
@@ -35,7 +35,7 @@ Usage: ./'+mainfilename+'.py <energy> <fraction> [<th12> <th13> <th23> <delta> <
        <th23>                      Mixing angle theta_23\n\
        <delta>                     CP phase delta\n\
        <md21>                      Mass splitting m^2_{21}\n\
-       <md31>                      Mass splitting m^2_{31}\n\
+       <md3l>                      Mass splitting m^2_{3l} (l=1 NO, l=2 IO)\n\
 \n\
 Options:\n\
        -h, --help                  Show this help message and exit\n\
@@ -79,7 +79,7 @@ if options.in_slha != "":
   pmns = PMNS(th12, th13, th23, d)
 
   DeltamSq21 = nu_params['dm21']
-  DeltamSq31 = nu_params['dm31']
+  DeltamSq3l = nu_params['dm3l']
 
 # Otherwise, the parameters are given as arguments
 else:
@@ -91,15 +91,15 @@ else:
   pmns = PMNS(th12, th13, th23, d)
 
   DeltamSq21 = float(args[6])
-  DeltamSq31 = float(args[7])
+  DeltamSq3l = float(args[7])
 
 # Print program banner and inputs
 print_banner()
-print_inputs(Settings(pmns, DeltamSq21, DeltamSq31, E, fraction, options))
+print_inputs(Settings(pmns, DeltamSq21, DeltamSq3l, E, fraction, options))
 print("Running PEANUTS...")
 
 # Compute probability for the given sample fraction and energy
-prob = Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius(), solar_model.density(), solar_model.fraction(fraction))
+prob = Psolar(pmns, DeltamSq21, DeltamSq3l, E, solar_model.radius(), solar_model.density(), solar_model.fraction(fraction))
 
 # Print results
 print()

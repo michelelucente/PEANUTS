@@ -95,7 +95,7 @@ if options.slha_file != "":
   pmns = PMNS(th12, th13, th23, d)
 
   DeltamSq21 = nu_params['dm21']
-  DeltamSq31 = nu_params['dm31']
+  DeltamSq3l = nu_params['dm3l']
 
 else:
   # Values to compare with SNO, if no slha is provided
@@ -104,7 +104,7 @@ else:
   th23 = 0.85521
   d = 3.4034
   DeltamSq21 = 7.9e-5
-  DeltamSq31 = 2.46e-3
+  DeltamSq3l = 2.46e-3
   pmns = PMNS(th12, th13, th13, d)
 
 # Energy
@@ -112,8 +112,8 @@ E = 10
 
 # Compute probability for the sample fractions '8B' and 'hep' in the energy ragnge E=[1,20]
 xrange = np.arange(1,20,0.1)
-ProbB8 = [Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius(), solar_model.density(), solar_model.fraction('8B')) for E in xrange]
-Probhep = [Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius(), solar_model.density(), solar_model.fraction('hep')) for E in xrange]
+ProbB8 = [Psolar(pmns, DeltamSq21, DeltamSq3l, E, solar_model.radius(), solar_model.density(), solar_model.fraction('8B')) for E in xrange]
+Probhep = [Psolar(pmns, DeltamSq21, DeltamSq3l, E, solar_model.radius(), solar_model.density(), solar_model.fraction('hep')) for E in xrange]
 
 # Use SNO's example data files for comparison
 SNO_B8 = f.read_csv(path + "/Data/SNO_8B.csv", skiprows=4, names=['energy', 'Pnuenue'])
@@ -149,7 +149,7 @@ plt.show()
 # Compare 8B energy spectrum with distorted flux
 B8_spectrum = solar_model.spectrum("8B")
 
-survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius(), solar_model.density(), solar_model.fraction('8B')) for E in B8_spectrum.Energy])
+survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq3l, E, solar_model.radius(), solar_model.density(), solar_model.fraction('8B')) for E in B8_spectrum.Energy])
 SNO_interp = interp1d(SNO_B8.energy, SNO_B8.Pnuenue, kind='cubic', fill_value='extrapolate')
 SNO_survival_prob = np.array([SNO_interp(E) for E in B8_spectrum.Energy])
 distorted_shape = np.array([B8_spectrum.Spectrum]).T * survival_prob
@@ -171,7 +171,7 @@ plt.show()
 # Compare hep energy spectrum with distorted flux
 hep_spectrum = solar_model.spectrum("hep")
 
-survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq31, E, solar_model.radius(), solar_model.density(), solar_model.fraction('hep')) for E in hep_spectrum.Energy])
+survival_prob = np.array([Psolar(pmns, DeltamSq21, DeltamSq3l, E, solar_model.radius(), solar_model.density(), solar_model.fraction('hep')) for E in hep_spectrum.Energy])
 SNO_interp = interp1d(SNO_hep.energy, SNO_hep.Pnuenue, kind='cubic', fill_value='extrapolate')
 SNO_survival_prob = np.array([SNO_interp(E) for E in hep_spectrum.Energy])
 distorted_shape = np.array([hep_spectrum.Spectrum]).T * survival_prob
@@ -234,13 +234,13 @@ E = 10 # MeV
 #eta = np.random.uniform(0, pi/2)
 #E = np.random.uniform(1,20)
 
-sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis="flavour", mode="numerical", full_oscillation=True)
+sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis="flavour", mode="numerical", full_oscillation=True)
 
 One_num = sol[-1]
 One_num = np.array([One_num])
 
 # Check analytical solution
-One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H)
+One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H)
 
 err = np.linalg.norm(One_num - One_an)/np.linalg.norm(One_num + One_an)
 
@@ -266,13 +266,13 @@ E = 10 # MeV
 #eta = np.random.uniform(pi/2, pi)
 #E = np.random.uniform(1,20)
 
-sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="numerical", full_oscillation=True)
+sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, mode="numerical", full_oscillation=True)
 
 One_num = sol[-1]
 One_num = np.array([One_num])
 
 # Check analytical solution
-One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H)
+One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H)
 
 err = np.linalg.norm(One_num - One_an)/np.linalg.norm(One_num + One_an)
 
@@ -306,9 +306,9 @@ density = solar_model.density()
 fraction = solar_model.fraction('8B')
 
 
-mass_weights = solar_flux_mass(th12, th13, DeltamSq21, DeltamSq31, E, radius_samples, density, fraction)
+mass_weights = solar_flux_mass(th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction)
 
-flavour_probabilities = Pearth(mass_weights, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis="mass")
+flavour_probabilities = Pearth(mass_weights, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis="mass")
 
 print("For E = %.2f and eta = %.2f pi the flavour probabilitites are %s" % (E, eta/pi, str(flavour_probabilities)) )
 

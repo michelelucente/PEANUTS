@@ -5,7 +5,7 @@
 
 Energy: [4,15,0.5]
 
-#Neutrinos: "examples/example_slha.slha2"
+#Neutrinos: "examples/example_slha_NO.slha2"
 Neutrinos:
   dm21: 7.42e-05
   dm31: 2.51e-03

@@ -82,17 +82,17 @@ for param in settings.scan:
 
     # Compute probability for the given sample fraction and energy
     if settings.probabilities:
-      out["solar"] = Psolar(pmns, param.dm21, param.dm31, param.energy, solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
+      out["solar"] = Psolar(pmns, param.dm21, param.dm3l, param.energy, solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
 
     # Add undistorted or distorted spectrum if requested
     if settings.undistorted_spectrum:
       out['spectrum'] = solar_model.spectrum(settings.fraction, energy=param.energy)
     elif settings.distorted_spectrum:
-      out['spectrum'] = solar_model.spectrum(settings.fraction, energy=param.energy) * Psolar(pmns, param.dm21, param.dm31, param.energy, solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
+      out['spectrum'] = solar_model.spectrum(settings.fraction, energy=param.energy) * Psolar(pmns, param.dm21, param.dm3l, param.energy, solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
 
     # If the earth propbabilities are to be computed, we need the mass weights
     if settings.earth:
-      mass_weights = solar_flux_mass(param.theta12, param.theta13, param.dm21, param.dm31, param.energy,
+      mass_weights = solar_flux_mass(param.theta12, param.theta13, param.dm21, param.dm3l, param.energy,
                                      solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
 
   if settings.earth:
@@ -104,14 +104,14 @@ for param in settings.scan:
 
     # If the latitude is provided compute probability integrated over exposure
     if settings.exposure:
-      out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm31, param.energy, settings.depth, mode=settings.evolution,
+      out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, settings.depth, mode=settings.evolution,
                                        lam=radians(settings.latitude), d1=settings.exposure_time[0], d2=settings.exposure_time[1],
                                        normalized=settings.exposure_normalized, ns=settings.exposure_samples,
                                        from_file=settings.exposure_file, angle=settings.exposure_angle)
 
     else:
       # Compute probability of survival after propagation through Earth
-      out["earth"] = Pearth(nustate, earth_density, pmns, param.dm21, param.dm31, param.energy, param.eta, settings.depth, mode=settings.evolution, basis=basis)
+      out["earth"] = Pearth(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, param.eta, settings.depth, mode=settings.evolution, basis=basis)
 
     # If the evolved state is requested, compute that too
     if settings.evolved_state:
@@ -119,7 +119,7 @@ for param in settings.scan:
         print("Warning: The evolved state can only be computed from a neutrino state in the flavour basis, so it will not be provided")
         settings.evolved_state = False
       else:
-        out["evolved_state"] = evolved_state(nustate, earth_density, pmns, param.dm21, param.dm31, param.energy, param.eta, settings.depth, mode=settings.evolution)
+        out["evolved_state"] = evolved_state(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, param.eta, settings.depth, mode=settings.evolution)
 
   # Append to list
   outs.append(out)

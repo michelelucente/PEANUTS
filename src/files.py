@@ -83,7 +83,7 @@ def read_slha(filepath):
 
   # Build dictionary of neutrino parameters
   nu_params = {'dm21' : mNu2**2 - mNu1**2,
-               'dm31' : mNu3**2 - mNu1**2,
+               'dm3l' : mNu3**2 - mNu1**2 if mNu3 > mNu1 else mNu3**2 - mNu2**2,
                'theta12'    : theta12,
                'theta23'    : theta23,
                'theta13'    : theta13,
@@ -117,8 +117,8 @@ def output(settings, outs):
       towrite += "delta_CP\t"
     if "dm21" in settings.scan.labels:
       towrite += "Dm21^2 [eV^2]\t"
-    if "dm31" in settings.scan.labels:
-      towrite += "Dm31^2 [eV^2]\t"
+    if "dm3l" in settings.scan.labels:
+      towrite += "Dm3l^2 [eV^2]\t"
 
     if settings.solar:
       towrite += "Psolar (e) \t Psolar (mu) \t Psolar (tau)\t"
@@ -143,8 +143,8 @@ def output(settings, outs):
         towrite += str(dec(param.delta)) + "\t"
       if "dm21" in settings.scan.labels:
         towrite += str(dec(param.dm21)) + "\t"
-      if "dm31" in settings.scan.labels:
-        towrite += str(dec(param.dm31)) + "\t"
+      if "dm3l" in settings.scan.labels:
+        towrite += str(dec(param.dm3l)) + "\t"
 
       if settings.solar:
 

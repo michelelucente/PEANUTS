@@ -32,7 +32,7 @@ parser.add_option("-i", "--in_slha", help="SLHA input file", action='store', des
 if len(args) < 3 or (options.in_slha == "" and len(args) != 9):
   print('Wrong number of arguments \n\
         \n\
-Usage: ./'+mainfilename+'.py -f/-m <eigenstate> <energy> <eta> <depth> [<th12> <th13> <th23> <delta> <md21> <md31>]\n\
+Usage: ./'+mainfilename+'.py -f/-m <eigenstate> <energy> <eta> <depth> [<th12> <th13> <th23> <delta> <md21> <md3l>]\n\
        <eigenstate>                Flavour (-f/--flavour) or mass (-m/--mass) input eigenstate\n\
        <energy>                    Energy of neutrinos\n\
        <eta>                       Nadir angle of the incident neutrinos\n\
@@ -42,7 +42,7 @@ Usage: ./'+mainfilename+'.py -f/-m <eigenstate> <energy> <eta> <depth> [<th12> <
        <th23>                      Mixing angle theta_23\n\
        <delta>                     CP phase delta\n\
        <md21>                      Mass splitting m^2_{21}\n\
-       <md31>                      Mass splitting m^2_{31}\n\
+       <md3l>                      Mass splitting m^2_{3} (l=1 NO, l=2 IO)\n\
 \n\
 Options:\n\
        -h, --help                  Show this help message and exit\n\
@@ -90,7 +90,7 @@ if options.in_slha != "":
   pmns = PMNS(th12, th13, th23, d)
 
   DeltamSq21 = nu_params['dm21']
-  DeltamSq31 = nu_params['dm31']
+  DeltamSq3l = nu_params['dm3l']
 
 # Otherwise, the parameters are given as arguments
 else:
@@ -102,7 +102,7 @@ else:
   pmns = PMNS(th12, th13, th23, d)
 
   DeltamSq21 = float(args[7])
-  DeltamSq31 = float(args[8])
+  DeltamSq3l = float(args[8])
 
 # Parse neutrino state
 nustate = np.zeros(3)
@@ -122,18 +122,18 @@ earth_density = EarthDensity(density_file)
 
 # Print program banner and inputs
 print_banner()
-print_inputs(Settings(pmns, DeltamSq21, DeltamSq31, E, eta, H, options))
+print_inputs(Settings(pmns, DeltamSq21, DeltamSq3l, E, eta, H, options))
 print("Running PEANUTS...")
 
 # Compute probability of survival after propagation through Earth
 
 # Check if analytical solution was requested
 if options.analytical:
-  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, basis=basis)
+  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis=basis)
 
 # Otherwise use numerical solution
 else:
- prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq31, E, eta, H, mode="numerical", basis=basis)
+ prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, mode="numerical", basis=basis)
 
 
 # Print results

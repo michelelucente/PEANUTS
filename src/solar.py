@@ -14,7 +14,7 @@ import numba as nb
 from math import cos, sin
 from scipy import integrate
 from scipy.interpolate import interp1d
-from src.matter_mixing import th13_M, th12_M
+from src.matter_mixing import th13_M, th12_M, th13_M_old, th12_M_old
 from src.pmns import PMNS
 
 import src.files as f
@@ -24,7 +24,7 @@ class SolarModel:
     Class containing the info of the solar model
     """
 
-    def __init__(self, filename=None, spectrum_files={}):
+    def __init__(self, filename=None, spectrum_files={}, fluxrow=-1, fluxcols={}, tablerow=-1, radiuscol=-1, densitycol=-1, fractioncols={}):
         """
         Constructor of the solar model.
         Reads the solar model file and fills useful variables
@@ -35,35 +35,42 @@ class SolarModel:
         self.filename = path + "/../Data/bs2005agsopflux.csv" if filename == None else filename
 
         # Format for the various spectra are layered differently
-        fluxrow = 0
-        fractionrow = 0
         if "bs2005" in self.filename:
-          fluxcols = [3, 5]
+          fluxcols = {'hep':3, '8B':5}
           fluxrow = 6
-          fractioncols = [1, 3, 7, 13]
-          fractionrow = 27
+          tablerow = 27
+          radiuscol = 1
+          densitycol = 3
+          fractioncols = {'8B':7, 'hep':13}
         elif "bp00" in self.filename:
-          fluxcols=[3,5]
+          fluxcols = {'hep':3, '8B':5}
           fluxrow = 25
-          fractioncols = [0, 2, 6, 12]
-          fractionrow = 29
-        else:
-            print("Error: Unknown solar model file")
-            exit()
+          tablerow = 29
+          radiuscol = 0
+          densitycol = 2
+          fractioncols = {'8B':6, 'hep':12}
+        elif len(fluxcols) == 0 or len(fractioncols) == 0 or fluxrow<0 or tablerow<0 or radiuscol<0 or densitycol<0:
+          print("Error: Solar model not known to PEANUTS, you must provide the rows and columns for the fluxes and fractions")
+          exit()
+        elif len(fluxcols) != len(fractioncols):
+          print("Error: The number of selected fractions for the flux and fraction distributions must be the same.")
+          exit()
 
+        tablecols = [radiuscol, densitycol] + list(fractioncols.values())
+        tablenames = ['radius', 'density_log_10'] + [fr + ' fraction' for fr in fractioncols.keys()]
 
         try:
           # Import fluxes
           self.fluxes = f.read_csv(self.filename,
-                                   usecols = fluxcols,
-                                   names = ['hep', '8B'],
+                                   usecols = list(fluxcols.values()),
+                                   names = list(fluxcols.keys()),
                                    sep=" ", skiprows=fluxrow, nrows=1, header=None)
 
           # Import fraction data from solar model
           self.model = f.read_csv(self.filename,
-                                  usecols = fractioncols,
-                                  names = ['radius', 'density_log_10', '8B fraction', 'hep fraction'],
-                                  sep=" ", skiprows=fractionrow, header=None)
+                                  usecols = tablecols,
+                                  names = tablenames,
+                                  sep=" ", skiprows=tablerow, header=None)
 
         except:
           print("Error! The solar model file provided does not exist or it is corrupted")
@@ -72,8 +79,7 @@ class SolarModel:
         # Set useful variables
         self.rad = self.model['radius']
         self.dens =  10**self.model['density_log_10']
-        self.frac = {'8B' : self.model['8B fraction'],
-                     'hep': self.model['hep fraction']}
+        self.frac = {fr : self.model[fr + ' fraction'] for fr in fractioncols.keys()}
 
         # Import spectral shapes
         spectrum_files["8B"] = path + "/../Data/8B_shape_Ortiz_et_al.csv" if "8B" not in spectrum_files else spectrum_files['8B']
@@ -138,20 +144,22 @@ class SolarModel:
 
 # Compute flux of incoherent mass eigenstates for fixed density value
 @nb.njit
-def Tei (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
+def Tei (pmns, DeltamSq21, DeltamSq3l, E, ne):
     """
-    Tei(th12, th13, DeltamSq21, DeltamSq3l, E, ne) computes the weights composing an incoherent flux of
+    Tei(pmns, DeltamSq21, DeltamSq3l, E, ne) computes the weights composing an incoherent flux of
     neutrino mass eigenstates, for electron neutrinos produced in matter in the adiabatic approximation:
-    - thij: the PMNS mixing angles;
+    - pmns: the PMNs matrix
     - DeltamSq21. DeltamSq3l: the squared mass differences in units of eV^2;
     - E: the neutrino energy, in units of MeV;
     - ne: the electron density at production point, in units of mol/cm^3.
-    See Eq. (6.11) in FiuzadeBarros:2011qna for its derivation.
+    See arXiv:1604.08167 and arXiv:1801.06514.
     """
 
     # Compute the mixing angles at neutrino production point
-    th13m = th13_M(th13, DeltamSq3l, E, ne)
-    th12m = th12_M(th12, th13, DeltamSq21, E, ne)
+#    th13m = th13_M(pmns.theta12, pmns.theta13, DeltamSq21, DeltamSq3l, E, ne)
+#    th12m = th12_M(pmns.theta12, pmns.theta13, DeltamSq21, DeltamSq3l, E, ne)
+    th13m = th13_M_old(pmns.theta13, DeltamSq3l, E, ne)
+    th12m = th12_M_old(pmns.theta12, pmns.theta13, DeltamSq21, E, ne)
 
     # Compute and return the weights
     c13M = np.cos(th13m)
@@ -164,12 +172,12 @@ def Tei (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
 
 # Compute flux of inchoerent mass eigenstates integrated over production point in the Sun
 @nb.njit
-def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction):
+def solar_flux_mass (pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction):
     """
-    solar_flux_mass(th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction) computes
+    solar_flux_mass(pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction) computes
     the weights of mass eigenstates composing the incoherent flux of solar neutrinos in the adiabatic
     approximation:
-    - thij: the PMNS mixing angles;
+    - pmns: the PMNs matrix
     - DeltamSq21, DeltamSq3l: the squared mass differences in units of eV^2;
     - E: the neutrino energy, in units of MeV;
     - radius_samples: a list of solar relative radius values, where density and fraction are sampled;
@@ -180,7 +188,7 @@ def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, dens
 
     IntegratedFraction = np.trapz(y=fraction, x=radius_samples)
 
-    temp = Tei(th12, th13, DeltamSq21, DeltamSq3l, E, density)
+    temp = Tei(pmns, DeltamSq21, DeltamSq3l, E, density)
     temp = [temp[i]*fraction for i in range(len(temp))]
 
     Te = [np.trapz(y=temp[i], x = radius_samples) / IntegratedFraction
@@ -205,7 +213,7 @@ def Psolar (pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction):
     """
 
     # Compute the weights in the uncoherent solar flux of mass eigenstates
-    Tei = np.array(solar_flux_mass(pmns.theta12, pmns.theta13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction))
+    Tei = np.array(solar_flux_mass(pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction))
 
     # Compute the probabilities that a mass eigenstate is observed as a given flavour
     #P_i_to_a = np.square(np.abs(PMNS(th12, th13, th23, -d))) # TODO: Why negative -d? ANSWER: because the mass eigenstates are given by

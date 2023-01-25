@@ -306,7 +306,7 @@ density = solar_model.density()
 fraction = solar_model.fraction('8B')
 
 
-mass_weights = solar_flux_mass(th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction)
+mass_weights = solar_flux_mass(pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction)
 
 flavour_probabilities = Pearth(mass_weights, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis="mass")
 

@@ -54,7 +54,9 @@ outs = []
 if settings.solar:
 
   # Import data from solar model and spectrum files
-  solar_model = SolarModel(settings.solar_file, spectrum_files=settings.spectra if settings.spectra is not None else {})
+  solar_model = SolarModel(settings.solar_file, spectrum_files=settings.spectra if settings.spectra is not None else {},
+                           fluxrow=settings.fluxrow, fluxcols=settings.fluxcols, tablerow=settings.tablerow,
+                           radiuscol=settings.radiuscol, densitycol=settings.densitycol, fractioncols=settings.fractioncols)
 
 if settings.earth:
 
@@ -92,7 +94,7 @@ for param in settings.scan:
 
     # If the earth propbabilities are to be computed, we need the mass weights
     if settings.earth:
-      mass_weights = solar_flux_mass(param.theta12, param.theta13, param.dm21, param.dm3l, param.energy,
+      mass_weights = solar_flux_mass(pmns, param.dm21, param.dm3l, param.energy,
                                      solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
 
   if settings.earth:

@@ -94,7 +94,7 @@ for param in settings.scan:
 
     # If the earth propbabilities are to be computed, we need the mass weights
     if settings.earth:
-      mass_weights = solar_flux_mass(pmns, param.dm21, param.dm3l, param.energy,
+      mass_weights = solar_flux_mass(pmns.theta12, pmns.theta13, param.dm21, param.dm3l, param.energy,
                                      solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
 
   if settings.earth:

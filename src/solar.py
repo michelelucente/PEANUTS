@@ -144,11 +144,11 @@ class SolarModel:
 
 # Compute flux of incoherent mass eigenstates for fixed density value
 @nb.njit
-def Tei (pmns, DeltamSq21, DeltamSq3l, E, ne):
+def Tei (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
     """
-    Tei(pmns, DeltamSq21, DeltamSq3l, E, ne) computes the weights composing an incoherent flux of
+    Tei(th12, th13, DeltamSq21, DeltamSq3l, E, ne) computes the weights composing an incoherent flux of
     neutrino mass eigenstates, for electron neutrinos produced in matter in the adiabatic approximation:
-    - pmns: the PMNs matrix
+    - thij: the vacuum mixing angles in radians;
     - DeltamSq21. DeltamSq3l: the squared mass differences in units of eV^2;
     - E: the neutrino energy, in units of MeV;
     - ne: the electron density at production point, in units of mol/cm^3.
@@ -156,8 +156,8 @@ def Tei (pmns, DeltamSq21, DeltamSq3l, E, ne):
     """
 
     # Compute the mixing angles at neutrino production point
-    th13m = th13_M(pmns.theta12, pmns.theta13, DeltamSq21, DeltamSq3l, E, ne)
-    th12m = th12_M(pmns.theta12, pmns.theta13, DeltamSq21, DeltamSq3l, E, ne)
+    th13m = th13_M(th12, th13, DeltamSq21, DeltamSq3l, E, ne)
+    th12m = th12_M(th12, th13, DeltamSq21, DeltamSq3l, E, ne)
 
     # Compute and return the weights
     c13M = np.cos(th13m)
@@ -170,12 +170,12 @@ def Tei (pmns, DeltamSq21, DeltamSq3l, E, ne):
 
 # Compute flux of inchoerent mass eigenstates integrated over production point in the Sun
 @nb.njit
-def solar_flux_mass (pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction):
+def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction):
     """
-    solar_flux_mass(pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction) computes
+    solar_flux_mass(th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction) computes
     the weights of mass eigenstates composing the incoherent flux of solar neutrinos in the adiabatic
     approximation:
-    - pmns: the PMNs matrix
+    - thij: the vacuum mixing angles in radians;
     - DeltamSq21, DeltamSq3l: the squared mass differences in units of eV^2;
     - E: the neutrino energy, in units of MeV;
     - radius_samples: a list of solar relative radius values, where density and fraction are sampled;
@@ -186,7 +186,7 @@ def solar_flux_mass (pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, f
 
     IntegratedFraction = np.trapz(y=fraction, x=radius_samples)
 
-    temp = Tei(pmns, DeltamSq21, DeltamSq3l, E, density)
+    temp = Tei(th12, th13, DeltamSq21, DeltamSq3l, E, density)
     temp = [temp[i]*fraction for i in range(len(temp))]
 
     Te = [np.trapz(y=temp[i], x = radius_samples) / IntegratedFraction
@@ -211,7 +211,7 @@ def Psolar (pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction):
     """
 
     # Compute the weights in the uncoherent solar flux of mass eigenstates
-    Tei = np.array(solar_flux_mass(pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction))
+    Tei = np.array(solar_flux_mass(pmns.theta12, pmns.theta13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction))
 
     # Compute the probabilities that a mass eigenstate is observed as a given flavour
     #P_i_to_a = np.square(np.abs(PMNS(th12, th13, th23, -d))) # TODO: Why negative -d? ANSWER: because the mass eigenstates are given by

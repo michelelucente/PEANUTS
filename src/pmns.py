@@ -36,7 +36,6 @@ class PMNS:
     r23 = self.R23(th23)
     delta = self.Delta(d)
 
-    np.dot(np.dot(np.dot(r23, delta), np.dot(r13, delta.conjugate())), r12)
     self.pmns = np.dot(np.dot(np.dot(r23, delta), np.dot(r13, delta.conjugate())), r12)
 
     self.U = np.dot(r13, r12)

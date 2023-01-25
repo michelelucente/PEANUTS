@@ -105,7 +105,7 @@ else:
   d = 3.4034
   DeltamSq21 = 7.9e-5
   DeltamSq3l = 2.46e-3
-  pmns = PMNS(th12, th13, th13, d)
+  pmns = PMNS(th12, th13, th23, d)
 
 # Energy
 E = 10
@@ -278,7 +278,7 @@ err = np.linalg.norm(One_num - One_an)/np.linalg.norm(One_num + One_an)
 
 print("For E = %.2f and eta = %.2f pi the relative error between analytic and numerical solutions is %f" % (E, eta/pi, err))
 
-probs = np.square(np.abs(sol))
+probs = sol
 
 plt.xlabel("Trajectory coordinate")
 plt.ylabel("Probability")

@@ -240,7 +240,7 @@ One_num = sol[-1]
 One_num = np.array([One_num])
 
 # Check analytical solution
-One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H)
+One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis="flavour")
 
 err = np.linalg.norm(One_num - One_an)/np.linalg.norm(One_num + One_an)
 
@@ -266,13 +266,13 @@ E = 10 # MeV
 #eta = np.random.uniform(pi/2, pi)
 #E = np.random.uniform(1,20)
 
-sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, mode="numerical", full_oscillation=True)
+sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis="flavour", mode="numerical", full_oscillation=True)
 
 One_num = sol[-1]
 One_num = np.array([One_num])
 
 # Check analytical solution
-One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H)
+One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis="flavour")
 
 err = np.linalg.norm(One_num - One_an)/np.linalg.norm(One_num + One_an)
 

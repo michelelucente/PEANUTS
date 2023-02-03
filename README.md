@@ -17,9 +17,9 @@ PEANUTS runs successfully on any system with a Python 3 environment and the foll
 Quick start
 -----------
 
-Detailed explanation of how to run PEANUTS and all available options can be found in the reference above. Here are listed the various running modes of PEANUTS without explanation.
+A detailed explanation of how to run PEANUTS and all available options can be found in the reference above. Here are listed the various running modes of PEANUTS without explanation.
 
-The *simple* mode of PEANUTS runs directly on the command line and can be used with the command
+The *simple* mode of PEANUTS runs directly on the command line and can be used with
 
 ```
 run_prob_sun.py [options] <energy> <fraction> [<th12> <th13> <th23> <delta> <dm21> <dm3l>]

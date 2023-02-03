@@ -50,7 +50,7 @@ def th13_M (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
 
     vk = Vk(DeltamSqee(th12, DeltamSq21, DeltamSq3l), E, ne)
 
-    return 0.5*np.arccos((np.cos(2*th13) - vk) / np.sqrt((np.cos(2*th13) - vk)**2 + np.sin(2*th13)**2)) % np.pi
+    return 0.5*np.arccos((np.cos(2*th13) - vk) / np.sqrt((np.cos(2*th13) - vk)**2 + np.sin(2*th13)**2)) % (np.pi/2)
 
 
 @nb.njit
@@ -67,4 +67,4 @@ def th12_M (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
     th13m = th13_M(th12, th13, DeltamSq21, DeltamSq3l, E, ne)
     Vkprime = Vk(DeltamSq21, E, ne)*np.cos(th13m)**2 + DeltamSqee(th12, DeltamSq21, DeltamSq3l)/DeltamSq21*np.sin(th13m-th13)**2
 
-    return 0.5*np.arccos((np.cos(2*th12) - Vkprime) / np.sqrt((np.cos(2*th12) - Vkprime)**2 + np.sin(2*th12)**2*np.cos(th13m-th13)**2)) % np.pi
+    return 0.5*np.arccos((np.cos(2*th12) - Vkprime) / np.sqrt((np.cos(2*th12) - Vkprime)**2 + np.sin(2*th12)**2*np.cos(th13m-th13)**2)) % (np.pi/2)

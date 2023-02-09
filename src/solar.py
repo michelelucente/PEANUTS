@@ -36,14 +36,14 @@ class SolarModel:
 
         # Format for the various spectra are layered differently
         if "bs2005" in self.filename:
-          fluxcols = {'hep':3, '8B':5}
+          fluxcols = {'hep':2, '8B':4}
           fluxrow = 6
           tablerow = 27
-          radiuscol = 1
-          densitycol = 3
-          fractioncols = {'8B':7, 'hep':13}
+          radiuscol = 0
+          densitycol = 2
+          fractioncols = {'8B':6, 'hep':12}
         elif "bp00" in self.filename:
-          fluxcols = {'hep':3, '8B':5}
+          fluxcols = {'hep':2, '8B':4}
           fluxrow = 25
           tablerow = 29
           radiuscol = 0
@@ -64,13 +64,13 @@ class SolarModel:
           self.fluxes = f.read_csv(self.filename,
                                    usecols = list(fluxcols.values()),
                                    names = list(fluxcols.keys()),
-                                   sep=" ", skiprows=fluxrow, nrows=1, header=None)
+                                   delim_whitespace=True, skiprows=fluxrow, nrows=1, header=None)
 
           # Import fraction data from solar model
           self.model = f.read_csv(self.filename,
                                   usecols = tablecols,
                                   names = tablenames,
-                                  sep=" ", skiprows=tablerow, header=None)
+                                  delim_whitespace=True, skiprows=tablerow, header=None)
 
         except:
           print("Error! The solar model file provided does not exist or it is corrupted")

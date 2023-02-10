@@ -173,12 +173,14 @@ class Settings:
           self.fraction = settings["Solar"]["fraction"]
 
         self.solar_file = settings["Solar"]["solar_model"] if "solar_model" in settings["Solar"] else None
-        self.fluxrow = settings["Solar"]["fluxrow"] if "fluxrow" in settings["Solar"] else -1
-        self.fluxcols = settings["Solar"]["fluxcols"] if "fluxcols" in settings["Solar"] else {}
-        self.tablerow = settings["Solar"]["tablerow"] if "tablerow" in settings["Solar"] else -1
-        self.radiuscol = settings["Solar"]["radiuscol"] if "radiuscol" in settings["Solar"] else -1
-        self.densitycol = settings["Solar"]["densitycol"] if "densitycol" in settings["Solar"] else -1
-        self.fractioncols = settings["Solar"]["fractioncols"] if "fractioncols" in settings["Solar"] else {}
+        self.flux_file = settings["Solar"]["flux_file"] if "flux_file" in settings["Solar"] else None
+        self.fluxrows = settings["Solar"]["fluxrows"] if "fluxrows" in settings["Solar"] else None
+        self.fluxcols = settings["Solar"]["fluxcols"] if "fluxcols" in settings["Solar"] else None
+        self.fluxscale = settings["Solar"]["fluxscale"] if "fluxscale" in settings["Solar"] else None
+        self.distrow = settings["Solar"]["distrow"] if "distrow" in settings["Solar"] else None
+        self.radiuscol = settings["Solar"]["radiuscol"] if "radiuscol" in settings["Solar"] else None
+        self.densitycol = settings["Solar"]["densitycol"] if "densitycol" in settings["Solar"] else None
+        self.fractioncols = settings["Solar"]["fractioncols"] if "fractioncols" in settings["Solar"] else None
 
         self.spectra = settings["Solar"]["spectra"] if "spectra" in settings["Solar"] else None
 

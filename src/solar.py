@@ -24,7 +24,7 @@ class SolarModel:
     Class containing the info of the solar model
     """
 
-    def __init__(self, filename=None, spectrum_files={}, fluxrow=-1, fluxcols={}, tablerow=-1, radiuscol=-1, densitycol=-1, fractioncols={}):
+    def __init__(self, solar_model_file=None, flux_file=None, spectrum_files=None, fluxrows=None, fluxcols=None, fluxscale=None, distrow=None, radiuscol=None, densitycol=None, fractioncols=None):
         """
         Constructor of the solar model.
         Reads the solar model file and fills useful variables
@@ -32,45 +32,93 @@ class SolarModel:
 
         # Set file name
         path = os.path.dirname(os.path.realpath( __file__ ))
-        self.filename = path + "/../Data/bs2005agsopflux.csv" if filename == None else filename
+        # Default solar model file is the B16 from Vinyoles et al 2016, https://www.ice.csic.es/personal/aldos/Solar_Data.html
+        self.solar_model_file = path + "/../Data/nudistr_b16_agss09.dat" if solar_model_file == None else solar_model_file
+        # Default flux file is the B16 from Vinyoles et al 2016, https://www.ice.csic.es/personal/aldos/Solar_Data.html
+        self.flux_file = path + "/../Data/fluxes_b16.dat" if (flux_file == None and "b16" in self.solar_model_file) else (solar_model_file if flux_file == None else flux_file)
 
         # Format for the various spectra are layered differently
-        if "bs2005" in self.filename:
+        if "b16" in self.solar_model_file:
+          if not "b16" in self.flux_file:
+            print("Error: Flux file for B16 solar model should also be from B16")
+            exit()
+          if "b16_ags" in self.solar_model_file:
+            fluxcols = 2
+          else:
+            fluxcols = 0
+          fluxrows = {'pp':9, 'pep':10, 'hep':11, '7Be':12, '8B':13, '13N':14, '15O':15, '17F':16}
+          fluxscale = {'pp':1e10, 'pep':1e8, 'hep':1e3, '7Be':1e9, '8B':1e6, '13N':1e8, '15O':1e8, '17F':1e6}
+          distrow = 22
+          radiuscol = 0
+          densitycol = 2
+          fractioncols = {'pp':4, 'pep':5, 'hep':6, '7Be':7, '8B':8, '13N':9, '15O':10, '17F':11}
+        elif "bs2005" in self.solar_model_file:
+          self.flux_file = self.solar_model_file
           fluxcols = {'hep':2, '8B':4}
-          fluxrow = 6
-          tablerow = 27
+          fluxrows = 6
+          fluxscale = 1e10
+          distrow = 27
           radiuscol = 0
           densitycol = 2
           fractioncols = {'8B':6, 'hep':12}
-        elif "bp00" in self.filename:
+        elif "bp00" in self.solar_model_file:
+          self.flux_file = self.solar_model_file
           fluxcols = {'hep':2, '8B':4}
-          fluxrow = 25
-          tablerow = 29
+          fluxrows = 25
+          fluxscale = 1e10
+          distrow = 29
           radiuscol = 0
           densitycol = 2
           fractioncols = {'8B':6, 'hep':12}
-        elif len(fluxcols) == 0 or len(fractioncols) == 0 or fluxrow<0 or tablerow<0 or radiuscol<0 or densitycol<0:
+        elif fluxcols is None or fractioncols is None or fluxrows is None or distrow is None or radiuscol is None or densitycol is None:
           print("Error: Solar model not known to PEANUTS, you must provide the rows and columns for the fluxes and fractions")
           exit()
-        elif len(fluxcols) != len(fractioncols):
+
+        # Make sure the shapes of optional variables are correct
+        if isinstance(fluxcols, dict) and len(fluxcols) != len(fractioncols):
           print("Error: The number of selected fractions for the flux and fraction distributions must be the same.")
           exit()
+        if isinstance(fluxrows, dict) and len(fluxrows) != len(fractioncols):
+          print("Error: The number of selected fractions for the flux and fraction distributions must be the same.")
+          exit()
+        if isinstance(fluxcols, dict) and isinstance(fluxrows, dict) and len(fluxcols) != len(fluxrows):
+          print("Error: The number of fraction rows and columns must be the same.")
+          exit()
+        if (not isinstance(fluxcols, dict) and not isinstance(fluxrows, dict)) or not isinstance(fractioncols, dict):
+          print("Error: fluxcols (or fluxrows) and fractioncols should be dictionaries with fraction name and column number, e.g. {'8B': 2}, please change that.")
+          exit()
+        if not isinstance(fluxcols, dict):
+          fluxcols = {frac : fluxcols for frac in fluxrows.keys()}
+        if not isinstance(fluxrows, dict):
+          fluxrows = {frac : fluxrows for frac in fluxcols.keys()}
+        if fluxscale is not None:
+          if isinstance(fluxscale, dict) and len(fluxscale) != len(fluxcols):
+            print("Error: The number of scaling factors for the fluxes must match the number of fraction distributions.")
+            exit()
+          elif not isinstance(fluxscale, dict):
+            fluxscale = {frac: fluxscale for frac in fluxcols.keys()}
 
-        tablecols = [radiuscol, densitycol] + list(fractioncols.values())
-        tablenames = ['radius', 'density_log_10'] + [fr + ' fraction' for fr in fractioncols.keys()]
+        distcols = [radiuscol, densitycol] + list(fractioncols.values())
+        distnames = ['radius', 'density_log_10'] + [fr + ' fraction' for fr in fractioncols.keys()]
 
         try:
           # Import fluxes
-          self.fluxes = f.read_csv(self.filename,
-                                   usecols = list(fluxcols.values()),
-                                   names = list(fluxcols.keys()),
-                                   delim_whitespace=True, skiprows=fluxrow, nrows=1, header=None)
+          self.fluxes = {}
+
+          for key, val in fluxcols.items():
+            self.fluxes[key] = f.read_csv(self.flux_file,
+                                   usecols = [val],
+                                   names = [key],
+                                   delim_whitespace=True, skiprows=fluxrows[key], nrows=1, header=None)[key][0]
+            if fluxscale is not None:
+              self.fluxes[key] = self.fluxes[key]*fluxscale[key]
+
 
           # Import fraction data from solar model
-          self.model = f.read_csv(self.filename,
-                                  usecols = tablecols,
-                                  names = tablenames,
-                                  delim_whitespace=True, skiprows=tablerow, header=None)
+          self.model = f.read_csv(self.solar_model_file,
+                                  usecols = distcols,
+                                  names = distnames,
+                                  delim_whitespace=True, skiprows=distrow, header=None)
 
         except:
           print("Error! The solar model file provided does not exist or it is corrupted")
@@ -82,8 +130,8 @@ class SolarModel:
         self.frac = {fr : self.model[fr + ' fraction'] for fr in fractioncols.keys()}
 
         # Import spectral shapes
-        spectrum_files["8B"] = path + "/../Data/8B_shape_Ortiz_et_al.csv" if "8B" not in spectrum_files else spectrum_files['8B']
-        spectrum_files["hep"] = path + "/../Data/hep_shape.csv" if "hep" not in spectrum_files else spectrum_files['hep']
+        spectrum_files["8B"] = path + "/../Data/8B_shape_Ortiz_et_al.csv" if (spectrum_files is not None and "8B" not in spectrum_files) else spectrum_files['8B']
+        spectrum_files["hep"] = path + "/../Data/hep_shape.csv" if (spectrum_files is not None and "hep" not in spectrum_files) else spectrum_files['hep']
         self.spectra = {}
         for fraction, spectrum_file in spectrum_files.items():
           self.spectra[fraction] = f.read_csv(spectrum_file, usecols=[0, 1], names = ["Energy", "Spectrum"], skiprows=3, header=None)
@@ -126,7 +174,7 @@ class SolarModel:
        Returns the cumulative fluxes for each channel in cm^-2 s^-1
        """
 
-       return self.fluxes[name][0]*1e10
+       return self.fluxes[name]
 
     def spectrum(self, name, energy=None):
        """

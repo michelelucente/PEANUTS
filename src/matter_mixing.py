@@ -52,7 +52,6 @@ def th13_M (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
 
     return 0.5*np.arccos((np.cos(2*th13) - vk) / np.sqrt((np.cos(2*th13) - vk)**2 + np.sin(2*th13)**2)) % (np.pi/2)
 
-
 @nb.njit
 def th12_M (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
     """

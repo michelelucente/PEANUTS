@@ -1,6 +1,6 @@
 Distribution of neutrino fluxes in the BP00 standard solar model model.
 
-astro-ph/001034
+astro-ph/0010346
 
 Columns in the Table below represent:
 
@@ -8,10 +8,10 @@ Columns in the Table below represent:
 2) Temperature in units of 10^6 deg (K)
 3) Logarithm (to the base 10) of the electron density in units of
    cm^{-3}/N_A, where N_A is the Avogadro number
-4) Mass of the zone with the given radius in units of one solar mass 
+4) Mass of the zone with the given radius in units of one solar mass
 5) X(^7Be): beryllium-7 mass fraction
    [For special purposes, it is useful to know the 7^Be mass fraction.]
-6) Fraction of pp neutrinos produced in the zone 
+6) Fraction of pp neutrinos produced in the zone
 7) Fraction of boron 8 neutrinos produced in the zone
 8) Fraction of nitrogen 13 neutrinos produced in the zone
 9) Fraction of oxygen 15 neutrinos produced in the zone
@@ -20,10 +20,10 @@ Columns in the Table below represent:
 12) Fraction of pep neutrinos produced in the zone
 13) Fraction of hep neutrinos produced in the zone
 
-The integrated fluxes given in Table7 of BP00 are listed below: 
+The integrated fluxes given in Table7 of BP00 are listed below:
 
- 
- 5.95E+00 1.400E-02 9.3E-07 4.77E-01 5.05E-04 5.48E-02 4.80E-02 5.63E-04 
+
+ 5.95E+00 1.400E-02 9.3E-07 4.77E-01 5.05E-04 5.48E-02 4.80E-02 5.63E-04
 
 The Table begins here.
 

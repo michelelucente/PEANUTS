@@ -54,8 +54,8 @@ outs = []
 if settings.solar:
 
   # Import data from solar model and spectrum files
-  solar_model = SolarModel(settings.solar_file, spectrum_files=settings.spectra if settings.spectra is not None else {},
-                           fluxrow=settings.fluxrow, fluxcols=settings.fluxcols, tablerow=settings.tablerow,
+  solar_model = SolarModel(solar_model_file=settings.solar_file, flux_file=settings.flux_file, spectrum_files=settings.spectra,
+                           fluxrows=settings.fluxrows, fluxcols=settings.fluxcols, distrow=settings.distrow,
                            radiuscol=settings.radiuscol, densitycol=settings.densitycol, fractioncols=settings.fractioncols)
 
 if settings.earth:

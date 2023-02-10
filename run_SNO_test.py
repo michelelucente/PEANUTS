@@ -129,7 +129,7 @@ plt.title("${}^8$B neutrinos")
 plt.xlabel('Energy [MeV]')
 plt.ylabel(r"P(${\nu_e \rightarrow \nu_\alpha})$")
 plt.legend()
-plt.savefig(plots_folder + "8B_SNO_cmparison.pdf")
+plt.savefig(plots_folder + "8B_SNO_comparison.pdf")
 
 plt.show()
 

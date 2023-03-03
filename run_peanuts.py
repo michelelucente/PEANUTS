@@ -101,7 +101,7 @@ for param in settings.scan:
 
     # If the solar probabilities were computed before, use the precomputed mass weights as neutrino state
     if settings.solar:
-      nustate = mass_weights
+      nustate = np.array(mass_weights, dtype=complex)
       basis = "mass"
 
     # If the latitude is provided compute probability integrated over exposure

@@ -17,7 +17,7 @@ from src.potentials import k, MatterPotential, R_E
 from src.integration import c0, c1, lambdas, Iab
 
 @nb.njit
-def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c):
+def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c, antiNu):
     """
     Upert(DeltamSq21, DeltamSq3l, pmns, E,  x2, x1, a, b, c) computes the evolutor
     for an ultrarelativistic neutrino state in flavour basis, for a reduced mixing matrix U = R_{13} R_{12}
@@ -30,6 +30,7 @@ def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c):
     - E is the neutrino energy, in units of MeV;
     - x1 (x2) is the starting (ending) point in the path;
     - a, b, c parametrise the density profile on the path, n_e(x) = a + b x^2 + c x^4.
+    - antiNu: False for neutrinos, True for antineutrinos
     See hep-ph/9702343 for the definition of the perturbative expansion of the evolutor in a 2-flavours case.
     """
 
@@ -46,7 +47,7 @@ def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c):
     naverage = (a * (x2 - x1) + b * (x2**3 - x1**3)/3 + c * (x2**5 - x1**5)/5) / (x2 - x1)
 
     # Matter potential for the 0th order evolutor
-    V = MatterPotential(naverage)
+    V = MatterPotential(naverage, antiNu)
 
     # Parameter for the density perturbation around the mean density value:
     atilde = a - naverage
@@ -56,6 +57,8 @@ def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c):
 
     # Reduced mixing matrix U = R_{13} R_{12}
     U = pmns.U
+    if antiNu:
+      U = U.conjugate()
 
     # Hamiltonian in the reduced flavour basis
     H = np.dot(np.dot(U, np.diag(ki)), U.transpose()) + np.diag(np.array([V, 0, 0]))
@@ -65,8 +68,8 @@ def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c):
     T = H - tr/3 * id3
 
     # Coefficients of the characteristic equation for T
-    c0_loc = c0(ki, pmns.theta12, pmns.theta13, naverage)
-    c1_loc = c1(ki, pmns.theta12, pmns.theta13, naverage)
+    c0_loc = c0(ki, pmns.theta12, pmns.theta13, naverage, antiNu)
+    c1_loc = c1(ki, pmns.theta12, pmns.theta13, naverage, antiNu)
 
     # Roots of the characteristic equation for T
     lam = lambdas(c0_loc, c1_loc)
@@ -86,7 +89,7 @@ def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c):
     if (b != 0) | (c != 0):
       for idx_a in range(3) :
         for idx_b in range(3) :
-          u1 += np.dot(np.dot(M[idx_a], np.diag(np.array([-1j * MatterPotential(Iab(lam[idx_a] + tr/3, lam[idx_b] + tr/3, atilde, b, c, x2, x1)), 0, 0]))), M[idx_b])
+          u1 += np.dot(np.dot(M[idx_a], np.diag(np.array([-1j * MatterPotential(Iab(lam[idx_a] + tr/3, lam[idx_b] + tr/3, atilde, b, c, x2, x1), antiNu), 0, 0]))), M[idx_b])
 
     u = u0 + u1
 
@@ -95,7 +98,7 @@ def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c):
 
 
 @nb.njit
-def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H):
+def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H, antiNu):
     """
     FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H) computes the full evolutor for an ultrarelativistic
     neutrino crossing the Earth:
@@ -107,6 +110,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H):
     - d is the CP-violating PMNS phase;
     - eta is the nadir angle;
     - H is the underground detector depth, in units of meters.
+    - antiNu: False for neutrinos, True for antineutrinos
     """
 
     # If the detector is on the surface and neutrinos are coming from above the horizon, there is no
@@ -125,6 +129,11 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H):
     r23 = pmns.R23(pmns.theta23)
     delta = pmns.Delta(pmns.delta)
 
+    # Conjuagate for antineutrinos
+    if antiNu:
+      r23 = r23.conjugate()
+      delta = delta.conjugate()
+
     # If 0 <= eta < pi/2 we compute the evolutor taking care of matter density perturbation around the
     # density mean value at first order
     if 0 <= eta < pi/2:
@@ -141,7 +150,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H):
         params2 = np.flipud(params)
 
         # Compute the evolutors for the path from Earth entry point to trajectory mid-point at x == 0
-        evolutors_full_path = [Upert(DeltamSq21, DeltamSq3l,pmns, E, params2[i][3], params2[i+1][3] if i < len(params2)-1 else 0, params2[i][0], params2[i][1], params2[i][2]) for i in range(len(params))]
+        evolutors_full_path = [Upert(DeltamSq21, DeltamSq3l,pmns, E, params2[i][3], params2[i+1][3] if i < len(params2)-1 else 0, params2[i][0], params2[i][1], params2[i][2], antiNu) for i in range(len(params))]
 
         # Multiply the single evolutors
         evolutor_half_full = evolutors_full_path[0]
@@ -152,7 +161,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H):
         # Only the evolutor for the most external shell needs to be computed
         evolutors_to_detectors = evolutors_full_path.copy()
 
-        evolutors_to_detectors[0] = Upert(DeltamSq21, DeltamSq3l, pmns, E, x_d, params[-2][3] if len(params) > 1 else 0, params[-1][0], params[-1][1], params[-1][2])
+        evolutors_to_detectors[0] = Upert(DeltamSq21, DeltamSq3l, pmns, E, x_d, params[-2][3] if len(params) > 1 else 0, params[-1][0], params[-1][1], params[-1][2], antiNu)
 
         # Multiply the single evolutors
         evolutor_half_detector = evolutors_to_detectors[0]
@@ -175,7 +184,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H):
 
         # Compute the evolutor for constant density n_1 and traveled distance Deltax,
         # and include the factorised dependence on th23 and d to obtain the full evolutor
-        evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, Deltax, 0, n_1, 0, 0), delta)), r23.transpose())
+        evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, Deltax, 0, n_1, 0, 0, antiNu), delta)), r23.transpose())
         return evolutor
 
     else:

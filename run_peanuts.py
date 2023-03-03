@@ -62,7 +62,7 @@ if settings.earth:
 
   # If the solar probabilities will not be computed before, take state from settings
   if not settings.solar:
-    nustate = settings.nustate
+    nustate = settings.nustatesigned
     basis = settings.basis
 
   # Earth density

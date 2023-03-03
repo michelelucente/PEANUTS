@@ -20,6 +20,7 @@ import src.files as f
 from src.potentials import k, MatterPotential, R_E
 from src.evolutor import FullEvolutor
 from src.time_average import NadirExposure
+from src.pmns import isantiNu
 
 earthdensity =  [
   ('density_file', nb.types.string),
@@ -118,7 +119,7 @@ class EarthDensity:
     return alpha_prime[idx] + beta_prime[idx] * x**2 + gamma_prime[idx] * x**4
 
 
-def numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, H):
+def numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, antiNu):
   """
   numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, H) computes
   numerically the probability of survival of an incident electron neutrino spectrum
@@ -128,12 +129,19 @@ def numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, H):
   - E: the neutrino energy
   - eta: the nadir angle
   - H: the detector depth below the surface of the Earth
+  - antiNu: False for neutrinos, True for antineutrinos
   """
 
   # Extract from pmns matrix
   U = pmns.U
   r23 = pmns.R23(pmns.theta23)
   delta = pmns.Delta(pmns.delta)
+
+  # Conjugate for antineutrinos
+  if antiNu:
+    U = U.conjugate()
+    r23 = r23.conjugate()
+    delta = delta.conjugate()
 
   if DeltamSq3l > 0: # NO, l = 1
     ki = k(np.array([0, DeltamSq21, DeltamSq3l]), E)
@@ -154,7 +162,7 @@ def numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, H):
   def model(t, y):
     nue, numu, nutau = y
     dnudt = - 1j * np.dot(multi_dot([r23, delta.conjugate(), Hk + np.diag([
-        MatterPotential(density.call(t, eta_prime) if 0 <= eta < pi/2 else n_1)
+        MatterPotential(density.call(t, eta_prime) if 0 <= eta < pi/2 else n_1, antiNu)
         ,0,0]), delta, r23.transpose()]), [nue, numu, nutau])
     return dnudt
 
@@ -204,7 +212,10 @@ def evolved_state_numerical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, e
   - full_oscillation: return full oscillation along path (def. False))
   """
 
-  num_solution, x = numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, H)
+  # Figure out whether it is a neutrino or an antineutrino
+  antiNu, nustate  = isantiNu(nustate)
+
+  num_solution, x = numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, antiNu)
 
   state = [np.array(np.dot(num_solution[i].transpose(), nustate)) for i in range(len(x))]
 
@@ -228,12 +239,18 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, 
   - full_oscillation: return full oscillation along path (def. False))
   """
 
-  num_solution, x = numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, H)
+  # Figure out whether it is a neutrino or an antineutrino
+  antiNu, nustate = isantiNu(nustate)
+
+  num_solution, x = numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, antiNu)
 
   if basis == "flavour":
       evolution = [np.array(np.square(np.abs(np.dot(num_solution[i].transpose(), nustate))) ) for i in range(len(x))]
   elif basis == "mass":
-      evolution = [np.array(np.real(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns))), nustate))) for i in range(len(x))]
+      if not antiNu:
+        evolution = [np.array(np.real(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns))), nustate))) for i in range(len(x))]
+      else:
+        evolution = [np.array(np.real(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns.conjugate()))), nustate))) for i in range(len(x))]
   else:
       print("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")
       exit()
@@ -258,7 +275,10 @@ def evolved_state_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, 
   - H: the detector depth below the surface of the Earth
   """
 
-  evol = FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H)
+  # Figure out whether it is a neutrino or an antineutrino
+  antiNu, nustate = isantiNu(nustate)
+
+  evol = FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H, antiNu)
   return np.dot(evol.transpose(), nustate.astype(nb.complex128))
 
 
@@ -277,11 +297,17 @@ def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, H,
   - basis: the basis of the neutrino eigenstate (def. mass)
   """
 
-  evol = FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H)
+  # Figure out whether it is a neutrino or an antineutrino
+  antiNu, nustate = isantiNu(nustate)
+
+  evol = FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H, antiNu)
   if basis == "flavour":
       return np.square(np.abs(np.dot(evol.transpose(), nustate.astype(nb.complex128))))
   elif basis == "mass":
-      return np.real(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns)).astype(nb.complex128)), nustate.astype(nb.complex128)))
+      if not antiNu:
+        return np.real(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns)).astype(nb.complex128)), nustate.astype(nb.complex128)))
+      else:
+        return np.real(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns.conjugate())).astype(nb.complex128)), nustate.astype(nb.complex128)))
 
   else:
       raise Exception("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")

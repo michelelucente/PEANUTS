@@ -18,7 +18,7 @@ from src.potentials import k, MatterPotential
 
 # Computes coefficients of the characteristic equation for the matrix T = H - Tr(H)/3, cf. hep-ph/9910546
 @nb.njit
-def c0 (ki, th12, th13, n):
+def c0 (ki, th12, th13, n, antiNu):
     """
     c0(ki, th12, th13, n) computes the coefficient c_0 defined in hep-ph/9910546, for the specific case
     in which the mixing matrix is the reduced one U = R_{13} R_{12}:
@@ -26,13 +26,14 @@ def c0 (ki, th12, th13, n):
     - thij: the PMNS mixing angles;
     - E: the neutrino energy, in units of MeV;
     - n: the electron matted density, in units of mol/cm**3.
+    - antiNu: False for neutrinos, True for antineutrinos
     See hep-ph/9910546 for the full context of the definition.
     """
 
     k1 = ki[0]
     k2 = ki[1]
     k3 = ki[2]
-    V = MatterPotential(n)
+    V = MatterPotential(n, antiNu)
 
     return (-4*(k1 + k2 - 2*k3)*(2*k1 - k2 - k3)*(k1 - 2*k2 + k3) +
     3*(k1**2 - 4*k1*k2 + k2**2 + 2*(k1 + k2)*k3 - 2*k3**2)*V +
@@ -41,7 +42,7 @@ def c0 (ki, th12, th13, n):
     k2*(2*k3 + V) + k1*(-4*k2 + 2*k3 + V))*cos(2*th13) )/108
 
 @nb.njit
-def c1(ki,th12, th13, n):
+def c1(ki,th12, th13, n, antiNu):
     """
     c1(ki, th12, th13, n) computes the coefficient c_1 defined in hep-ph/9910546, for the specific case
     in which the mixing matrix is the reduced one U = R_{13} R_{12}:
@@ -49,11 +50,12 @@ def c1(ki,th12, th13, n):
     - thij: the PMNS mixing angles;
     - E: the neutrino energy, in units of MeV;
     - n: the electron matted density, in units of mol/cm**3.
+    - antiNu: False for neutrinos, True for antineutrinos
     See hep-ph/9910546 for the full context of the definition.
     """
 
     [k1, k2, k3] = ki
-    V = MatterPotential(n)
+    V = MatterPotential(n, antiNu)
 
     return (-4*(k1**2 - k1*k2 + k2**2 - (k1 + k2)*k3 + k3**2) + (k1 + k2 - 2*k3)*V -
     4*V**2 + 6*(-k1 + k2)*V*cos(2*th12)*cos(th13)**2 -

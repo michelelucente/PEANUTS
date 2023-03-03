@@ -130,8 +130,9 @@ class SolarModel:
         self.frac = {fr : self.model[fr + ' fraction'] for fr in fractioncols.keys()}
 
         # Import spectral shapes
-        spectrum_files["8B"] = path + "/../Data/8B_shape_Ortiz_et_al.csv" if (spectrum_files is not None and "8B" not in spectrum_files) else spectrum_files['8B']
-        spectrum_files["hep"] = path + "/../Data/hep_shape.csv" if (spectrum_files is not None and "hep" not in spectrum_files) else spectrum_files['hep']
+        spectrum_files = {} if spectrum_files is None else spectrum_files
+        spectrum_files["8B"] = path + "/../Data/8B_shape_Ortiz_et_al.csv" if "8B" not in spectrum_files else spectrum_files['8B']
+        spectrum_files["hep"] = path + "/../Data/hep_shape.csv" if "hep" not in spectrum_files else spectrum_files['hep']
         self.spectra = {}
         for fraction, spectrum_file in spectrum_files.items():
           self.spectra[fraction] = f.read_csv(spectrum_file, usecols=[0, 1], names = ["Energy", "Spectrum"], skiprows=3, header=None)

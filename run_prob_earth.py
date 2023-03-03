@@ -122,7 +122,8 @@ earth_density = EarthDensity(density_file)
 
 # Print program banner and inputs
 print_banner()
-print_inputs(Settings(pmns, DeltamSq21, DeltamSq3l, E, eta, H, options))
+settings = Settings(pmns, DeltamSq21, DeltamSq3l, E, eta, H, options)
+print_inputs(settings)
 print("Running PEANUTS...")
 
 # Compute probability of survival after propagation through Earth
@@ -138,7 +139,7 @@ else:
 
 # Print results
 print()
-print("Probability to oscillate to an electron neutrino : ", prob[0])
-print("Probability to oscillate to a muon neutrino      : ", prob[1])
-print("Probability to oscillate to a tau neutrino       : ", prob[2])
+print("Probability to oscillate to an electron " + ("anti" if settings.antiNu else "") + "neutrino : ", prob[0])
+print("Probability to oscillate to a muon " + ("anti" if settings.antiNu else "") + "neutrino      : ", prob[1])
+print("Probability to oscillate to a tau " + ("anti" if settings.antiNu else "") + "neutrino       : ", prob[2])
 print()

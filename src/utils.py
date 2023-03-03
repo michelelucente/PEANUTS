@@ -63,8 +63,14 @@ def print_inputs(settings):
     inputs += "\n"\
               "Computing the probability on Earth with values\n\n"
     if not settings.solar:
+      if not settings.antiNu:
+        inputs += \
+             "Neutrino state           : " + str(settings.nustate) + "\n"
+      else:
+        inputs += \
+             "Antineutrino state       : " + str(settings.nustate) + "\n"
       inputs += \
-             "Neutrino " + settings.basis + " eigenstate : " + str(settings.nustate) + "\n"\
+             "Basis                    : " + settings.basis + "\n"\
              "theta_{12}               : " + str(settings.theta12) + "\n"\
              "theta_{13}               : " + str(settings.theta13) + "\n"\
              "theta_{23}               : " + str(settings.theta23) + "\n"\
@@ -113,7 +119,7 @@ def get_comma_separated_floats(option, opt, value, parser):
   """
   Get an argument from the argparser with
   comma-separated values and make a
-  list of floats
+  list of complex numbers
   """
   try:
     setattr(parser.values, option.dest, [complex(x) for x in value.split(',')])

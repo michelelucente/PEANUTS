@@ -22,17 +22,18 @@ mainfilename = 'run_prob_earth'
 
 parser = OptionParser()
 parser.add_option("-v", "--verbose", help = "Print debug output", action='store_true', dest='verbose', default=False)
+parser.add_option("-i", "--in_slha", help="SLHA input file", action='store', dest='in_slha', default="")
 parser.add_option("-d", "--density", help ="Add custom earth density profile", action='store', dest="density", default="")
-parser.add_option("-a", "--analytical", help="Perform analytical evolution", action='store_true', dest="analytical", default=True)
-parser.add_option("-n", "--numerical", help="Perform numerical evolution", action='store_false', dest="analytical")
+parser.add_option("--antinu", help = "", action="store_true", dest="antinu", default=False)
+parser.add_option("--analytical", help="Perform analytical evolution", action='store_true', dest="analytical", default=True)
+parser.add_option("--numerical", help="Perform numerical evolution", action='store_false', dest="analytical")
 parser.add_option("-f", "--flavour", help="Input neutrino state, in flavour basis", type='string', action='callback', callback=get_comma_separated_floats, dest="flavour")
 parser.add_option("-m", "--mass", help="Input neutrino state, in mass basis", type='string', action='callback', callback=get_comma_separated_floats, dest="mass")
-parser.add_option("-i", "--in_slha", help="SLHA input file", action='store', dest='in_slha', default="")
 (options, args) = parser.parse_args()
 if len(args) < 3 or (options.in_slha == "" and len(args) != 9):
   print('Wrong number of arguments \n\
         \n\
-Usage: ./'+mainfilename+'.py -f/-m <eigenstate> <energy> <eta> <depth> [<th12> <th13> <th23> <delta> <md21> <md3l>]\n\
+Usage: ./'+mainfilename+'.py [options] -f/-m <eigenstate> <energy> <eta> <depth> [<th12> <th13> <th23> <delta> <md21> <md3l>]\n\
        <eigenstate>                Flavour (-f/--flavour) or mass (-m/--mass) input eigenstate\n\
        <energy>                    Energy of neutrinos\n\
        <eta>                       Nadir angle of the incident neutrinos\n\
@@ -49,8 +50,9 @@ Options:\n\
        -v, --verbose               Print debug output\n\
        -i, --in_slha <slha_file>   SLHA input file for neutrino parameters\n\
        -d, --density               Add custom earth density profile\n\
-       -a, --analytical            Perform analytical evolution\n\
-       -n, --numerical             Perform numerical evolution')
+       --antinu                    Input state is an antineutrino\n\
+       --analytical                Perform analytical evolution\n\
+       --numerical                 Perform numerical evolution')
   exit()
 
 
@@ -105,6 +107,7 @@ else:
   DeltamSq3l = float(args[8])
 
 # Parse neutrino state
+antinu = options.antinu
 nustate = np.zeros(3)
 if options.flavour != None:
   nustate = np.array(options.flavour)
@@ -130,16 +133,16 @@ print("Running PEANUTS...")
 
 # Check if analytical solution was requested
 if options.analytical:
-  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis=basis)
+  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis=basis, antinu=antinu)
 
 # Otherwise use numerical solution
 else:
- prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, mode="numerical", basis=basis)
+ prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, mode="numerical", basis=basis, antinu=antinu)
 
 
 # Print results
 print()
-print("Probability to oscillate to an electron " + ("anti" if settings.antiNu else "") + "neutrino : ", prob[0])
-print("Probability to oscillate to a muon " + ("anti" if settings.antiNu else "") + "neutrino      : ", prob[1])
-print("Probability to oscillate to a tau " + ("anti" if settings.antiNu else "") + "neutrino       : ", prob[2])
+print("Probability to oscillate to an electron " + ("anti" if settings.antinu else "") + "neutrino : ", prob[0])
+print("Probability to oscillate to a muon " + ("anti" if settings.antinu else "") + "neutrino      : ", prob[1])
+print("Probability to oscillate to a tau " + ("anti" if settings.antinu else "") + "neutrino       : ", prob[2])
 print()

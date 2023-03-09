@@ -15,13 +15,13 @@ R_E = 6.371e6 # meters
 
 # Matter potential
 @nb.njit
-def MatterPotential (n, antiNu):
+def MatterPotential (n, antinu):
     """
     MatterPotential(n) computes the matter potential due to an electron density n, expressed in mol/cm^3
     - n: electron density, in mol / cm^3
     See Eq. 4.17 in 1802.05781.
     """
-    return (-1 if antiNu else 1) * R_E * 3.868e-7 * n # dimensionless
+    return (-1 if antinu else 1) * R_E * 3.868e-7 * n # dimensionless
 
 # Kinetic potential
 @nb.njit

@@ -13,20 +13,6 @@ from numba.experimental import jitclass
 from math import cos, sin
 from cmath import exp
 
-@nb.njit
-def isantiNu(nustate):
-  """
-  Check whether the neutrino state is an antineutrino
-  and return a boolean and the modified state without sign
-  """
-
-  antiNu = np.any(np.real(nustate) < 0)
-
-  if antiNu:
-    nustate = np.array([np.abs(np.real(i)) + 1j*np.imag(i) for i in nustate]).astype(nb.complex128)
-
-  return antiNu, nustate
-
 pmns = [('theta12', nb.float64),
         ('theta13', nb.float64),
         ('theta23', nb.float64),

@@ -63,7 +63,7 @@ def print_inputs(settings):
     inputs += "\n"\
               "Computing the probability on Earth with values\n\n"
     if not settings.solar:
-      if not settings.antiNu:
+      if not settings.antinu:
         inputs += \
              "Neutrino state           : " + str(settings.nustate) + "\n"
       else:

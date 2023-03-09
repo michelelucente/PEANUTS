@@ -9,7 +9,7 @@ Created on My 11 2022
 import numpy as np
 import copy
 
-from src.pmns import PMNS, isantiNu
+from src.pmns import PMNS
 
 class Param:
 
@@ -172,7 +172,7 @@ class Settings:
         else:
           self.fraction = settings["Solar"]["fraction"]
 
-        self.antiNu = False
+        self.antinu = False
         self.solar_file = settings["Solar"]["solar_model"] if "solar_model" in settings["Solar"] else None
         self.flux_file = settings["Solar"]["flux_file"] if "flux_file" in settings["Solar"] else None
         self.fluxrows = settings["Solar"]["fluxrows"] if "fluxrows" in settings["Solar"] else None
@@ -203,14 +203,14 @@ class Settings:
       # Extract earth parameters
       if "Earth" in settings:
 
-        self.antiNu = False
+        self.antinu = False
         if "Solar" not in settings and\
            ("state" not in settings["Earth"] or "basis" not in settings["Earth"]):
           print("Error: missing input neutrino state or basis, please provide both.")
           exit()
         elif "Solar" not in settings:
-          self.nustatesigned = np.array(settings["Earth"]["state"],dtype=complex)
-          self.antiNu, self.nustate = isantiNu(np.array(settings["Earth"]["state"],dtype=complex))
+          self.nustate = np.array(settings["Earth"]["state"],dtype=complex)
+          self.antinu = settings["Earth"]["antinu"] if "antinu" in settings["Earth"] else False
           self.basis = settings["Earth"]["basis"]
           self.probabilities = True
 
@@ -284,6 +284,7 @@ class Settings:
     elif len(args) == 7:
 
       self.earth = True
+      self.antinu = args[6].antinu
       self.pmns = args[0]
       self.theta12 = self.pmns.theta12
       self.theta13 = self.pmns.theta13
@@ -296,11 +297,11 @@ class Settings:
       self.depth = args[5]
 
       if args[6].flavour is not None:
-        self.antiNu, self.nustate = isantiNu(np.array(args[6].flavour))
         self.basis = "flavour"
+        self.nustate = args[6].flavour
       elif args[6].mass is not None:
-        self.antiNu, self.nustate = isantiNu(np.array(args[6].mass))
         self.basis = "mass"
+        self.nustate = args[6].mass
       else:
         print("Error: unknown basis, please choose either flavour or mass basis.")
         exit()

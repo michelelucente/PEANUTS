@@ -121,17 +121,17 @@ def output(settings, outs):
       towrite += "Dm3l^2 [eV^2]\t"
 
     if settings.solar:
-      if not settings.antiNu:
+      if not settings.antinu:
         towrite += "Psolar (e) \t Psolar (mu) \t Psolar (tau)\t"
       else:
         towrite += "Psolar (~e) \t Psolar (~mu) \t Psolar (~tau)\t"
     if settings.earth:
-      if not settings.antiNu:
+      if not settings.antinu:
         towrite += "Pearth (e) \t Pearth (mu) \t Pearth (tau)\t"
       else:
         towrite += "Pearth (~e) \t Pearth (~mu) \t Pearth (~tau)\t"
       if settings.evolved_state:
-        towrite += "Evolved " + ("anti" if settings.antiNu else "") + "neutrino state\t"
+        towrite += "Evolved " + ("anti" if settings.antinu else "") + "neutrino state\t"
     towrite += "\n"
 
     for i, param in settings.scan.enumerate():

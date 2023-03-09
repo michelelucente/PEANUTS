@@ -280,7 +280,7 @@ class Settings:
       self.distorted_spectrum =  False
 
     # If there are exactly 7 arguments, we are in earth mode
-    # args = (pmns, dm21, dm3l, E, eta, H, options)
+    # args = (pmns, dm21, dm3l, E, eta, depth, options)
     elif len(args) == 7:
 
       self.earth = True

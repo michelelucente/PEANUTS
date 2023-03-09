@@ -71,7 +71,7 @@ density_file = path +'/Data/Earth_Density.csv' if options.density == '' else opt
 # Get parameters
 E = float(args[0])
 eta = float(args[1])
-H = float(args[2])
+depth = float(args[2])
 
 # If the -i/--in_slha option is given, read the slha file
 if options.in_slha != "":
@@ -125,7 +125,7 @@ earth_density = EarthDensity(density_file)
 
 # Print program banner and inputs
 print_banner()
-settings = Settings(pmns, DeltamSq21, DeltamSq3l, E, eta, H, options)
+settings = Settings(pmns, DeltamSq21, DeltamSq3l, E, eta, depth, options)
 print_inputs(settings)
 print("Running PEANUTS...")
 
@@ -133,11 +133,11 @@ print("Running PEANUTS...")
 
 # Check if analytical solution was requested
 if options.analytical:
-  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis=basis, antinu=antinu)
+  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, basis=basis, antinu=antinu)
 
 # Otherwise use numerical solution
 else:
- prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, mode="numerical", basis=basis, antinu=antinu)
+ prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode="numerical", basis=basis, antinu=antinu)
 
 
 # Print results

@@ -19,7 +19,7 @@ from src.integration import c0, c1, lambdas, Iab
 @nb.njit
 def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c, antinu):
     """
-    Upert(DeltamSq21, DeltamSq3l, pmns, E,  x2, x1, a, b, c) computes the evolutor
+    Upert(DeltamSq21, DeltamSq3l, pmns, E,  x2, x1, a, b, c, antinu) computes the evolutor
     for an ultrarelativistic neutrino state in flavour basis, for a reduced mixing matrix U = R_{13} R_{12}
     (the dependence on th_{23} and CP-violating phase \delta_{CP} can be factorised) for a density profile
     parametrised by a 4th degree even poliomial in the trajectory coordinate, to 1st order corrections around
@@ -98,9 +98,9 @@ def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c, antinu):
 
 
 @nb.njit
-def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H, antinu):
+def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
     """
-    FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H) computes the full evolutor for an ultrarelativistic
+    FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu) computes the full evolutor for an ultrarelativistic
     neutrino crossing the Earth:
     - density is the Earth density object
     - DeltamSq21: the solar mass splitting
@@ -109,17 +109,17 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, H, antinu):
     - E is the neutrino energy, in units of MeV;
     - d is the CP-violating PMNS phase;
     - eta is the nadir angle;
-    - H is the underground detector depth, in units of meters.
+    - depth is the underground detector depth, in units of meters.
     - antinu: False for neutrinos, True for antineutrinos
     """
 
     # If the detector is on the surface and neutrinos are coming from above the horizon, there is no
     # matter effect
-    if H == 0 and (pi/2 <= eta <= pi):
+    if depth == 0 and (pi/2 <= eta <= pi):
         return (1+0.j)*np.identity(3)
 
     # Detector depth normalised to Earth radius
-    h = H / R_E
+    h = depth / R_E
 
     # Position of detector the on a radial path
     r_d = 1 - h # This is valid for eta = 0

@@ -276,7 +276,7 @@ def evolved_state_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, 
 
 
 @nb.njit
-def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, basis="mass", antinu=False):
+def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, height, basis="mass", antinu=False):
   """
   Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, basis, antinu) computes
   analytically the probability of survival of an incident electron neutrino spectrum
@@ -291,7 +291,7 @@ def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, de
   - antinu: False for neutrinos, True for antineutrinos
   """
 
-  evol = FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu)
+  evol = FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, height, antinu)
   if basis == "flavour":
       return np.square(np.abs(np.dot(evol.transpose(), nustate.astype(nb.complex128))))
   elif basis == "mass":
@@ -339,7 +339,7 @@ def evolved_state(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth,
 
 
 
-def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode="analytical", basis="mass", full_oscillation=False, antinu=False):
+def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, height, mode="analytical", basis="mass", full_oscillation=False, antinu=False):
   """
   Pearth(nustate, density, pmns, DeltamSq21, DeltamSq21, E, eta, depth, mode, basis, full_oscillation, antinu), computes with a given mode
   the probability of survival of an incident electron neutrino spectrum
@@ -368,7 +368,7 @@ def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode="
     if full_oscillation:
       print("Warning: full oscillation only available in numerical mode. Result will be only final probability values")
 
-    return Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, basis=basis, antinu=antinu)
+    return Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, height, basis=basis, antinu=antinu)
 
   elif mode == "numerical":
     return Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, basis=basis, full_oscillation=full_oscillation, antinu=antinu)

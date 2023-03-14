@@ -25,7 +25,7 @@ except:
 import pandas as pd
 from decimal import Decimal
 
-from src.settings import Settings
+from peanuts.settings import Settings
 import os
 
 

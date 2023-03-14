@@ -13,7 +13,7 @@ from math import cos
 from cmath import exp
 from cmath import sqrt as csqrt
 
-from src.potentials import k, MatterPotential
+from peanuts.potentials import k, MatterPotential
 
 
 # Computes coefficients of the characteristic equation for the matrix T = H - Tr(H)/3, cf. hep-ph/9910546

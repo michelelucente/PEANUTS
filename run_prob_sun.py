@@ -11,11 +11,11 @@ import os
 import numpy as np
 from optparse import OptionParser
 
-import src.files as f
-from src.utils import print_banner, print_inputs
-from src.settings import Settings
-from src.pmns import PMNS
-from src.solar import SolarModel, solar_flux_mass, Psolar
+import peanuts.files as f
+from peanuts.utils import print_banner, print_inputs
+from peanuts.settings import Settings
+from peanuts.pmns import PMNS
+from peanuts.solar import SolarModel, solar_flux_mass, Psolar
 
 mainfilename = 'run_prob_sun'
 

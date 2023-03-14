@@ -16,10 +16,10 @@ from numpy.linalg import multi_dot
 from math import sin, cos, sqrt, pi, asin
 from scipy.integrate import complex_ode
 
-import src.files as f
-from src.potentials import k, MatterPotential, R_E
-from src.evolutor import FullEvolutor
-from src.time_average import NadirExposure
+import peanuts.files as f
+from peanuts.potentials import k, MatterPotential, R_E
+from peanuts.evolutor import FullEvolutor
+from peanuts.time_average import NadirExposure
 
 earthdensity =  [
   ('density_file', nb.types.string),

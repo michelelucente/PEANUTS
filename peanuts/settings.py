@@ -9,7 +9,7 @@ Created on My 11 2022
 import numpy as np
 import copy
 
-from src.pmns import PMNS
+from peanuts.pmns import PMNS
 
 class Param:
 
@@ -145,7 +145,7 @@ class Settings:
           self.scan.add("delta", self.delta)
       else:
 
-        import src.files as f
+        import peanuts.files as f
 
         slha_file = settings["Neutrinos"]
         try:

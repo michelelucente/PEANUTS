@@ -18,7 +18,7 @@ from mpmath import fp, ellipf, sec, csc
 from interval import interval
 from scipy import integrate
 from scipy.interpolate import interp1d
-import src.files as f
+import peanuts.files as f
 
 
 # Sometimes the function cmath.sqrt takes the "wrong" side of the branch cut, if its argument has vanishing

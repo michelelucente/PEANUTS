@@ -11,12 +11,12 @@ import os
 import numpy as np
 from optparse import OptionParser
 
-import src.files as f
-from src.utils import get_comma_separated_floats, print_banner, print_inputs
-from src.settings import Settings
-from src.pmns import PMNS
-from src.solar import SolarModel, solar_flux_mass
-from src.earth import EarthDensity, Pearth
+import peanuts.files as f
+from peanuts.utils import get_comma_separated_floats, print_banner, print_inputs
+from peanuts.settings import Settings
+from peanuts.pmns import PMNS
+from peanuts.solar import SolarModel, solar_flux_mass
+from peanuts.earth import EarthDensity, Pearth
 
 mainfilename = 'run_prob_earth'
 

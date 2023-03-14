@@ -11,7 +11,7 @@ import os
 import sys
 sys.path.insert(0, os.path.dirname(os.path.realpath( __file__ )))
 
-from src.pmns import PMNS
-from src.solar import SolarModel, Psolar, solar_flux_mass
-from src.earth import EarthDensity, Pearth, Pearth_integrated
-from src.time_average import NadirExposure
+from peanuts.pmns import PMNS
+from peanuts.solar import SolarModel, Psolar, solar_flux_mass
+from peanuts.earth import EarthDensity, Pearth, Pearth_integrated
+from peanuts.time_average import NadirExposure

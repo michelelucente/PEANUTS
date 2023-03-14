@@ -14,9 +14,9 @@ from numpy import arctan, arcsin
 from optparse import OptionParser
 from scipy.interpolate import interp1d
 
-import src.files as f
-from src.pmns import PMNS
-from src.solar import SolarModel, Psolar
+import peanuts.files as f
+from peanuts.pmns import PMNS
+from peanuts.solar import SolarModel, Psolar
 
 mainfilename = 'run_SNO_test'
 
@@ -197,7 +197,7 @@ plt.show()
 # Test Earth density profiles
 #############################
 from math import pi
-from src.earth import EarthDensity
+from peanuts.earth import EarthDensity
 
 x = np.arange(0,1,0.001)
 eta = [0, pi/6, pi/4, pi/3]
@@ -218,7 +218,7 @@ plt.show()
 
 # Test analytical vs numerical solutions
 ########################################
-from src.earth import Pearth
+from peanuts.earth import Pearth
 
 # Use SNO location for comparison
 H = 2e3 # meters
@@ -293,8 +293,8 @@ plt.show()
 
 # Test Sun-Earth survival probability
 #####################################
-from src.solar import solar_flux_mass
-from src.evolutor import FullEvolutor
+from peanuts.solar import solar_flux_mass
+from peanuts.evolutor import FullEvolutor
 
 E = np.random.uniform(1, 20)
 eta = np.random.uniform(0, pi)
@@ -316,7 +316,7 @@ print("For E = %.2f and eta = %.2f pi the flavour probabilitites are %s" % (E, e
 # Test exposure time average
 #############################
 from math import radians
-from src.time_average import NadirExposure
+from peanuts.time_average import NadirExposure
 
 # Get the values of eta for all the shells
 shells_eta = np.insert(earth_density.shells_eta(), 0, 0)

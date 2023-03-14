@@ -12,12 +12,12 @@ import numpy as np
 from optparse import OptionParser
 from math import pi, radians
 
-import src.files as f
-from src.utils import get_comma_separated_floats, print_banner, print_inputs
-from src.pmns import PMNS
-from src.solar import SolarModel, solar_flux_mass, Psolar
-from src.earth import EarthDensity, Pearth, Pearth_integrated, evolved_state
-from src.time_average import NadirExposure
+import peanuts.files as f
+from peanuts.utils import get_comma_separated_floats, print_banner, print_inputs
+from peanuts.pmns import PMNS
+from peanuts.solar import SolarModel, solar_flux_mass, Psolar
+from peanuts.earth import EarthDensity, Pearth, Pearth_integrated, evolved_state
+from peanuts.time_average import NadirExposure
 
 mainfilename = 'run_peanuts'
 

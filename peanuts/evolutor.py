@@ -13,8 +13,8 @@ import numba as nb
 from math import sin, asin, cos, sqrt, pi
 from cmath import exp
 
-from src.potentials import k, MatterPotential, R_E
-from src.integration import c0, c1, lambdas, Iab
+from peanuts.potentials import k, MatterPotential, R_E
+from peanuts.integration import c0, c1, lambdas, Iab
 
 @nb.njit
 def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c, antinu):

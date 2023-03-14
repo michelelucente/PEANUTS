@@ -14,10 +14,10 @@ import numba as nb
 from math import cos, sin
 from scipy import integrate
 from scipy.interpolate import interp1d
-from src.matter_mixing import th13_M, th12_M
-from src.pmns import PMNS
+from peanuts.matter_mixing import th13_M, th12_M
+from peanuts.pmns import PMNS
 
-import src.files as f
+import peanuts.files as f
 
 class SolarModel:
     """"

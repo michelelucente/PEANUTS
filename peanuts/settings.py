@@ -219,6 +219,7 @@ class Settings:
           exit()
         else:
           self.depth = settings["Earth"]["depth"]
+        self.height = settings["Earth"]["height"] if "height" in settings["Earth"] else 0
 
         # Either a specific nadir angle, eta, or a latitude or exposure file must be provided
         if "eta" not in settings["Earth"] and "latitude" not in settings["Earth"] and not "exposure_file" in settings["Earth"]:

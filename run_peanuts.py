@@ -106,14 +106,16 @@ for param in settings.scan:
 
     # If the latitude is provided compute probability integrated over exposure
     if settings.exposure:
-      out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, settings.depth, mode=settings.evolution, antinu=settings.antinu,
-                                       lam=radians(settings.latitude), d1=settings.exposure_time[0], d2=settings.exposure_time[1],
+      out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, settings.depth, height=settings.height,
+                                       mode=settings.evolution, antinu=settings.antinu, lam=radians(settings.latitude),
+                                       d1=settings.exposure_time[0], d2=settings.exposure_time[1],
                                        normalized=settings.exposure_normalized, ns=settings.exposure_samples,
                                        from_file=settings.exposure_file, angle=settings.exposure_angle)
 
     else:
       # Compute probability of survival after propagation through Earth
-      out["earth"] = Pearth(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, param.eta, settings.depth, mode=settings.evolution, basis=basis, antinu=settings.antinu)
+      out["earth"] = Pearth(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, param.eta, settings.depth, height=settings.height,
+                            mode=settings.evolution, basis=basis, antinu=settings.antinu)
 
     # If the evolved state is requested, compute that too
     if settings.evolved_state:
@@ -121,7 +123,8 @@ for param in settings.scan:
         print("Warning: The evolved state can only be computed from a neutrino state in the flavour basis, so it will not be provided")
         settings.evolved_state = False
       else:
-        out["evolved_state"] = evolved_state(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, param.eta, settings.depth, mode=settings.evolution, antinu=settings.antinu)
+        out["evolved_state"] = evolved_state(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, param.eta, settings.depth, height=settings.height,
+                                             mode=settings.evolution, antinu=settings.antinu)
 
   # Append to list
   outs.append(out)

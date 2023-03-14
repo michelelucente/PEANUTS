@@ -98,16 +98,17 @@ def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c, antinu):
 
 
 # Compute lenght DL of trajectory from production point to Earth surface, normalized to Earth radius
+@nb.njit
 def DL(eta, height):
     r_surface = (R_E)/(R_E + height) # Relative radius of Earth surface relative to production sphere
-        
+
     if eta >= 0 and eta <= pi/2:
         delta_relative = - r_surface * cos(eta) + sqrt(1 - r_surface**2 * sin(eta)**2) # lenght of path normalised to production radius
     elif eta > pi/2 and eta <= pi:
         delta_relative = r_surface * cos(eta) + sqrt(1 - r_surface**2 * sin(eta)**2) # lenght of path normalised to production radius
-            
+
     return delta_relative * (R_E + height) / R_E # Returns the lenght normlised to Earth radius
-    
+
 
 @nb.njit
 def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, height, antinu):
@@ -125,6 +126,9 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, height, a
     - height: the altitude production point of neutrinos, in meters above the Earth surface
     - antinu: False for neutrinos, True for antineutrinos
     """
+
+    # 3d identity matrix of complex numbers
+    id3 = np.eye(3, dtype=nb.complex128)
 
     # If the detector is on the surface and neutrinos are coming from above the horizon, there is no
     # matter effect
@@ -146,7 +150,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, height, a
     if antinu:
       r23 = r23.conjugate()
       delta = delta.conjugate()
-    
+
 
     # If 0 <= eta < pi/2 we compute the evolutor taking care of matter density perturbation around the
     # density mean value at first order
@@ -162,9 +166,9 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, height, a
         # profile n_e(x) = a + b x^2 + c x^4 along the crossed shell, with each shell ending at x == x_i
         params = density.parameters(eta_prime)
         params2 = np.flipud(params)
-        
+
         # Compute evolutor above Earth surface
-        evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime, height), 0, 0, 0, 0, antinu) if height > 0 else np.identity(3)
+        evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime, height), 0, 0, 0, 0, antinu) if height > 0 else id3
 
         # Compute the evolutors for the path from Earth entry point to trajectory mid-point at x == 0
         evolutors_full_path = [Upert(DeltamSq21, DeltamSq3l,pmns, E, params2[i][3], params2[i+1][3] if i < len(params2)-1 else 0, params2[i][0], params2[i][1], params2[i][2], antinu) for i in range(len(params))]
@@ -200,9 +204,9 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, height, a
 
         # Deltax is the lenght of the crossed path
         Deltax = r_d * cos(eta) + sqrt(1 - r_d**2 * sin(eta)**2)
-        
+
         # Compute evolutor above Earth surface
-        evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime, height), 0, 0, 0, 0, antinu) if height > 0 else np.identity(3)
+        evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime, height), 0, 0, 0, 0, antinu) if height > 0 else id3
 
         # Compute the evolutor for constant density n_1 and traveled distance Deltax,
         # and include the factorised dependence on th23 and d to obtain the full evolutor

@@ -18,7 +18,7 @@ def print_banner():
             "   Tomas Gonzalo   (tomas.gonzalo@kit.edu)\n\n"\
             "PEANUTS 1.0 is open source and under the terms of the GPL-3 license.\n\n"\
             "Documentation and details for PEANUTS can be found at\n"\
-            "T. Gonzalo and M. Lucente, arXiv:xxxx.xxxx\n\n"\
+            "T. Gonzalo and M. Lucente, arXiv:2303.15527\n\n"\
             "==========================================\n"
 
   print(banner)

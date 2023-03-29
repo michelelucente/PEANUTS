@@ -5,7 +5,7 @@ PEANUTS is a software for the automatic computation of solar neutrino flux and i
 
 Please cite the following paper when using PEANUTS:
 
-T. E. Gonzalo and M. Lucente, arXiv:xxxx.xxxx
+T. E. Gonzalo and M. Lucente, arXiv:2303.15527
 
 PEANUTS is distributed under the GPL-3.0 license, which permits the free use and modification of the software for any use. Please read the accompanying LICENSE document for more details of the GPL-3.0 license.
 

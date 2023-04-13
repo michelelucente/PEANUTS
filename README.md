@@ -44,4 +44,4 @@ where the given YAML file determines the specific computation to perform.
 Contact
 -------
 
-Please contact Michele Lucente (lucente@physik.rwth-aachen.de) or Tomas Gonzalo (tomas.gonzalo@kit.edu) for any questions or feedback about PEANUTS.
+Please contact Michele Lucente (michele.lucente@unibo.it) or Tomas Gonzalo (tomas.gonzalo@kit.edu) for any questions or feedback about PEANUTS.

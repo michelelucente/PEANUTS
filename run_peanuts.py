@@ -63,7 +63,7 @@ if settings.earth:
   # If the solar probabilities will not be computed before, take state from settings
   if not settings.solar:
     nustate = settings.nustate
-    basis = settings.basis
+    massbasis = True if settings.basis=="mass" else False
 
   # Earth density
   earth_density = EarthDensity(settings.density_file)
@@ -102,7 +102,7 @@ for param in settings.scan:
     # If the solar probabilities were computed before, use the precomputed mass weights as neutrino state
     if settings.solar:
       nustate = np.array(mass_weights, dtype=complex)
-      basis = "mass"
+      massbasis = True
 
     # If the latitude is provided compute probability integrated over exposure
     if settings.exposure:
@@ -113,11 +113,11 @@ for param in settings.scan:
 
     else:
       # Compute probability of survival after propagation through Earth
-      out["earth"] = Pearth(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, param.eta, settings.depth, mode=settings.evolution, basis=basis, antinu=settings.antinu)
+      out["earth"] = Pearth(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, param.eta, settings.depth, mode=settings.evolution, massbasis=massbasis, antinu=settings.antinu)
 
     # If the evolved state is requested, compute that too
     if settings.evolved_state:
-      if basis == "mass":
+      if massbasis:
         print("Warning: The evolved state can only be computed from a neutrino state in the flavour basis, so it will not be provided")
         settings.evolved_state = False
       else:

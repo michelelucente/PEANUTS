@@ -111,14 +111,14 @@ antinu = options.antinu
 nustate = np.zeros(3)
 if options.flavour != None:
   nustate = np.array(options.flavour)
-  basis = "flavour"
+  massbasis = False
 elif options.mass != None:
   #if len(options.mass) != 3:
   #  print("Error: neutrino state provided has the wrong format, it must be a vector of size 3.")
   #  exit()
   #nustate = np.array(np.dot(pmns.pmns, np.array(options.mass)))[0]
   nustate = np.array(options.mass)
-  basis = "mass"
+  massbasis = True
 
 # Earth density
 earth_density = EarthDensity(density_file)
@@ -133,11 +133,11 @@ print("Running PEANUTS...")
 
 # Check if analytical solution was requested
 if options.analytical:
-  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, basis=basis, antinu=antinu)
+  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, massbasis=massbasis, antinu=antinu)
 
 # Otherwise use numerical solution
 else:
- prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode="numerical", basis=basis, antinu=antinu)
+ prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode="numerical", massbasis=massbasis, antinu=antinu)
 
 
 # Print results

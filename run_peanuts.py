@@ -102,11 +102,14 @@ for param in settings.scan:
     # If the solar probabilities were computed before, use the precomputed mass weights as neutrino state
     if settings.solar:
       nustate = np.array(mass_weights, dtype=complex)
+      height = 2e4 # Maximum height of the atmosphere, 20 km
       massbasis = True
+    else:
+      height = param.height
 
     # If the latitude is provided compute probability integrated over exposure
     if settings.exposure:
-      out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, settings.depth, height=settings.height,
+      out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, settings.depth, height=height,
                                        mode=settings.evolution, antinu=settings.antinu, lam=radians(settings.latitude),
                                        d1=settings.exposure_time[0], d2=settings.exposure_time[1],
                                        normalized=settings.exposure_normalized, ns=settings.exposure_samples,
@@ -114,7 +117,7 @@ for param in settings.scan:
 
     else:
       # Compute probability of survival after propagation through Earth
-      out["earth"] = Pearth(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, param.eta, settings.depth, height=settings.height,
+      out["earth"] = Pearth(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, param.eta, settings.depth, height=height,
                            mode=settings.evolution, massbasis=massbasis, antinu=settings.antinu)
 
     # If the evolved state is requested, compute that too
@@ -123,7 +126,7 @@ for param in settings.scan:
         print("Warning: The evolved state can only be computed from a neutrino state in the flavour basis, so it will not be provided")
         settings.evolved_state = False
       else:
-        out["evolved_state"] = evolved_state(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, param.eta, settings.depth, height=settings.height,
+        out["evolved_state"] = evolved_state(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, param.eta, settings.depth, height=height,
                                              mode=settings.evolution, antinu=settings.antinu)
 
   # Append to list

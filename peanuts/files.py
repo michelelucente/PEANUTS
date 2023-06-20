@@ -119,6 +119,8 @@ def output(settings, outs):
       towrite += "Dm21^2 [eV^2]\t"
     if "dm3l" in settings.scan.labels:
       towrite += "Dm3l^2 [eV^2]\t"
+    if "height" in settings.scan.labels:
+      towrite += "Height (m)\t"
 
     if settings.solar:
       if not settings.antinu:
@@ -135,22 +137,8 @@ def output(settings, outs):
     towrite += "\n"
 
     for i, param in settings.scan.enumerate():
-      if "energy" in settings.scan.labels:
-        towrite += str(dec(param.energy)) + "\t"
-      if "eta" in settings.scan.labels:
-        towrite += str(dec(param.eta)) + "\t"
-      if "theta12" in settings.scan.labels:
-        towrite += str(dec(param.theta12)) + "\t"
-      if "theta13" in settings.scan.labels:
-        towrite += str(dec(param.theta13)) + "\t"
-      if "theta23" in settings.scan.labels:
-        towrite += str(dec(param.theta23)) + "\t"
-      if "delta" in settings.scan.labels:
-        towrite += str(dec(param.delta)) + "\t"
-      if "dm21" in settings.scan.labels:
-        towrite += str(dec(param.dm21)) + "\t"
-      if "dm3l" in settings.scan.labels:
-        towrite += str(dec(param.dm3l)) + "\t"
+      for label in settings.scan.labels:
+        towrite += str(dec(getattr(param,label))) + "\t"
 
       if settings.solar:
 

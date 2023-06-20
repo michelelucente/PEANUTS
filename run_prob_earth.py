@@ -24,7 +24,8 @@ parser = OptionParser()
 parser.add_option("-v", "--verbose", help = "Print debug output", action='store_true', dest='verbose', default=False)
 parser.add_option("-i", "--in_slha", help="SLHA input file", action='store', dest='in_slha', default="")
 parser.add_option("-d", "--density", help ="Add custom earth density profile", action='store', dest="density", default="")
-parser.add_option("--antinu", help = "", action="store_true", dest="antinu", default=False)
+parser.add_option("--height", help="Height", action='store', default=0)
+parser.add_option("--antinu", help = "Antineutrino", action="store_true", dest="antinu", default=False)
 parser.add_option("--analytical", help="Perform analytical evolution", action='store_true', dest="analytical", default=True)
 parser.add_option("--numerical", help="Perform numerical evolution", action='store_false', dest="analytical")
 parser.add_option("-f", "--flavour", help="Input neutrino state, in flavour basis", type='string', action='callback', callback=get_comma_separated_floats, dest="flavour")
@@ -50,6 +51,7 @@ Options:\n\
        -v, --verbose               Print debug output\n\
        -i, --in_slha <slha_file>   SLHA input file for neutrino parameters\n\
        -d, --density               Add custom earth density profile\n\
+       --height                    Select height of starting neutrino path in the atmosphere\n\
        --antinu                    Input state is an antineutrino\n\
        --analytical                Perform analytical evolution\n\
        --numerical                 Perform numerical evolution')
@@ -133,11 +135,11 @@ print("Running PEANUTS...")
 
 # Check if analytical solution was requested
 if options.analytical:
-  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, massbasis=massbasis, antinu=antinu)
+  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, height=settings.height, massbasis=massbasis, antinu=antinu)
 
 # Otherwise use numerical solution
 else:
- prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode="numerical", massbasis=massbasis, antinu=antinu)
+ prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, height=settings.height, mode="numerical", massbasis=massbasis, antinu=antinu)
 
 
 # Print results

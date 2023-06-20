@@ -26,9 +26,9 @@ def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c, antinu):
     the mean density value:
     - DeltamSq21: the solar mass splitting
     - DeltamSq3l: the atmospheric mass splitting (l=1 for NO, l=2 for IO)
-    - pmns is the PMNS matrix;
-    - E is the neutrino energy, in units of MeV;
-    - x1 (x2) is the starting (ending) point in the path;
+    - pmns: the PMNS matrix;
+    - E: the neutrino energy, in units of MeV;
+    - x1 (x2): the starting (ending) point in the path;
     - a, b, c parametrise the density profile on the path, n_e(x) = a + b x^2 + c x^4.
     - antinu: False for neutrinos, True for antineutrinos
     See hep-ph/9702343 for the definition of the perturbative expansion of the evolutor in a 2-flavours case.
@@ -115,14 +115,14 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, height, a
     """
     FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu) computes the full evolutor for an ultrarelativistic
     neutrino crossing the Earth:
-    - density is the Earth density object
+    - density: the Earth density object
     - DeltamSq21: the solar mass splitting
     - DeltamSq3l: the atmospheric mass splitting (l=1 for NO, l=2 for IO)
-    - pmns is the PMNS matrix
-    - E is the neutrino energy, in units of MeV;
-    - d is the CP-violating PMNS phase;
-    - eta is the nadir angle;
-    - depth is the underground detector depth, in units of meters.
+    - pmns: the PMNS matrix
+    - E: the neutrino energy, in units of MeV;
+    - d:  the CP-violating PMNS phase;
+    - eta: the nadir angle;
+    - depth: the underground detector depth, in units of meters.
     - height: the altitude production point of neutrinos, in meters above the Earth surface
     - antinu: False for neutrinos, True for antineutrinos
     """

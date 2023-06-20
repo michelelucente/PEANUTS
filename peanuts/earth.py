@@ -125,9 +125,9 @@ def numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, hei
   - density: the Earth density object
   - pmns: the PMNS matrix
   - DeltamSq21, Deltamq3l: the mass squared differences
-  - E: the neutrino energy
+  - E: the neutrino energy, in units of MeV;
   - eta: the nadir angle
-  - depth: the detector depth below the surface of the Earth
+  - depth: the detector depth below the surface of the Earth, in meters
   - height: the altitudde production point of neutrios, in meters above the Earth surface
   - antinu: False for neutrinos, True for antineutrinos
   """
@@ -208,9 +208,9 @@ def evolved_state_numerical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, e
   - density: the Earth density object
   - pmns: the PMNS matrix
   - DeltamSq21, Deltamq3l: the mass squared differences
-  - E: the neutrino energy
+  - E is the neutrino energy, in units of MeV;
   - eta: the nadir angle
-  - depth: detector depth below the surface of the Earth
+  - depth: detector depth below the surface of the Earth, in meters
   - height: the altitudde production point of neutrios, in meters above the Earth surface
   - full_oscillation: return full oscillation along path (def. False))
   - antinu: False for neutrinos, True for antineutrinos
@@ -233,9 +233,9 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, dep
   - density: the Earth density object
   - pmns: the PMNS matrix
   - DeltamSq21, Deltamq3l: the mass squared differences
-  - E: the neutrino energy
+  - E is the neutrino energy, in units of MeV;
   - eta: the nadir angle
-  - depth: the detector depth below the surface of the Earth
+  - depth: the detector depth below the surface of the Earth, in meters
   - height: the altitudde production point of neutrios, in meters above the Earth surface
   - massbasis: the basis of the neutrino eigenstate, True: mass, False: flavour (def. True)
   - full_oscillation: return full oscillation along path (def. False))
@@ -270,10 +270,10 @@ def evolved_state_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, 
   - density: the Earth density object
   - pmns: the PMNS matrix
   - DeltamSq21, Deltamq3l: the mass squared differences
-  - E: the neutrino energy
+  - E: the neutrino energy, in units of MeV;
   - eta: the nadir angle
   - height: the altitude production point of neutrinos, in meters above the Earth surface
-  - depth: the detector depth below the surface of the Earth
+  - depth: the detector depth below the surface of the Earth, in meters
   - antinu: False for neutrinos, True for antineutrinos
   """
 
@@ -290,9 +290,9 @@ def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, de
   - density: the Earth density object
   - pmns: the PMNS matrix
   - DeltamSq21, Deltamq3l: the mass squared differences
-  - E: the neutrino energy
+  - E: the neutrino energy, in units of MeV;
   - eta: the nadir angle
-  - depth: the detector depth below the surface of the Earth
+  - depth: the detector depth below the surface of the Earth, in meters
   - height: the altitude production point of neutrinos, in meters above the Earth surface
   - massbasis: the basis of the neutrino eigenstate, True: mass, False: flavour (def. True)
   - antinu: False for neutrinos, True for antineutrinos
@@ -318,9 +318,9 @@ def evolved_state(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth,
   - density: the Earth density object
   - pmns: the PMNS matrix
   - DeltamSq21, Deltamq3l: the mass squared differences
-  - E: the neutrino energy
+  - E: the neutrino energy, in units of MeV;
   - eta: the nadir angle
-  - depth:  the detector depth below the surface of the Earth
+  - depth:  the detector depth below the surface of the Earth, in meters
   - height: the altitude production point of neutrinos, in meters above the Earth surface
   - mode: either analytical or numerical computation of the evolutor (def. analytical)
   - full_oscillation: return full oscillation along path (def. False))
@@ -355,9 +355,9 @@ def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, height
   - density: the Earth density object
   - pmns: the PMNS matrix
   - DeltamSq21, Deltamq3l: the mass squared differences
-  - E: the neutrino energy
+  - E: the neutrino energy, in units of MeV;
   - eta: the nadir angle
-  - depth:  the detector depth below the surface of the Earth
+  - depth:  the detector depth below the surface of the Earth, in meters
   - height: the altitude production point of neutrinos, in meters above the Earth surface
   - mode: either analytical or numerical computation of the evolutor (def. analytical)
   - massbasis: the basis of the neutrino eigenstate, True: mass, False: flavour (def. True)
@@ -394,8 +394,8 @@ def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, depth, 
   - density: the Earth density object
   - pmns: the PMNS matrix
   - DeltamSq21, Deltamq3l: the mass squared differences
-  - E: the neutrino energy
-  - depth:  the detector depth below the surface of the Earth
+  - E: the neutrino energy, in units of MeV;
+  - depth:  the detector depth below the surface of the Earth, in meters
   - height: the altitude production point of neutrinos, in meters above the Earth surface
   - lam: the latitude of the experiment (def. -1)
   - mode: either analytical or numerical computation of the evolutor (def. analytical)

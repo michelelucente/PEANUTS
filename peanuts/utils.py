@@ -6,6 +6,8 @@ Created on Mar 30 2022
 @author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
+VERSION = "1.3"
+
 def print_banner():
   """
   Print banner for the program
@@ -16,7 +18,7 @@ def print_banner():
             "Created by:\n"\
             "   Michele Lucente (michele.lucente@unibo.it)\n"\
             "   Tomas Gonzalo   (tomas.gonzalo@kit.edu)\n\n"\
-            "PEANUTS 1.0 is open source and under the terms of the GPL-3 license.\n\n"\
+            "PEANUTS " + VERSION + " is open source and under the terms of the GPL-3 license.\n\n"\
             "Documentation and details for PEANUTS can be found at\n"\
             "T. Gonzalo and M. Lucente, arXiv:2303.15527\n\n"\
             "==========================================\n"
@@ -102,7 +104,11 @@ def print_inputs(settings):
              "Exposure angle           : " + settings.exposure_angle + "\n"
 
     inputs += \
-             "Depth                    : " + str(settings.depth) + " m\n"\
+             "Depth                    : " + str(settings.depth) + "  m\n"
+    if not settings.solar and settings.height:
+      inputs += \
+             "Height                   : " + str(settings.height) + " m \n"
+    inputs += \
              "Evolution method         : " + settings.evolution + "\n"
     if settings.density_file is not None:
       inputs += "Earth density         : " + settings.density_file + "\n"

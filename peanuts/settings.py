@@ -213,13 +213,17 @@ class Settings:
           self.antinu = settings["Earth"]["antinu"] if "antinu" in settings["Earth"] else False
           self.basis = settings["Earth"]["basis"]
           self.probabilities = True
+          self.height = settings["Earth"]["height"] if "height" in settings["Earth"] else 0
+          self.scan.add("height", self.height)
+        else:
+          if "height" in settings["Earth"]:
+            print("Warning: height parameter will be ignored for neutrinos produced in the Sun, as they will cross the full atmosphere.")
 
         if "depth" not in settings["Earth"]:
           print("Error: missing depth of experiment, please provide it.")
           exit()
         else:
           self.depth = settings["Earth"]["depth"]
-        self.height = settings["Earth"]["height"] if "height" in settings["Earth"] else 0
 
         # Either a specific nadir angle, eta, or a latitude or exposure file must be provided
         if "eta" not in settings["Earth"] and "latitude" not in settings["Earth"] and not "exposure_file" in settings["Earth"]:
@@ -296,6 +300,7 @@ class Settings:
       self.energy = args[3]
       self.eta = args[4]
       self.depth = args[5]
+      self.height = float(args[6].height)
 
       if args[6].flavour is not None:
         self.basis = "flavour"

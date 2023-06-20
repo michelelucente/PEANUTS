@@ -234,13 +234,13 @@ E = 10 # MeV
 #eta = np.random.uniform(0, pi/2)
 #E = np.random.uniform(1,20)
 
-sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis="flavour", mode="numerical", full_oscillation=True)
+sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, massbasis=False, mode="numerical", full_oscillation=True)
 
 One_num = sol[-1]
 One_num = np.array([One_num])
 
 # Check analytical solution
-One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis="flavour")
+One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, massbasis=False)
 
 err = np.linalg.norm(One_num - One_an)/np.linalg.norm(One_num + One_an)
 
@@ -266,13 +266,13 @@ E = 10 # MeV
 #eta = np.random.uniform(pi/2, pi)
 #E = np.random.uniform(1,20)
 
-sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis="flavour", mode="numerical", full_oscillation=True)
+sol, x = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, massbasis=False, mode="numerical", full_oscillation=True)
 
 One_num = sol[-1]
 One_num = np.array([One_num])
 
 # Check analytical solution
-One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis="flavour")
+One_an = Pearth(state, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, massbasis=False)
 
 err = np.linalg.norm(One_num - One_an)/np.linalg.norm(One_num + One_an)
 
@@ -308,7 +308,7 @@ fraction = solar_model.fraction('8B')
 
 mass_weights = solar_flux_mass(th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction)
 
-flavour_probabilities = Pearth(mass_weights, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, basis="mass")
+flavour_probabilities = Pearth(mass_weights, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, massbasis=True)
 
 print("For E = %.2f and eta = %.2f pi the flavour probabilitites are %s" % (E, eta/pi, str(flavour_probabilities)) )
 

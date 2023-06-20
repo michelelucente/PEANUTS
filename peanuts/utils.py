@@ -14,7 +14,7 @@ def print_banner():
   banner =  "Propagation and Evolution of Active NeUTrinoS (PEANUTS) \n"\
             "================================\n\n"\
             "Created by:\n"\
-            "   Michele Lucente (lucente@physik.rwth-aachen.de)\n"\
+            "   Michele Lucente (michele.lucente@unibo.it)\n"\
             "   Tomas Gonzalo   (tomas.gonzalo@kit.edu)\n\n"\
             "PEANUTS 1.0 is open source and under the terms of the GPL-3 license.\n\n"\
             "Documentation and details for PEANUTS can be found at\n"\

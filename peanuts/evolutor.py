@@ -131,7 +131,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
     r23 = pmns.R23(pmns.theta23)
     delta = pmns.Delta(pmns.delta)
 
-    # Conjuagate for antineutrinos
+    # Conjugate for antineutrinos
     if antinu:
       r23 = r23.conjugate()
       delta = delta.conjugate()

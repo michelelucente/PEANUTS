@@ -3,7 +3,7 @@
 # @author: Michele Lucente <lucente@physik.rwth-aachen.de>
 # @author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 
-Energy: 20
+Energy: 10
 
 Neutrinos:
 
@@ -14,11 +14,26 @@ Neutrinos:
   theta13: 1.49575e-01
   delta: 3.40339
 
+Solar:
+
+  fraction: "8B"
+  flux: true
+#  spectrum: "distorted"
+
+Atmosphere:
+
+  #state: [0.4, 0.2, 0.6]
+  #basis: "flavour"
+  eta: 0.9
+  #height: [1000,2000]
+  probabilities: False
+  #evolved_state: True
+
+
 Earth:
 
   state: [0.4, 0.2, 0.6]
-  height: [1000,2000]
   basis: "flavour"
-  eta: 0.8
+  eta: 0.9
   depth: 3000
   evolved_state: true

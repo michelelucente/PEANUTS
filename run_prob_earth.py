@@ -16,6 +16,7 @@ from peanuts.utils import get_comma_separated_floats, print_banner, print_inputs
 from peanuts.settings import Settings
 from peanuts.pmns import PMNS
 from peanuts.solar import SolarModel, solar_flux_mass
+from peanuts.atmosphere import evolved_state_atmosphere
 from peanuts.earth import EarthDensity, Pearth
 
 mainfilename = 'run_prob_earth'
@@ -131,15 +132,20 @@ settings = Settings(pmns, DeltamSq21, DeltamSq3l, E, eta, depth, options)
 print_inputs(settings)
 print("Running PEANUTS...")
 
+# If height is > 0 compute oscillations through the atmosphere
+if settings.height > 0:
+  nustate = evolved_state_atmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, settings.height, massbasis=massbasis, antinu=antinu)
+  massbasis = False
+
 # Compute probability of survival after propagation through Earth
 
 # Check if analytical solution was requested
 if options.analytical:
-  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, height=settings.height, massbasis=massbasis, antinu=antinu)
+  prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, massbasis=massbasis, antinu=antinu)
 
 # Otherwise use numerical solution
 else:
- prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, height=settings.height, mode="numerical", massbasis=massbasis, antinu=antinu)
+ prob = Pearth(nustate, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode="numerical", massbasis=massbasis, antinu=antinu)
 
 
 # Print results

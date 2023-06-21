@@ -100,6 +100,7 @@ class Settings:
   def __init__(self, *args):
 
     self.solar = False
+    self.atmosphere = False
     self.earth = False
     self.scan = Scan()
 
@@ -110,10 +111,12 @@ class Settings:
       # Select mode first
       if "Solar" in settings:
         self.solar = True
+      if "Atmosphere" in settings:
+        self.atmosphere = True
       if "Earth" in settings:
         self.earth = True
-      if not self.solar and not self.earth:
-        print("Error: unkown mode, please provide a running mode, \"Solar\", \"Earth\" or both")
+      if not self.solar and not self.atmosphere and not self.earth:
+        print("Error: unkown mode, please provide a running mode, \"Solar\", \"Atmosphere\", \"Earth\" or a combination")
         exit()
 
       # Extract neutrino parameters
@@ -164,7 +167,7 @@ class Settings:
 
 
       # Extract solar parameters
-      if "Solar" in settings:
+      if self.solar:
 
         if "fraction" not in settings["Solar"]:
           print("Error: missing solar neutrino fraction.")
@@ -185,7 +188,8 @@ class Settings:
 
         self.spectra = settings["Solar"]["spectra"] if "spectra" in settings["Solar"] else None
 
-        self.probabilities = settings["Solar"]["probabilities"] if "probabilities" in settings["Solar"] else True
+        self.solar_probabilities = settings["Solar"]["probabilities"] if "probabilities" in settings["Solar"] else True
+        self.solar_evolved_state = settings["Solar"]["evolved_state"] if "evolved_state" in settings["Solar"] else False
 
         self.flux = settings["Solar"]["flux"] if "flux" in settings["Solar"] else False
 
@@ -200,24 +204,55 @@ class Settings:
             print("Error: unknown option for spectrum, select undistorted or distorted")
             exit()
 
+      # Extract atmosphere parameters
+      if self.atmosphere:
+
+        if not self.solar and\
+           ("state" not in settings["Atmosphere"] or "basis" not in settings["Atmosphere"]):
+          print("Error: missing input neutrino state or basis, please provide both.")
+          exit()
+        elif not self.solar:
+          self.nustate = np.array(settings["Atmosphere"]["state"],dtype=complex)
+          self.basis = settings["Atmosphere"]["basis"]
+          self.antinu = settings["Atmosphere"]["antinu"] if "antinu" in settings["Atmosphere"] else False
+        elif "state" in settings["Atmosphere"] or "basis" in settings["Atmosphere"]:
+          print("Warning: atmospheric input neutrino state and basis will be ignored, as these are fixed for solar neutrinos")
+
+        if "eta" not in settings["Atmosphere"]:
+          print("Error: please provide a nadir angle (eta).")
+          exit()
+        elif "eta" in settings["Atmosphere"]:
+          self.eta = settings["Atmosphere"]["eta"]
+          self.scan.add("eta", self.eta)
+
+        if not self.solar and "height" not in settings["Atmosphere"]:
+          print("Error: missing height of neutrino production in the atmosphere.")
+          exit()
+        elif self.solar:
+          self.height = 2e4 # Maximum height of the atmosphere, 20 km
+          if "height" in settings["Atmosphere"]:
+            print("Warning: atmospheric height will be ignored as solar neutrinos traverse the whole atmosphere.")
+        else:
+          self.height = settings["Atmosphere"]["height"]
+        self.scan.add("height", self.height)
+
+        self.atm_evolved_state = settings["Atmosphere"]["evolved_state"] if "evolved_state" in settings["Atmosphere"] else False
+        self.atm_probabilities = settings["Atmosphere"]["probabilities"] if "probabilities" in settings["Atmosphere"] else True
+
       # Extract earth parameters
-      if "Earth" in settings:
+      if self.earth:
 
         self.antinu = False
-        if "Solar" not in settings and\
+        if (not self.solar and not self.atmosphere) and\
            ("state" not in settings["Earth"] or "basis" not in settings["Earth"]):
           print("Error: missing input neutrino state or basis, please provide both.")
           exit()
-        elif "Solar" not in settings:
+        elif not self.solar and not self.atmosphere:
           self.nustate = np.array(settings["Earth"]["state"],dtype=complex)
           self.antinu = settings["Earth"]["antinu"] if "antinu" in settings["Earth"] else False
           self.basis = settings["Earth"]["basis"]
-          self.probabilities = True
-          self.height = settings["Earth"]["height"] if "height" in settings["Earth"] else 0
-          self.scan.add("height", self.height)
         else:
-          if "height" in settings["Earth"]:
-            print("Warning: height parameter will be ignored for neutrinos produced in the Sun, as they will cross the full atmosphere.")
+          print("Warning: earth input neutrino state and basis will be ignored, as these are fixed for " + ("solar" if self.solar else "atmospheric") + " neutrinos.")
 
         if "depth" not in settings["Earth"]:
           print("Error: missing depth of experiment, please provide it.")
@@ -225,31 +260,42 @@ class Settings:
         else:
           self.depth = settings["Earth"]["depth"]
 
-        # Either a specific nadir angle, eta, or a latitude or exposure file must be provided
-        if "eta" not in settings["Earth"] and "latitude" not in settings["Earth"] and not "exposure_file" in settings["Earth"]:
-          print("Error: please provide a nadir angle (eta), a latitude or exposure file path.")
-          exit()
-        elif "eta" in settings["Earth"]:
-          self.eta = settings["Earth"]["eta"]
-          self.exposure = False
-          self.scan.add("eta", self.eta)
-        elif "latitude" in settings["Earth"] or "exposure_file" in settings["Earth"]:
-          if("latitude" in settings["Earth"] and "exposure_file" in settings["Earth"]):
-            print("Warning: both latitude and exposure file provided, latitude value will be ignored")
-          self.exposure = True
-          self.latitude = settings["Earth"]["latitude"] if "latitude" in settings["Earth"] and "exposure_file" not in settings["Earth"] else -1
-          self.exposure_normalized = settings["Earth"]["exposure_normalized"] if "exposure_normalized" in settings["Earth"] else False
-          self.exposure_time = settings["Earth"]["exposure_time"] if "exposure_time" in settings["Earth"] else [0,365]
-          self.exposure_samples = settings["Earth"]["exposure_samples"] if "exposure_samples" in settings["Earth"] else 1000
-          self.exposure_file = settings["Earth"]["exposure_file"] if "exposure_file" in settings["Earth"] else None
-          self.exposure_angle = settings["Earth"]["exposure_angle"] if "exposure_angle" in settings["Earth"] else "Nadir"
+        # Ignore eta or latitude if dealing with atmospheric neutrinos
+        if not self.atmosphere:
+          # Either a specific nadir angle, eta, or a latitude or exposure file must be provided
+          if "eta" not in settings["Earth"] and "latitude" not in settings["Earth"] and not "exposure_file" in settings["Earth"]:
+            print("Error: please provide a nadir angle (eta), a latitude or exposure file path.")
+            exit()
+          elif "eta" in settings["Earth"]:
+            self.eta = settings["Earth"]["eta"]
+            self.exposure = False
+            self.scan.add("eta", self.eta)
+          elif not self.atmosphere and "latitude" in settings["Earth"] or "exposure_file" in settings["Earth"]:
+            if("latitude" in settings["Earth"] and "exposure_file" in settings["Earth"]):
+              print("Warning: both latitude and exposure file provided, latitude value will be ignored")
+            self.exposure = True
+            self.latitude = settings["Earth"]["latitude"] if "latitude" in settings["Earth"] and "exposure_file" not in settings["Earth"] else -1
+            self.exposure_normalized = settings["Earth"]["exposure_normalized"] if "exposure_normalized" in settings["Earth"] else False
+            self.exposure_time = settings["Earth"]["exposure_time"] if "exposure_time" in settings["Earth"] else [0,365]
+            self.exposure_samples = settings["Earth"]["exposure_samples"] if "exposure_samples" in settings["Earth"] else 1000
+            self.exposure_file = settings["Earth"]["exposure_file"] if "exposure_file" in settings["Earth"] else None
+            self.exposure_angle = settings["Earth"]["exposure_angle"] if "exposure_angle" in settings["Earth"] else "Nadir"
+          else:
+            print("Error: a nadir angle (eta) and exposure option (latitude or file) were found, please provide only one of them.")
+            exit()
         else:
-          print("Error: a nadir angle (eta) and exposure option (latitude or file) were found, please provide only one of them.")
-          exit()
+          if "eta" in settings["Earth"]:
+            print("Warning: earth nadir angle will be ignored, as these is provided by the atmospheric neutrino path")
+          elif "latitude" in settings["Earth"]:
+            # TODO: Think about how to deal with latitudes and atmospherics
+            print("Warning: latitude value will be ignored, as this is not yet supported.")
+          self.exposure = False
+
 
         self.density_file = settings["Earth"]["density"] if "density" in settings["Earth"] else None
         self.evolution = settings["Earth"]["evolution"] if "evolution" in settings["Earth"] else "analytical"
-        self.evolved_state = settings["Earth"]["evolved_state"] if "evolved_state" in settings["Earth"] else False
+        self.earth_evolved_state = settings["Earth"]["evolved_state"] if "evolved_state" in settings["Earth"] else False
+        self.earth_probabilities = settings["Earth"]["probabilities"] if "probabilities" in settings["Earth"] else True
 
       # Extract energy
       if "Energy" not in settings:
@@ -280,7 +326,7 @@ class Settings:
       self.energy = args[3]
       self.fraction = args[4]
       self.solar_file = args[5].solar if args[5].solar != "" else None
-      self.probabilities = True
+      self.solar_probabilities = True
       self.undistorted_spectrum = False
       self.distorted_spectrum =  False
 
@@ -301,6 +347,11 @@ class Settings:
       self.eta = args[4]
       self.depth = args[5]
       self.height = float(args[6].height)
+
+      if self.height > 0:
+        self.atmosphere = True
+        self.atm_probabilities = False
+        self.atm_evolved_state = False
 
       if args[6].flavour is not None:
         self.basis = "flavour"

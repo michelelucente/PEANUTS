@@ -101,7 +101,9 @@ def output(settings, outs):
   if settings.solar and settings.flux:
     towrite += "# Flux [cm^-2 s^-1]\t" + str(dec(outs[0]["flux"])) + "\n"
 
-  if settings.probabilities:
+  if (settings.solar      and settings.solar_probabilities) or\
+     (settings.atmosphere and settings.atm_probabilities) or\
+     (settings.earth      and settings.earth_probabilities):
     towrite += "\n# Probabilities\n# "
     if "energy" in settings.scan.labels:
       towrite += "E [MeV]\t"
@@ -122,18 +124,22 @@ def output(settings, outs):
     if "height" in settings.scan.labels:
       towrite += "Height (m)\t"
 
+    nu = ['e','mu','tau'] if not settings.antinu else ['~e','~mu','~tau']
     if settings.solar:
-      if not settings.antinu:
-        towrite += "Psolar (e) \t Psolar (mu) \t Psolar (tau)\t"
-      else:
-        towrite += "Psolar (~e) \t Psolar (~mu) \t Psolar (~tau)\t"
+      if settings.solar_probabilities:
+        towrite += '\t'.join(["Psolar ("+nui+")  " for nui in nu]) + "\t"
+      if settings.solar_evolved_state:
+        towrite += "Evolved solar neutrino state\t"
+    if settings.atmosphere:
+      if settings.atm_probabilities:
+        towrite += '\t'.join(["Patm ("+nui+")    " for nui in nu]) + "\t"
+      if settings.atm_evolved_state:
+        towrite += "Evolved atmospheric " + ("anti" if settings.antinu else "") + "neutrino state\t"
     if settings.earth:
-      if not settings.antinu:
-        towrite += "Pearth (e) \t Pearth (mu) \t Pearth (tau)\t"
-      else:
-        towrite += "Pearth (~e) \t Pearth (~mu) \t Pearth (~tau)\t"
-      if settings.evolved_state:
-        towrite += "Evolved " + ("anti" if settings.antinu else "") + "neutrino state\t"
+      if settings.earth_probabilities:
+        towrite += '\t'.join(["Pearth("+nui+")   " for nui in nu]) + "\t"
+      if settings.earth_evolved_state:
+        towrite += "Evolved earth " + ("anti" if settings.antinu else "") + "neutrino state\t"
     towrite += "\n"
 
     for i, param in settings.scan.enumerate():
@@ -141,15 +147,25 @@ def output(settings, outs):
         towrite += str(dec(getattr(param,label))) + "\t"
 
       if settings.solar:
+        if settings.solar_probabilities:
+          for out in outs[i]["solar"]:
+            towrite += str(dec(out)) + "\t"
+        if settings.solar_evolved_state:
+          towrite += str([np.around(out,5) for out in outs[i]["solar_evolved_state"]]) + "\t"
 
-        for out in outs[i]["solar"]:
-          towrite += str(dec(out)) + "\t"
+      if settings.atmosphere:
+        if settings.atm_probabilities:
+          for out in outs[i]["atmosphere"]:
+            towrite += str(dec(out)) + "\t"
+        if settings.atm_evolved_state:
+          towrite += str([np.around(out,5) for out in outs[i]["atm_evolved_state"]]) + "\t"
 
       if settings.earth:
-        for out in outs[i]["earth"]:
-          towrite += str(dec(out)) + "\t"
-        if settings.evolved_state:
-          towrite += str([np.around(out,5) for out in outs[i]["evolved_state"]]) + "\t"
+        if settings.earth_probabilities:
+          for out in outs[i]["earth"]:
+            towrite += str(dec(out)) + "\t"
+        if settings.earth_evolved_state:
+          towrite += str([np.around(out,5) for out in outs[i]["earth_evolved_state"]]) + "\t"
 
       towrite += "\n"
 

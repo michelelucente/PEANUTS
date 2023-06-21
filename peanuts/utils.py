@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#i!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Mar 30 2022
@@ -6,7 +6,7 @@ Created on Mar 30 2022
 @author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
-VERSION = "1.3"
+VERSION = "2.0"
 
 def print_banner():
   """
@@ -35,7 +35,7 @@ def print_inputs(settings):
   if settings.solar:
     inputs += "\n"\
               "Computing the "
-    if settings.probabilities:
+    if settings.solar_probabilities:
       inputs += "probabilities "
       if settings.distorted_spectrum or settings.undistorted_spectrum:
         inputs += "and the "
@@ -43,6 +43,8 @@ def print_inputs(settings):
       inputs += "distorted spectrum "
     elif settings.undistorted_spectrum:
       inputs += "undistorted spectrum "
+    if not settings.solar_probabilities and not solar.distorted_spectrum and not solar.undistorted_spectrum:
+      inputs += "oscillations "
     inputs += "on the surface of the Sun with values\n\n"\
              "theta_{12}               : " + str(settings.theta12) + "\n"\
              "theta_{13}               : " + str(settings.theta13) + "\n"\
@@ -61,10 +63,50 @@ def print_inputs(settings):
     if settings.solar_file is not None:
       inputs += "Solar model              : " + settings.solar_file + "\n"
 
+  if settings.atmosphere:
+    inputs += "\n"\
+              "Computing the "
+    if settings.atm_probabilities:
+      inputs += "probabilities "
+      if settings.atm_evolved_state:
+        inputs += "and the "
+    if settings.atm_evolved_state:
+      inputs += "evolved state "
+    if not settings.atm_probabilities and not settings.atm_evolved_state:
+      inputs += "oscillations "
+    inputs += "on the surface of the Earth of neutrinos traversing the atmosphere, with values\n\n"
+    if not settings.solar:
+       if not settings.antinu:
+         inputs += \
+             "Neutrino state           : " + str(settings.nustate) + "\n"
+       else:
+         inputs += \
+             "Antineutrino state       : " + str(settings.nustate) + "\n"
+       inputs += \
+             "Basis                    : " + settings.basis + "\n"\
+             "theta_{12}               : " + str(settings.theta12) + "\n"\
+             "theta_{13}               : " + str(settings.theta13) + "\n"\
+             "theta_{23}               : " + str(settings.theta23) + "\n"\
+             "delta_CP                 : " + str(settings.delta) + "\n"\
+             "Delta m_{21}^2           : " + str(settings.dm21) + " eV^2\n"
+       if settings.dm3l > 0:
+         inputs += \
+             "Delta m_{31}^2           : " + str(settings.dm3l) + " eV^2\n"
+       else:
+         inputs += \
+             "Delta m_{32}^2           : " + str(settings.dm3l) + " eV^2\n"
+       inputs += \
+             "Energy                   : " + str(settings.energy) + " MeV\n"\
+             "Height                   : " + str(settings.height) + " m\n"
+    inputs += \
+             "Nadir angle              : " + str(settings.eta) + " rad\n"
+
+
+
   if settings.earth :
     inputs += "\n"\
               "Computing the probability on Earth with values\n\n"
-    if not settings.solar:
+    if not settings.solar and not settings.atmosphere:
       if not settings.antinu:
         inputs += \
              "Neutrino state           : " + str(settings.nustate) + "\n"
@@ -78,19 +120,19 @@ def print_inputs(settings):
              "theta_{23}               : " + str(settings.theta23) + "\n"\
              "delta_CP                 : " + str(settings.delta) + "\n"\
              "Delta m_{21}^2           : " + str(settings.dm21) + " eV^2\n"
-    if settings.dm3l > 0:
-      inputs += \
+      if settings.dm3l > 0:
+        inputs += \
              "Delta m_{31}^2           : " + str(settings.dm3l) + " eV^2\n"
-    else:
-      inputs += \
+      else:
+        inputs += \
              "Delta m_{32}^2           : " + str(settings.dm3l) + " eV^2\n"
-    inputs += \
+      inputs += \
              "Energy                   : " + str(settings.energy) + " MeV\n"
 
-    if not settings.exposure:
+    if not settings.atmosphere and not settings.exposure:
       inputs += \
              "Nadir angle              : " + str(settings.eta) + " rad\n"
-    else:
+    elif not settings.atmosphere:
       if settings.latitude != -1:
         inputs += \
              "Latitude                 : " + str(settings.latitude) + "\N{DEGREE SIGN}\n"
@@ -105,16 +147,13 @@ def print_inputs(settings):
 
     inputs += \
              "Depth                    : " + str(settings.depth) + "  m\n"
-    if not settings.solar and settings.height:
-      inputs += \
-             "Height                   : " + str(settings.height) + " m \n"
     inputs += \
              "Evolution method         : " + settings.evolution + "\n"
     if settings.density_file is not None:
       inputs += "Earth density         : " + settings.density_file + "\n"
 
 
-  if not settings.solar and not settings.earth:
+  if not settings.solar and not settings.atmosphere and not settings.earth:
     print("Error: Unknown mode.")
     exit()
 

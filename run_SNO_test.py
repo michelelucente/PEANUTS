@@ -316,7 +316,7 @@ print("For E = %.2f and eta = %.2f pi the flavour probabilitites are %s" % (E, e
 # Test exposure time average
 #############################
 from math import radians
-from peanuts.time_average import NadirExposure
+from peanuts.exposure import NadirExposure
 
 # Get the values of eta for all the shells
 shells_eta = np.insert(earth_density.shells_eta(), 0, 0)

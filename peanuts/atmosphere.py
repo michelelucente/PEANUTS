@@ -14,6 +14,9 @@ from math import sqrt, cos, sin, pi, asin
 from peanuts.evolutor import Upert
 from peanuts.potentials import R_E
 
+# Atmosphere maximum height
+Hmax = 2e4
+
 @nb.njit
 def DL(eta, height):
     """

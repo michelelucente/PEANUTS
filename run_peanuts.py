@@ -18,7 +18,6 @@ from peanuts.pmns import PMNS
 from peanuts.solar import SolarModel, solar_flux_mass, Psolar
 from peanuts.atmosphere import Patmosphere, evolved_state_atmosphere
 from peanuts.earth import EarthDensity, Pearth, Pearth_integrated, evolved_state
-from peanuts.time_average import NadirExposure
 
 mainfilename = 'run_peanuts'
 
@@ -122,7 +121,7 @@ for param in settings.scan:
                                       massbasis=massbasis, antinu=settings.antinu)
 
     # If the earth probabilities are to be computed, or the evolved state is requested, calculate the evolved state
-    if settings.atm_evolved_state or settings.earth:
+    if settings.atm_evolved_state or settings.earth and not settings.exposure:
        nustate = evolved_state_atmosphere(nustate, param.dm21, param.dm3l, pmns, param.energy, param.eta, param.height, depth=depth,
                                           massbasis=massbasis, antinu=settings.antinu)
        massbasis = False
@@ -135,11 +134,21 @@ for param in settings.scan:
 
     # If the latitude is provided compute probability integrated over exposure
     if settings.exposure:
-      out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, settings.depth,
-                                       mode=settings.evolution, antinu=settings.antinu, lam=radians(settings.latitude),
-                                       d1=settings.exposure_time[0], d2=settings.exposure_time[1],
-                                       normalized=settings.exposure_normalized, ns=settings.exposure_samples,
-                                       from_file=settings.exposure_file, angle=settings.exposure_angle)
+      if settings.atmosphere:
+        out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, settings.depth,
+                                         height=param.height, mode=settings.evolution, antinu=settings.antinu,
+                                         lam=radians(settings.latitude), d1=settings.exposure_time[0], d2=settings.exposure_time[1],
+                                         normalized=settings.exposure_normalized, ns=settings.exposure_samples,
+                                         angle_file=settings.exposure_file, angle=settings.exposure_angle, height_file=settings.height_file,
+                                         solar=settings.solar, atmosphere=settings.atmosphere)
+      else:
+        out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, settings.depth,
+                                         mode=settings.evolution, antinu=settings.antinu,
+                                         lam=radians(settings.latitude), d1=settings.exposure_time[0], d2=settings.exposure_time[1],
+                                         normalized=settings.exposure_normalized, ns=settings.exposure_samples,
+                                         angle_file=settings.exposure_file, angle=settings.exposure_angle,
+                                         solar=settings.solar, atmosphere=settings.atmosphere)
+
 
     else:
       # Compute probability of survival after propagation through Earth

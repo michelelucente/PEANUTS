@@ -18,8 +18,9 @@ from mpmath import fp, ellipf, sec, csc
 from interval import interval
 from scipy import integrate
 from scipy.interpolate import interp1d
-import peanuts.files as f
 
+import peanuts.files as f
+from peanuts.atmosphere import Hmax
 
 # Sometimes the function cmath.sqrt takes the "wrong" side of the branch cut, if its argument has vanishing
 # imaginary part prepended by a negative sign. To prevent this we define a custom version of the function
@@ -150,7 +151,7 @@ def IntegralDay (eta, lam, d1=0, d2=365):
     return weight1 + weight2
 
 
-def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir"):
+def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, file=None, angle="Nadir", solar=True):
     """
     NadirExposure(lam, d1, d2, ns) computes the exposure for ns nadir angle samples
     for an experiment located at latitude lam (in radians), taking data from day d1 to day d2.
@@ -159,8 +160,9 @@ def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=Non
     - d2: upper limit of day interval
     - ns: number of nadir angle samples
     - normalized: normalization of exposure
-    - from_file: file with experiments exposure
+    - file: file with experiments exposure
     - angle: angle of samples is exposure file
+    - solar: whether to use exposure based on solar neutrinos
     """
 
     # Generate ns samples of the nadir angle between 0 and pi
@@ -168,8 +170,8 @@ def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=Non
     deta = eta_samples[1]-eta_samples[0]
 
     # Get exposure from file
-    if from_file is not None:
-      raw_exposure=f.read_csv(from_file, skiprows=9, names=['Exposure'])
+    if file is not None:
+      raw_exposure=f.read_csv(file, skiprows=9, names=['Exposure'])
 
       if ns != len(raw_exposure['Exposure']):
         print("Error: number of samples must match that in the data file")
@@ -189,9 +191,13 @@ def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=Non
         exposure = [exposure_interp(-cos(eta_samples[i]))*sin(eta_samples[i])*deta/dcz for i in range(ns)]
         exposure = [exp if exp > 0 else 0 for exp in exposure]
 
-    elif lam >= 0:
-      # Compute exposure integrating in the given time ranges
+    elif lam >= 0 and solar:
+      # Compute solar exposure integrating in the given time ranges
       exposure = np.array([IntegralDay(eta, lam, d1, d2) for eta in eta_samples])
+
+    elif lam > 0:
+      # For non-solar neutrinos, there is no time dependence, so exposure is just the solid angle
+      exposure = np.array([2*pi*sin(eta) for eta in eta_samples])
 
     else:
       # If there is not file, there must be a latitude
@@ -204,3 +210,25 @@ def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=Non
         exposure = exposure/norm
 
     return np.vstack((eta_samples, exposure)).T
+
+
+def HeightExposure(height=Hmax, ns=1000, normalized=False, file=None):
+    """
+    HeightExposure(ns, normalized, file) computes the exposure for ns height samples
+    - height: starting height to compute exposure
+    - ns: number of nadir angle samples
+    - normalized: normalization of exposure
+    - file: file with experiments exposure
+    """
+
+    # Generate ns samples of the height between 0 and Hmax=20km
+    height_samples = np.linspace(0, height, ns)
+    dh = height_samples[1]-height_samples[0]
+
+    if file is not None:
+        # TODO: Not implemented
+        print("Error: Custom files for height exposure not implemented yet")
+        exit()
+    else:
+        return np.vstack((height_samples, [1 for h in height_samples])).T
+

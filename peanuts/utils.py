@@ -98,14 +98,20 @@ def print_inputs(settings):
        inputs += \
              "Energy                   : " + str(settings.energy) + " MeV\n"\
              "Height                   : " + str(settings.height) + " m\n"
-    inputs += \
+    else:
+       inputs += \
+             "Height (max)             : " + str(settings.height) + " m\n"
+
+    if not settings.earth and not settings.exposure:
+      inputs += \
              "Nadir angle              : " + str(settings.eta) + " rad\n"
+
 
 
 
   if settings.earth :
     inputs += "\n"\
-              "Computing the probability on Earth with values\n\n"
+              "Computing the probability through the Earth with values\n\n"
     if not settings.solar and not settings.atmosphere:
       if not settings.antinu:
         inputs += \

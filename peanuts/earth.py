@@ -19,7 +19,8 @@ from scipy.integrate import complex_ode
 import peanuts.files as f
 from peanuts.potentials import k, MatterPotential, R_E
 from peanuts.evolutor import FullEvolutor
-from peanuts.time_average import NadirExposure
+from peanuts.exposure import NadirExposure, HeightExposure
+from peanuts.atmosphere import evolved_state_atmosphere, Hmax
 
 earthdensity =  [
   ('density_file', nb.types.string),
@@ -390,41 +391,57 @@ def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode="
     raise Exception("Error: Unkown mode for the computation of evoulutor")
 
 
-def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, depth, mode="analytical", full_oscillation=False, antinu=False, lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir",daynight=None):
+def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, depth, height=Hmax, mode="analytical", full_oscillation=False, massbasis=True, antinu=False, lam=-1, d1=0, d2=365, ns=1000, normalized=False, angle_file=None, angle="Nadir", height_file=None, daynight=None, solar=True, atmosphere=True):
   """
   Pearth(nustate, density, pmns, DeltamSq21, DeltamSq21, E, lam, depth, mode, full_oscillation, antinu, d1, d2, ns, normalized, from_file, angle),
-  computes the probability of survival of an incident electron neutrino spectrum integrated over the spectrum
+  computes the probability of survival of an incident electron neutrino spectrum integrated over the exposure
   - nustate: array of weights of the incoherent neutrino flux
   - density: the Earth density object
   - pmns: the PMNS matrix
   - DeltamSq21, Deltamq3l: the mass squared differences
   - E: the neutrino energy, in units of MeV;
   - depth:  the detector depth below the surface of the Earth, in meters
-  - lam: the latitude of the experiment (def. -1)
+  - height: starting height to compute exposure
   - mode: either analytical or numerical computation of the evolutor (def. analytical)
   - full_oscillation: return full oscillation along path (def. False))
+  - massbasis: the basis of the neutrino eigenstate, True: mass, False: flavour (def. True)
   - antinu: False for neutrinos, True for antineutrinos
+  - lam: the latitude of the experiment (def. -1)
   - d1: lower limit of day interval
   - d2: upper limit of day interval
   - ns: number of nadir angle samples
   - normalized: normalization of exposure
-  - from_file: file with experiments exposure
+  - angle_file: file with experiments angular exposure
   - angle: angle of samples is exposure file
+  - height_file: file with experiments height exposure
+  - solar: whether to use exposure based on solar neutrinos
+  - atmosphere: whether to include effect of the atmosphere
   """
 
-  exposure = NadirExposure(lam=lam, normalized=normalized, d1=d1, d2=d2, ns=ns, from_file=from_file, angle=angle)
+  if not solar and not atmosphere:
+    print("Error: neutrinos should be either solar or atmospheric")
+    exit()
+
+  nadirexposure = NadirExposure(lam=lam, normalized=normalized, d1=d1, d2=d2, ns=ns, file=angle_file, angle=angle, solar=solar)
+  deta = nadirexposure[1][0]-nadirexposure[0][0]
+
+  if atmosphere:
+    heightexposure = HeightExposure(height=height, file=height_file)
+    dh = heightexposure[1][0]-heightexposure[0][0]
+  else:
+    heightexposure = [[0, 1]]
+    dh = 1
 
   day = True if daynight != "night" else False
   night = True if daynight != "day" else False
 
-
   prob = 0
-  deta = pi/ns
-  for eta, exp in exposure:
-    if eta < pi/2 and night:
-      prob += Pearth(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode=mode, massbasis=True, full_oscillation=full_oscillation, antinu=antinu) * exp * deta
-    elif eta >= pi/2 and day:
-      prob += Pearth(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode=mode, massbasis=True, full_oscillation=full_oscillation, antinu=antinu) * exp * deta
-
+  for eta, exp in nadirexposure:
+    if (eta < pi/2 and night) or (eta >= pi/2 and day):
+      for h, hexp in heightexposure:
+        if atmosphere:
+          nustate = evolved_state_atmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, h, depth=depth, massbasis=massbasis, antinu=antinu)
+          massbasis = False
+        prob += Pearth(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode=mode, massbasis=massbasis, full_oscillation=full_oscillation, antinu=antinu) * exp * hexp * deta * dh
 
   return prob

@@ -425,7 +425,8 @@ def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, depth, 
   nadirexposure = NadirExposure(lam=lam, normalized=normalized, d1=d1, d2=d2, ns=ns, file=angle_file, angle=angle, solar=solar)
   deta = nadirexposure[1][0]-nadirexposure[0][0]
 
-  if atmosphere:
+  # If the neutrinos are not solar, they must be atmospheric, so integrate over the height
+  if not solar and atmosphere:
     heightexposure = HeightExposure(height=height, file=height_file)
     dh = heightexposure[1][0]-heightexposure[0][0]
   else:

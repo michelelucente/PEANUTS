@@ -105,14 +105,25 @@ for param in settings.scan:
 
   if settings.atmosphere:
 
+    # If Earth oscillations are enabled, eta refers to the angle with the detector, so we need to pass the depth in order to compute eta_prime
+    if settings.earth:
+      depth = settings.depth;
+    else:
+      # If the nadir angle is < pi/2 (night), then the neutrino path crosses the Earth, so atmospheric oscillations are not enough
+      if param.eta < pi/2:
+        print("Error: Neutrinos with angles eta < pi/2 cross the Earth, so Earth oscillations should be enabled.\
+               Please add an Earth node to your yaml file, with depth = 0 for a detector on the surface")
+        exit()
+      depth = 0
+
     # Compute the probability on Earth's surface
     if settings.atm_probabilities:
-      out["atmosphere"] = Patmosphere(nustate, param.dm21, param.dm3l, pmns, param.energy, param.eta, param.height,
+      out["atmosphere"] = Patmosphere(nustate, param.dm21, param.dm3l, pmns, param.energy, param.eta, param.height, depth=depth,
                                       massbasis=massbasis, antinu=settings.antinu)
 
     # If the earth probabilities are to be computed, or the evolved state is requested, calculate the evolved state
     if settings.atm_evolved_state or settings.earth:
-       nustate = evolved_state_atmosphere(nustate, param.dm21, param.dm3l, pmns, param.energy, param.eta, param.height,
+       nustate = evolved_state_atmosphere(nustate, param.dm21, param.dm3l, pmns, param.energy, param.eta, param.height, depth=depth,
                                           massbasis=massbasis, antinu=settings.antinu)
        massbasis = False
 

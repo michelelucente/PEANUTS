@@ -9,7 +9,7 @@ Created on June 21 2023
 
 import numpy as np
 import numba as nb
-from math import sqrt, cos, sin, pi
+from math import sqrt, cos, sin, pi, asin
 
 from peanuts.evolutor import Upert
 from peanuts.potentials import R_E
@@ -33,7 +33,7 @@ def DL(eta, height):
 
 
 @nb.njit
-def evolved_state_atmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, height, massbasis=True, antinu=False):
+def evolved_state_atmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, height, depth=0, massbasis=True, antinu=False):
     """
     evolved_state_atmosphere() computes the evolved neutrino state on the surface of the Earth produced at some height in the atmosphere:
     - nustate: incoming neutrino state
@@ -43,6 +43,7 @@ def evolved_state_atmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, heig
     - E: the neutrino energy, in units of MeV;
     - eta: the nadir angle;
     - height: the altitude production point of neutrinos, in meters above the Earth surface
+    - depth: depth of the detector, default 0
     - massbasis: the basis of the neutrino eigenstate, True: mass, False: flavour (def. True)
     - antinu: False for neutrinos, True for antineutrinos
     """
@@ -60,8 +61,15 @@ def evolved_state_atmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, heig
       r23 = r23.conjugate()
       delta = delta.conjugate()
 
-    # TODO: Should this be eta_prime instead of eta?
-    evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta,height), 0, 0, 0, 0, antinu) if height > 0 else id3
+    # If the detector is underneath the Earth, compute eta_prime
+    if depth > 0:
+      h = depth/R_E
+      r_d = 1 - h
+      eta_prime = asin(r_d * sin(eta))
+    else:
+      eta_prime = eta
+
+    evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime,height), 0, 0, 0, 0, antinu) if height > 0 else id3
     evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(evolutor_atm , delta)), r23.transpose())
 
     if not massbasis:
@@ -74,7 +82,7 @@ def evolved_state_atmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, heig
 
 
 @nb.njit
-def Patmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, height, massbasis=True, antinu=False):
+def Patmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, height, depth=0, massbasis=True, antinu=False):
     """
     Patmosphere() computes the probability of survival of a neutrino state on the surface of the Earth produced at some height in the atmosphere:
     - nustate: incoming neutrino state
@@ -84,6 +92,7 @@ def Patmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, height, massbasis
     - E: the neutrino energy, in units of MeV;
     - eta: the nadir angle;
     - height: the altitude production point of neutrinos, in meters above the Earth surface
+    - depth: depth of the detector, default 0
     - massbasis: the basis of the neutrino eigenstate, True: mass, False: flavour (def. True)
     - antinu: False for neutrinos, True for antineutrinos
     """
@@ -101,8 +110,15 @@ def Patmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, height, massbasis
       r23 = r23.conjugate()
       delta = delta.conjugate()
 
-    # TODO: Should this be eta_prime instead of eta?
-    evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta,height), 0, 0, 0, 0, antinu) if height > 0 else id3
+    # If the detector is underneath the Earth, compute eta_prime
+    if depth > 0:
+      h = depth/R_E
+      r_d = 1 - h
+      eta_prime = asin(r_d * sin(eta))
+    else:
+      eta_prime = eta
+
+    evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime,height), 0, 0, 0, 0, antinu) if height > 0 else id3
     evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(evolutor_atm , delta)), r23.transpose())
 
     if not massbasis:

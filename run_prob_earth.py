@@ -134,7 +134,7 @@ print("Running PEANUTS...")
 
 # If height is > 0 compute oscillations through the atmosphere
 if settings.height > 0:
-  nustate = evolved_state_atmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, settings.height, massbasis=massbasis, antinu=antinu)
+  nustate = evolved_state_atmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, settings.height, depth=depth, massbasis=massbasis, antinu=antinu)
   massbasis = False
 
 # Compute probability of survival after propagation through Earth

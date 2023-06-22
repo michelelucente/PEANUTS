@@ -117,7 +117,6 @@ class EarthDensity:
 
     return alpha_prime[idx] + beta_prime[idx] * x**2 + gamma_prime[idx] * x**4
 
-
 def numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, antinu):
   """
   numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, antinu) computes

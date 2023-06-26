@@ -16,7 +16,7 @@ from peanuts.utils import get_comma_separated_floats, print_banner, print_inputs
 from peanuts.settings import Settings
 from peanuts.pmns import PMNS
 from peanuts.solar import SolarModel, solar_flux_mass
-from peanuts.atmosphere import evolved_state_atmosphere
+from peanuts.atmosphere import AtmosphereDensity, evolved_state_atmosphere
 from peanuts.earth import EarthDensity, Pearth
 
 mainfilename = 'run_prob_earth'
@@ -134,7 +134,8 @@ print("Running PEANUTS...")
 
 # If height is > 0 compute oscillations through the atmosphere
 if settings.height > 0:
-  nustate = evolved_state_atmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, settings.height, depth=depth, massbasis=massbasis, antinu=antinu)
+  atmos_density = AtmosphereDensity()
+  nustate = evolved_state_atmosphere(nustate, atmos_density, DeltamSq21, DeltamSq3l, pmns, E, eta, settings.height, depth=depth, massbasis=massbasis, antinu=antinu)
   massbasis = False
 
 # Compute probability of survival after propagation through Earth

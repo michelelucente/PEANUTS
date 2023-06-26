@@ -9,6 +9,7 @@ Created on June 21 2023
 
 import numpy as np
 import numba as nb
+from numba.experimental import jitclass
 from math import sqrt, cos, sin, pi, asin
 
 from peanuts.evolutor import Upert
@@ -16,6 +17,58 @@ from peanuts.potentials import R_E
 
 # Atmosphere maximum height
 Hmax = 2e4
+
+atmospheredensity = [
+   ('density_file', nb.types.string),
+   ('rho0', nb.float64),
+   ('H', nb.float64),
+]
+
+@jitclass(atmospheredensity)
+class AtmosphereDensity:
+  """
+  Exponential profile of atmospheric density
+  """
+
+  def __init__(self, density_file=None):
+    """
+    Construct the exponential profiel of atmospheric density
+    """
+
+    if density_file is not None:
+      print("Error: Custom atmospheric profiles are not supported yet")
+      exit()
+
+    else:
+
+      # Mean atmospheric temperature, in K
+      Tmean = 250 # K
+
+      # Mean mass of one mol of atmospheric particles = 0.029 kg/mol for Earth
+      Mmean = 0.029 # kg/mol
+
+      # Boltzmann constant
+      kB = 1.391e-23 # J / K = kg m^2 / s^2 / K
+
+      # acceleration due to gravity (assumed constant)
+      g = 9.8 # m/s^2
+
+      # Avogadro number
+      NA = 6.02214076e23 # mol^-1
+
+      # Atmospheric density on surface (1.2 kg/m^3)
+      self.rho0 = 1.2e-6 / Mmean # mol/cm^3
+
+      # Scale height, in m
+      self.H = NA * kB * Tmean / Mmean / g # m
+
+  def call(self, h):
+    """
+    Computes the value of the density from the exponential profile
+    for a value of h (in m), in units of mol/cm^3
+    """
+
+    return self.rho0 * np.exp(- h / self.H)
 
 @nb.njit
 def DL(eta, height):
@@ -36,7 +89,7 @@ def DL(eta, height):
 
 
 @nb.njit
-def evolved_state_atmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, height, depth=0, massbasis=True, antinu=False):
+def evolved_state_atmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, eta, height, depth=0, massbasis=True, antinu=False):
     """
     evolved_state_atmosphere() computes the evolved neutrino state on the surface of the Earth produced at some height in the atmosphere:
     - nustate: incoming neutrino state
@@ -75,17 +128,17 @@ def evolved_state_atmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, heig
     evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime,height), 0, 0, 0, 0, antinu) if height > 0 else id3
     evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(evolutor_atm , delta)), r23.transpose())
 
-    if not massbasis:
+    if not massbasis: # flavour
       return np.dot(evolutor.transpose(), nustate.astype(nb.complex128))
-    else:
+    else: # mass
       if not antinu:
         return np.dot(np.dot(evolutor.transpose(), pmns.pmns), nustate.astype(nb.complex128))
       else:
-        return np.dot(np.dot(evolutor.transpose(), pmns.pmns.conjugate()), nustate.astype(nb.complex128))
+        return np.dot(np.dot(evolutor.transpose(), pmns.conjugate()), nustate.astype(nb.complex128))
 
 
 @nb.njit
-def Patmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, height, depth=0, massbasis=True, antinu=False):
+def Patmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, eta, height, depth=0, massbasis=True, antinu=False):
     """
     Patmosphere() computes the probability of survival of a neutrino state on the surface of the Earth produced at some height in the atmosphere:
     - nustate: incoming neutrino state
@@ -128,6 +181,6 @@ def Patmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, height, depth=0, 
         return np.square(np.abs(np.dot(evolutor.transpose(), nustate.astype(nb.complex128))))
     elif massbasis:
         if not antinu:
-            return np.real(np.dot(np.square(np.abs(np.dot(evolutor.transpose(), pmns.pmns)).astype(nb.complex128)), nustate.astype(nb.complex128)))
+            return np.square(np.abs(np.dot(np.dot(evolutor.transpose(), pmns.pmns), nustate.astype(nb.complex128))))
         else:
-            return np.real(np.dot(np.square(np.abs(np.dot(evolutor.transpose(), pmns.pmns.conjugate())).astype(nb.complex128)), nustate.astype(nb.complex128)))
+            return np.square(np.abs(np.dot(np.dot(evolutor.transpose(), pmns.pmns.conjugate()), nustate.astype(nb.complex128))))

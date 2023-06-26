@@ -16,7 +16,7 @@ import peanuts.files as f
 from peanuts.utils import get_comma_separated_floats, print_banner, print_inputs
 from peanuts.pmns import PMNS
 from peanuts.solar import SolarModel, solar_flux_mass, Psolar
-from peanuts.atmosphere import Patmosphere, evolved_state_atmosphere
+from peanuts.atmosphere import AtmosphereDensity, Patmosphere, evolved_state_atmosphere, Hmax
 from peanuts.earth import EarthDensity, Pearth, Pearth_integrated, evolved_state
 
 mainfilename = 'run_peanuts'
@@ -63,6 +63,10 @@ else:
   nustate = settings.nustate
   massbasis = True if settings.basis=="mass" else False
 
+# Import atmospheric density, fixed for now
+if settings.atmosphere:
+  atmos_density = AtmosphereDensity()
+
 # Import earth density
 if settings.earth:
   earth_density = EarthDensity(settings.density_file)
@@ -91,15 +95,17 @@ for param in settings.scan:
     elif settings.distorted_spectrum:
       out['spectrum'] = solar_model.spectrum(settings.fraction, energy=param.energy) * Psolar(pmns, param.dm21, param.dm3l, param.energy, solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
 
-    # If the earth propbabilities are to be computed, or the evolved state is requested, we need the mass weights
-    if settings.earth or settings.atmosphere or settings.solar_evolved_state:
+    # If the earth or atmospheric propbabilities are to be computed, or the solar weights are requested, compute the solar weights
+    if settings.earth or settings.atmosphere or settings.solar_weights:
       mass_weights = solar_flux_mass(pmns.theta12, pmns.theta13, param.dm21, param.dm3l, param.energy,
                                      solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
-      if settings.solar_evolved_state:
-        out["solar_evolved_state"] = mass_weights
+      if settings.solar_weights:
+        out["solar_weights"] = mass_weights
 
-      # Use the mass weights as input neutrino state for further calculations
-      nustate = np.array(mass_weights, dtype=complex)
+    # If the earth or atmospheric probabilities are to be computed, the input state is a incoherent combination of mass eigenstates
+    # So the probabilities need to be computed for all mass eigenstates
+    if settings.earth or settings.atmosphere:
+      nustate = np.array([[1,0,0],[0,1,0],[0,0,1]], dtype=complex)
       massbasis = True
 
   if settings.atmosphere:
@@ -117,12 +123,15 @@ for param in settings.scan:
 
     # Compute the probability on Earth's surface
     if settings.atm_probabilities:
-      out["atmosphere"] = Patmosphere(nustate, param.dm21, param.dm3l, pmns, param.energy, param.eta, param.height, depth=depth,
+      out["atmosphere"] = Patmosphere(nustate, atmos_density, param.dm21, param.dm3l, pmns, param.energy, param.eta, param.height, depth=depth,
                                       massbasis=massbasis, antinu=settings.antinu)
+
+      if settings.solar:
+        out["atmosphere"] = np.dot(out["atmosphere"], mass_weights)
 
     # If the earth probabilities are to be computed, or the evolved state is requested, calculate the evolved state
     if settings.atm_evolved_state or settings.earth and not settings.exposure:
-       nustate = evolved_state_atmosphere(nustate, param.dm21, param.dm3l, pmns, param.energy, param.eta, param.height, depth=depth,
+       nustate = evolved_state_atmosphere(nustate, atmos_density, param.dm21, param.dm3l, pmns, param.energy, param.eta, param.height, depth=depth,
                                           massbasis=massbasis, antinu=settings.antinu)
        massbasis = False
 
@@ -132,28 +141,28 @@ for param in settings.scan:
 
   if settings.earth:
 
-    # If the latitude is provided compute probability integrated over exposure
+    # If the exposure is requested compute probability, integrating over exposure
     if settings.exposure:
       if settings.atmosphere:
-        out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, settings.depth,
-                                         height=param.height, mode=settings.evolution, antinu=settings.antinu,
-                                         lam=radians(settings.latitude), d1=settings.exposure_time[0], d2=settings.exposure_time[1],
-                                         normalized=settings.exposure_normalized, ns=settings.exposure_samples,
-                                         angle_file=settings.exposure_file, angle=settings.exposure_angle, height_file=settings.height_file,
-                                         solar=settings.solar, atmosphere=settings.atmosphere)
+        height = param.height
+        height_file = settings.height_file
       else:
-        out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, settings.depth,
-                                         mode=settings.evolution, antinu=settings.antinu,
-                                         lam=radians(settings.latitude), d1=settings.exposure_time[0], d2=settings.exposure_time[1],
-                                         normalized=settings.exposure_normalized, ns=settings.exposure_samples,
-                                         angle_file=settings.exposure_file, angle=settings.exposure_angle,
-                                         solar=settings.solar, atmosphere=settings.atmosphere)
+        height = Hmax
+        height_file  = None
 
+      out["earth"] = Pearth_integrated(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, settings.depth,
+                                       height=height, mode=settings.evolution, antinu=settings.antinu,
+                                       lam=radians(settings.latitude), d1=settings.exposure_time[0], d2=settings.exposure_time[1],
+                                       normalized=settings.exposure_normalized, ns=settings.exposure_samples,
+                                       angle_file=settings.exposure_file, angle=settings.exposure_angle, height_file=height_file,
+                                       solar=settings.solar, atmosphere=settings.atmosphere)
 
     else:
       # Compute probability of survival after propagation through Earth
       out["earth"] = Pearth(nustate, earth_density, pmns, param.dm21, param.dm3l, param.energy, param.eta, settings.depth,
                            mode=settings.evolution, massbasis=massbasis, antinu=settings.antinu)
+    if settings.solar:
+      out["earth"] = np.dot(out["earth"], mass_weights)
 
     # If the evolved state is requested, compute that too
     if settings.earth_evolved_state:

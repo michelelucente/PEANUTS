@@ -20,7 +20,7 @@ import peanuts.files as f
 from peanuts.potentials import k, MatterPotential, R_E
 from peanuts.evolutor import FullEvolutor
 from peanuts.exposure import NadirExposure, HeightExposure
-from peanuts.atmosphere import evolved_state_atmosphere, Hmax
+from peanuts.atmosphere import AtmosphereDensity, evolved_state_atmosphere, Hmax
 
 earthdensity =  [
   ('density_file', nb.types.string),
@@ -250,9 +250,9 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, dep
       evolution = [np.array(np.square(np.abs(np.dot(num_solution[i].transpose(), nustate))) ) for i in range(len(x))]
   elif massbasis:
       if not antinu:
-        evolution = [np.array(np.real(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns))), nustate))) for i in range(len(x))]
+        evolution = [np.array(np.square(np.abs(np.dot(np.dot(num_solution[i].transpose(), pmns.pmns), nustate)))) for i in range(len(x))]
       else:
-        evolution = [np.array(np.real(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns.conjugate()))), nustate))) for i in range(len(x))]
+        evolution = [np.array(np.square(np.abs(np.dot(np.dot(num_solution[i].transpose(), pmns.pmns.conjugate()), nustate)))) for i in range(len(x))]
   else:
       print("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")
       exit()
@@ -309,9 +309,9 @@ def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, de
       return np.square(np.abs(np.dot(evol.transpose(), nustate.astype(nb.complex128))))
   elif massbasis: # mass
       if not antinu:
-        return np.real(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns)).astype(nb.complex128)), nustate.astype(nb.complex128)))
+        return np.square(np.abs(np.dot(np.dot(evol.transpose(), pmns.pmns), nustate.astype(nb.complex128))))
       else:
-        return np.real(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns.conjugate())).astype(nb.complex128)), nustate.astype(nb.complex128)))
+        return np.square(np.abs(np.dot(np.dot(evol.transpose(), pmns.pmns.conjugate()), nustate.astype(nb.complex128))))
 
   else:
       raise Exception("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")
@@ -333,11 +333,6 @@ def evolved_state(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth,
   - full_oscillation: return full oscillation along path (def. False))
   - antinu: False for neutrinos, True for antineutrinos
   """
-
-  # Make sure nustate has the right format
-  if len(nustate) != 3:
-    print("Error: neutrino state provided has the wrong format, it must be a vector of size 3.")
-    exit()
 
   if mode == "analytical":
     if full_oscillation:
@@ -369,14 +364,6 @@ def Pearth(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode="
   - full_oscillation: return full oscillation along path (def. False))
   - antinu: False for neutrinos, True for antineutrinos
   """
-
-  # Make sure nustate has the right format
-  if len(nustate) != 3:
-    print("Error: neutrino state provided has the wrong format, it must be a vector of size 3.")
-    exit()
-  #if np.abs(np.sum(np.square(np.abs(nustate))) - 1) > 1e-3:
-  #  print("Error: neutrino state provided has the wrong format, it elements square must sum to 1.")
-  #  exit()
 
   if mode == "analytical":
     if full_oscillation:
@@ -429,6 +416,7 @@ def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, depth, 
   if not solar and atmosphere:
     heightexposure = HeightExposure(height=height, file=height_file)
     dh = heightexposure[1][0]-heightexposure[0][0]
+    atmos_density = AtmosphereDensity()
   else:
     heightexposure = [[0, 1]]
     dh = 1
@@ -441,7 +429,7 @@ def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, depth, 
     if (eta < pi/2 and night) or (eta >= pi/2 and day):
       for h, hexp in heightexposure:
         if atmosphere:
-          nustate = evolved_state_atmosphere(nustate, DeltamSq21, DeltamSq3l, pmns, E, eta, h, depth=depth, massbasis=massbasis, antinu=antinu)
+          nustate = evolved_state_atmosphere(nustate, atmos_density, DeltamSq21, DeltamSq3l, pmns, E, eta, h, depth=depth, massbasis=massbasis, antinu=antinu)
           massbasis = False
         prob += Pearth(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode=mode, massbasis=massbasis, full_oscillation=full_oscillation, antinu=antinu) * exp * hexp * deta * dh
 

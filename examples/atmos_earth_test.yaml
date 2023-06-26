@@ -14,26 +14,29 @@ Neutrinos:
   theta13: 1.49575e-01
   delta: 3.40339
 
-Solar:
+#Solar:
 
-  fraction: "8B"
-  flux: true
+#  fraction: "8B"
+#  flux: true
 #  spectrum: "distorted"
 
 Atmosphere:
 
   #state: [0.4, 0.2, 0.6]
   #basis: "flavour"
-  eta: 0.9
+  state: [0,0,1]
+  basis: "mass"
+  eta: 0.8
   #height: [1000,2000]
+  height: [0,20000]
   probabilities: False
   #evolved_state: True
 
 
 Earth:
 
-  state: [0.4, 0.2, 0.6]
-  basis: "flavour"
-  eta: 0.9
+#  state: [0.4, 0.2, 0.6]
+#  basis: "flavour"
+#  eta: 0.9
   depth: 3000
-  evolved_state: true
+#  evolved_state: true

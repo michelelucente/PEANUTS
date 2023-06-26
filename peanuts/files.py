@@ -128,8 +128,8 @@ def output(settings, outs):
     if settings.solar:
       if settings.solar_probabilities:
         towrite += '\t'.join(["Psolar ("+nui+")  " for nui in nu]) + "\t"
-      if settings.solar_evolved_state:
-        towrite += "Evolved solar neutrino state\t"
+      if settings.solar_weights:
+        towrite += "Solar weights for each mass eigenstate\t"
     if settings.atmosphere:
       if settings.atm_probabilities:
         towrite += '\t'.join(["Patm ("+nui+")    " for nui in nu]) + "\t"
@@ -150,8 +150,8 @@ def output(settings, outs):
         if settings.solar_probabilities:
           for out in outs[i]["solar"]:
             towrite += str(dec(out)) + "\t"
-        if settings.solar_evolved_state:
-          towrite += str([np.around(out,5) for out in outs[i]["solar_evolved_state"]]) + "\t"
+        if settings.solar_weights:
+          towrite += str([np.around(out,5) for out in outs[i]["solar_weights"]]) + "\t"
 
       if settings.atmosphere:
         if settings.atm_probabilities:

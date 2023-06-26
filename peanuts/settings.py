@@ -196,7 +196,7 @@ class Settings:
         self.spectra = settings["Solar"]["spectra"] if "spectra" in settings["Solar"] else None
 
         self.solar_probabilities = settings["Solar"]["probabilities"] if "probabilities" in settings["Solar"] else True
-        self.solar_evolved_state = settings["Solar"]["evolved_state"] if "evolved_state" in settings["Solar"] else False
+        self.solar_weights = settings["Solar"]["solar_weights"] if "solar_weights" in settings["Solar"] else False
 
         self.flux = settings["Solar"]["flux"] if "flux" in settings["Solar"] else False
 

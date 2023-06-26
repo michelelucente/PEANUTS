@@ -18,10 +18,13 @@ Solar:
 
   fraction: "8B"
 
-Earth:
+Atmosphere:
 
   eta: 0.8
-  depth: 3000
+
+Earth:
+
+ depth: 3000
 
 Output: "stdout"
 #Output: "out.dat"

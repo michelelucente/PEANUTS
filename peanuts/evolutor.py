@@ -256,7 +256,7 @@ def ExponentialEvolutor(DeltamSq21, DeltamSq3l, pmns, E, xi, xf, antinu=False):
   # Get eigenvalues of rotated hamiltonian
   X1 = w1**2 + w2**2 + w3**2 - w1*w2 - w1*w3 - w2*w3 + 3*(chi2**2 + chi3**2)
   X2 = -(2*w1 - w2 - w3)*(2*w2 - w1 - w3)*(2*w3 - w1 - w2) + 9*((2*w3 - w2 - w2)*chi2**2 + (2*w2 - w1 - w3)*chi3**2)
-  phi = np.arctan(np.sqrt(4*X1**3/X2**2-1)) if X2>0 else np.arctan(-np.sqrt(4*X1**3/X2**2-1))+pi if X2<0 else pi/2
+  phi = np.arctan(np.sqrt(4*X1*(X1/X2)**2-1)) if X2>0 else np.arctan(-np.sqrt(4*X1*(X1/X2)**2-1))+pi if X2<0 else pi/2
   print(X1,X2)
   print(phi)
   print(w1+w2+w3)

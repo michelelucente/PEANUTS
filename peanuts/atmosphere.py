@@ -12,7 +12,7 @@ import numba as nb
 from numba.experimental import jitclass
 from math import sqrt, cos, sin, pi, asin
 
-from peanuts.evolutor import Upert
+from peanuts.evolutor import Upert, ExponentialEvolutor
 from peanuts.potentials import R_E
 
 # Atmosphere maximum height
@@ -70,6 +70,7 @@ class AtmosphereDensity:
 
     return self.rho0 * np.exp(- h / self.H)
 
+
 @nb.njit
 def DL(eta, height):
     """
@@ -88,7 +89,7 @@ def DL(eta, height):
     return delta_relative * (R_E + height) / R_E # Returns the lenght normlised to Earth radius
 
 
-@nb.njit
+
 def evolved_state_atmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, eta, height, depth=0, massbasis=True, antinu=False):
     """
     evolved_state_atmosphere() computes the evolved neutrino state on the surface of the Earth produced at some height in the atmosphere:
@@ -104,19 +105,6 @@ def evolved_state_atmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, 
     - antinu: False for neutrinos, True for antineutrinos
     """
 
-    # 3d identity matrix of complex numbers
-    id3 = np.eye(3, dtype=nb.complex128)
-
-    # Compute the factorised matrices R_{23} and \Delta
-    # (remember that U_{PMNS} = R_{23} \Delta R_{13} \Delta^* R_{12})
-    r23 = pmns.R23(pmns.theta23)
-    delta = pmns.Delta(pmns.delta)
-
-    # Conjugate for antineutrinos
-    if antinu:
-      r23 = r23.conjugate()
-      delta = delta.conjugate()
-
     # If the detector is underneath the Earth, compute eta_prime
     if depth > 0:
       h = depth/R_E
@@ -125,19 +113,21 @@ def evolved_state_atmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, 
     else:
       eta_prime = eta
 
-    evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime,height), 0, 0, 0, 0, antinu) if height > 0 else id3
-    evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(evolutor_atm , delta)), r23.transpose())
+    #evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime,height), 0, 0, 0, 0, antinu) if height > 0 else id3
+    #evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(evolutor_atm , delta)), r23.transpose())
+    evolutor = ExponentialEvolutor(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime, height), 0)
+    print(evolutor)
+    exit()
 
     if not massbasis: # flavour
-      return np.dot(evolutor.transpose(), nustate.astype(nb.complex128))
+      return np.dot(evolutor.transpose(), nustate)
     else: # mass
       if not antinu:
-        return np.dot(np.dot(evolutor.transpose(), pmns.pmns), nustate.astype(nb.complex128))
+        return np.dot(np.dot(evolutor.transpose(), pmns.pmns), nustate)
       else:
-        return np.dot(np.dot(evolutor.transpose(), pmns.conjugate()), nustate.astype(nb.complex128))
+        return np.dot(np.dot(evolutor.transpose(), pmns.conjugate()), nustate.astype)
 
 
-@nb.njit
 def Patmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, eta, height, depth=0, massbasis=True, antinu=False):
     """
     Patmosphere() computes the probability of survival of a neutrino state on the surface of the Earth produced at some height in the atmosphere:
@@ -153,19 +143,6 @@ def Patmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, eta, height, 
     - antinu: False for neutrinos, True for antineutrinos
     """
 
-    # 3d identity matrix of complex numbers
-    id3 = np.eye(3, dtype=nb.complex128)
-
-    # Compute the factorised matrices R_{23} and \Delta
-    # (remember that U_{PMNS} = R_{23} \Delta R_{13} \Delta^* R_{12})
-    r23 = pmns.R23(pmns.theta23)
-    delta = pmns.Delta(pmns.delta)
-
-    # Conjugate for antineutrinos
-    if antinu:
-      r23 = r23.conjugate()
-      delta = delta.conjugate()
-
     # If the detector is underneath the Earth, compute eta_prime
     if depth > 0:
       h = depth/R_E
@@ -178,9 +155,9 @@ def Patmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, eta, height, 
     evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(evolutor_atm , delta)), r23.transpose())
 
     if not massbasis:
-        return np.square(np.abs(np.dot(evolutor.transpose(), nustate.astype(nb.complex128))))
+        return np.square(np.abs(np.dot(evolutor.transpose(), nustate)))
     elif massbasis:
         if not antinu:
-            return np.square(np.abs(np.dot(np.dot(evolutor.transpose(), pmns.pmns), nustate.astype(nb.complex128))))
+            return np.square(np.abs(np.dot(np.dot(evolutor.transpose(), pmns.pmns), nustate)))
         else:
-            return np.square(np.abs(np.dot(np.dot(evolutor.transpose(), pmns.pmns.conjugate()), nustate.astype(nb.complex128))))
+            return np.square(np.abs(np.dot(np.dot(evolutor.transpose(), pmns.pmns.conjugate()), nustate)))

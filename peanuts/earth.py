@@ -17,7 +17,7 @@ from math import sin, cos, sqrt, pi, asin
 from scipy.integrate import complex_ode
 
 import peanuts.files as f
-from peanuts.potentials import k, MatterPotential, R_E
+from peanuts.potentials import k_E, MatterPotential, R_E
 from peanuts.evolutor import FullEvolutor
 from peanuts.exposure import NadirExposure, HeightExposure
 from peanuts.atmosphere import AtmosphereDensity, evolved_state_atmosphere, Hmax
@@ -143,9 +143,9 @@ def numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, ant
     delta = delta.conjugate()
 
   if DeltamSq3l > 0: # NO, l = 1
-    ki = k(np.array([0, DeltamSq21, DeltamSq3l]), E)
+    ki = k_E(np.array([0, DeltamSq21, DeltamSq3l]), E)
   else: # IO, l = 2
-    ki = k(np.array([-DeltamSq21, 0, DeltamSq3l]), E)
+    ki = k_E(np.array([-DeltamSq21, 0, DeltamSq3l]), E)
   Hk = multi_dot([U, np.diag(ki), U.transpose()])
 
   h = depth/R_E

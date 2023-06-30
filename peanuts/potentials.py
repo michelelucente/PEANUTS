@@ -13,6 +13,9 @@ import numba as nb
 # multiplied by R_E
 R_E = 6.371e6 # meters
 
+# Sun raidus R_S
+R_S = 6.96e8 # meters
+
 # Matter potential
 @nb.njit
 def MatterPotential (n, antinu):
@@ -23,13 +26,24 @@ def MatterPotential (n, antinu):
     """
     return (-1 if antinu else 1) * R_E * 3.868e-7 * n # dimensionless
 
-# Kinetic potential
+# Kinetic potential on Earth
 @nb.njit
-def k(mSq, E):
+def k_E(mSq, E):
     """
-    k(mSq, E) computes the kinetic potential for an ultrarelativistic neutrino:
+    k_E(mSq, E) computes the kinetic potential for an ultrarelativistic neutrino:
     - mSq: the squared mass (or mass difference) in units of eV^2;
     - E: the neutrino energy in MeV.
     See Eq. 4.18 in 1802.05781.
     """
     return R_E * 2.533 * mSq / E # dimensionless
+
+# Kinetic potential on the Sun
+@nb.njit
+def k_S(mSq, E):
+    """
+    k_S(mSq, E) computes the kinetic potential for an ultrarelativistic neutrino:
+    - mSq: the squared mass (or mass difference) in units of eV^2;
+    - E: the neutrino energy in MeV.
+    See Eq. 4.18 in 1802.05781.
+    """
+    return R_S * 2.533 * mSq / E # dimensionless

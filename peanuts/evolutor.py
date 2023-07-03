@@ -13,6 +13,7 @@ import numba as nb
 from math import sin, asin, cos, sqrt, pi
 from cmath import exp
 from mpmath import hyp2f2
+from scipy.linalg import inv
 
 from peanuts.potentials import k_E, k_S, MatterPotential, R_E, R_S
 from peanuts.integration import c0, c1, lambdas, Iab
@@ -197,7 +198,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
         raise ValueError('eta must be comprised between 0 and pi.')
 
 
-def ExponentialEvolutor(DeltamSq21, DeltamSq3l, pmns, E, xi, xf, antinu=False):
+def ExponentialEvolutor(initialstate, DeltamSq21, DeltamSq3l, pmns, E, xi, xf, antinu=False):
   """
   """
 
@@ -227,6 +228,7 @@ def ExponentialEvolutor(DeltamSq21, DeltamSq3l, pmns, E, xi, xf, antinu=False):
   u = x*R_S/r0 + u0
 
   # Reduced hamiltonian
+  # TODO: multiplicative factor for the sun
   Htildeu = r0/R_S * np.dot(U.conjugate(), np.dot(np.diag(ki), U.transpose()))
   HV = np.array([np.exp(-u),0,0])
   #HV[x_] := R * DiagonalMatrix[{V0 Exp[-((x R)/r0)], 0, 0}];
@@ -251,6 +253,9 @@ def ExponentialEvolutor(DeltamSq21, DeltamSq3l, pmns, E, xi, xf, antinu=False):
   chi3 = Htildeu[0,2]
   [chi2, chi3] = np.dot(R23a.transpose(),[chi2,chi3])
 
+  # Write rotation matrix as 3x3
+  r23a = np.block([[1,np.zeros((1,2))],[np.zeros((2,1)),R23a]])
+
   # Get eigenvalues of rotated hamiltonian
   X1 = w1**2 + w2**2 + w3**2 - w1*w2 - w1*w3 - w2*w3 + 3*(chi2**2 + chi3**2)
   X2 = -(2*w1 - w2 - w3)*(2*w2 - w1 - w3)*(2*w3 - w1 - w2) + 9*((2*w3 - w1 - w2)*chi2**2 + (2*w2 - w1 - w3)*chi3**2)
@@ -259,32 +264,51 @@ def ExponentialEvolutor(DeltamSq21, DeltamSq3l, pmns, E, xi, xf, antinu=False):
   mu2 = (w1 + w2 + w3 + 2*np.sqrt(X1)*np.cos((phi-pi)/3))/3
   mu3 = (w1 + w2 + w3 + 2*np.sqrt(X1)*np.cos((phi+pi)/3))/3
   [mu1,mu2,mu3] = np.sort([mu1,mu2,mu3])
-  # Write solutions
+
+  # Coefficients of solutions
   [K1, K2, K3] = [1/np.sqrt((w2-mu1)*(w3-mu1)*(mu2-mu1)*(mu3-mu1)),
                   1/np.sqrt((w2-mu2)*(w3-mu2)*(mu1-mu2)*(mu3-mu2)),
                   1/np.sqrt((w2-mu3)*(w3-mu3)*(mu1-mu3)*(mu2-mu3))]
 
+  # Solution at end
+  psi1 = np.array([K1 * (mu1-w2)*(mu1-w3) * np.exp(-1j*mu1*u) * hyp2f2(1-1j*(w2-mu1), 1-1j*(w3-mu1), 1-1j*(mu2-mu1), 1-1j*(mu3-mu1), 1j*np.exp(-u)),
+                   K2 * (mu2-w2)*(mu2-w3) * np.exp(-1j*mu2*u) * hyp2f2(1-1j*(w2-mu2), 1-1j*(w3-mu2), 1-1j*(mu1-mu2), 1-1j*(mu3-mu2), 1j*np.exp(-u)),
+                   K3 * (mu3-w2)*(mu3-w3) * np.exp(-1j*mu3*u) * hyp2f2(1-1j*(w2-mu3), 1-1j*(w3-mu3), 1-1j*(mu1-mu3), 1-1j*(mu2-mu3), 1j*np.exp(-u))],
+          dtype=np.complex128)
 
-  psi1 = [K1 * (mu1-w2)*(mu1-w3) * np.exp(-1j*mu1*u) * hyp2f2(1-1j*(w2-mu1), 1-1j*(w3-mu1), 1-1j*(mu2-mu1), 1-1j*(mu3-mu1), 1j*np.exp(-u)),
-          K2 * (mu2-w2)*(mu2-w3) * np.exp(-1j*mu2*u) * hyp2f2(1-1j*(w2-mu2), 1-1j*(w3-mu2), 1-1j*(mu1-mu2), 1-1j*(mu3-mu2), 1j*np.exp(-u)),
-          K3 * (mu3-w2)*(mu3-w3) * np.exp(-1j*mu3*u) * hyp2f2(1-1j*(w2-mu3), 1-1j*(w3-mu3), 1-1j*(mu1-mu3), 1-1j*(mu2-mu3), 1j*np.exp(-u))]
+  psi2 = np.array([K1 * chi2 * (mu1-w3) * np.exp(-1j*mu1*u) * hyp2f2(-1j*(w2-mu1), 1-1j*(w3-mu1), 1-1j*(mu2-mu1), 1-1j*(mu3-mu1), 1j*np.exp(-u)),
+                   K2 * chi2 * (mu2-w3) * np.exp(-1j*mu2*u) * hyp2f2(-1j*(w2-mu2), 1-1j*(w3-mu2), 1-1j*(mu1-mu2), 1-1j*(mu3-mu2), 1j*np.exp(-u)),
+                   K3 * chi2 * (mu3-w3) * np.exp(-1j*mu3*u) * hyp2f2(-1j*(w2-mu3), 1-1j*(w3-mu3), 1-1j*(mu1-mu3), 1-1j*(mu2-mu3), 1j*np.exp(-u))],
+         dtype=np.complex128)
 
+  psi3 = np.array([K1 * chi3 * (mu1-w2) * np.exp(-1j*mu1*u) * hyp2f2(1-1j*(w2-mu1), -1j*(w3-mu1), 1-1j*(mu2-mu1), 1-1j*(mu3-mu1), 1j*np.exp(-u)),
+                   K2 * chi3 * (mu2-w2) * np.exp(-1j*mu2*u) * hyp2f2(1-1j*(w2-mu2), -1j*(w3-mu2), 1-1j*(mu1-mu2), 1-1j*(mu3-mu2), 1j*np.exp(-u)),
+                   K3 * chi3 * (mu3-w2) * np.exp(-1j*mu3*u) * hyp2f2(1-1j*(w2-mu3), -1j*(w3-mu3), 1-1j*(mu1-mu3), 1-1j*(mu2-mu3), 1j*np.exp(-u))],
+         dtype=np.complex128)
 
-  psi2 = [K1 * chi2 * (mu1-w3) * np.exp(-1j*mu1*u) * hyp2f2(-1j*(w2-mu1), 1-1j*(w3-mu1), 1-1j*(mu2-mu1), 1-1j*(mu3-mu1), 1j*np.exp(-u)),
-          K2 * chi2 * (mu2-w3) * np.exp(-1j*mu2*u) * hyp2f2(-1j*(w2-mu2), 1-1j*(w3-mu2), 1-1j*(mu1-mu2), 1-1j*(mu3-mu2), 1j*np.exp(-u)),
-          K3 * chi2 * (mu3-w3) * np.exp(-1j*mu3*u) * hyp2f2(-1j*(w2-mu3), 1-1j*(w3-mu3), 1-1j*(mu1-mu3), 1-1j*(mu2-mu3), 1j*np.exp(-u))]
+  # Solutions at beginning
+  psi10 = np.array([K1 * (mu1-w2)*(mu1-w3) * np.exp(-1j*mu1*u0) * hyp2f2(1-1j*(w2-mu1), 1-1j*(w3-mu1), 1-1j*(mu2-mu1), 1-1j*(mu3-mu1), 1j*np.exp(-u0)),
+                    K2 * (mu2-w2)*(mu2-w3) * np.exp(-1j*mu2*u0) * hyp2f2(1-1j*(w2-mu2), 1-1j*(w3-mu2), 1-1j*(mu1-mu2), 1-1j*(mu3-mu2), 1j*np.exp(-u0)),
+                    K3 * (mu3-w2)*(mu3-w3) * np.exp(-1j*mu3*u0) * hyp2f2(1-1j*(w2-mu3), 1-1j*(w3-mu3), 1-1j*(mu1-mu3), 1-1j*(mu2-mu3), 1j*np.exp(-u0))],
+           dtype=np.complex128)
 
-  psi3 = [K1 * chi3 * (mu1-w2) * np.exp(-1j*mu1*u) * hyp2f2(1-1j*(w2-mu1), -1j*(w3-mu1), 1-1j*(mu2-mu1), 1-1j*(mu3-mu1), 1j*np.exp(-u)),
-          K2 * chi3 * (mu2-w2) * np.exp(-1j*mu2*u) * hyp2f2(1-1j*(w2-mu2), -1j*(w3-mu2), 1-1j*(mu1-mu2), 1-1j*(mu3-mu2), 1j*np.exp(-u)),
-          K3 * chi3 * (mu3-w2) * np.exp(-1j*mu3*u) * hyp2f2(1-1j*(w2-mu3), -1j*(w3-mu3), 1-1j*(mu1-mu3), 1-1j*(mu2-mu3), 1j*np.exp(-u))]
+  psi20 = np.array([K1 * chi2 * (mu1-w3) * np.exp(-1j*mu1*u0) * hyp2f2(-1j*(w2-mu1), 1-1j*(w3-mu1), 1-1j*(mu2-mu1), 1-1j*(mu3-mu1), 1j*np.exp(-u0)),
+                    K2 * chi2 * (mu2-w3) * np.exp(-1j*mu2*u0) * hyp2f2(-1j*(w2-mu2), 1-1j*(w3-mu2), 1-1j*(mu1-mu2), 1-1j*(mu3-mu2), 1j*np.exp(-u0)),
+                    K3 * chi2 * (mu3-w3) * np.exp(-1j*mu3*u0) * hyp2f2(-1j*(w2-mu3), 1-1j*(w3-mu3), 1-1j*(mu1-mu3), 1-1j*(mu2-mu3), 1j*np.exp(-u0))],
+          dtype=np.complex128)
 
+  psi30 = np.array([K1 * chi3 * (mu1-w2) * np.exp(-1j*mu1*u0) * hyp2f2(1-1j*(w2-mu1), -1j*(w3-mu1), 1-1j*(mu2-mu1), 1-1j*(mu3-mu1), 1j*np.exp(-u0)),
+                    K2 * chi3 * (mu2-w2) * np.exp(-1j*mu2*u0) * hyp2f2(1-1j*(w2-mu2), -1j*(w3-mu2), 1-1j*(mu1-mu2), 1-1j*(mu3-mu2), 1j*np.exp(-u0)),
+                    K3 * chi3 * (mu3-w2) * np.exp(-1j*mu3*u0) * hyp2f2(1-1j*(w2-mu3), -1j*(w3-mu3), 1-1j*(mu1-mu3), 1-1j*(mu2-mu3), 1j*np.exp(-u0))],
+          dtype=np.complex128)
 
-  # TODO: Temporary values for the coefficients C, not really valid for all cases
-  C = [-0.068396 - 0.201064j, -0.613008 - 0.743907j, 0.135444 + 0.0858706j]
+  # Get coefficients from boundary conditions (rotate initial state to match the rotated hamiltonian)
+  Mboundary = np.matrix([psi10, psi20, psi30])
+  phi0 = np.dot(r23a.transpose(), np.dot(delta, np.dot(r23.transpose(), initialstate)))
+  C = np.dot(inv(Mboundary),phi0)
+
+  # Get final solution
   psi = np.array([np.dot(C,psi1), np.dot(C,psi2), np.dot(C,psi3)],dtype=np.complex128)
-
-  # Write rotation matrix as 3x3
-  r23a = np.block([[1,np.zeros((1,2))],[np.zeros((2,1)),R23a]])
 
   # Reintroduce the theta23 and delta matrices
   return np.dot(r23,np.dot(delta.conjugate(), np.dot(r23a, psi)))

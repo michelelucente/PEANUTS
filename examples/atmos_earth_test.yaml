@@ -16,7 +16,7 @@ Neutrinos:
 
 Atmosphere:
 
-  state: [0,1,0]
+  state: [1,0,0]
   basis: "flavour"
   eta: 0.8
   #height: [1000,2000]

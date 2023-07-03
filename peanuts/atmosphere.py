@@ -115,7 +115,11 @@ def evolved_state_atmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, 
 
     #evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime,height), 0, 0, 0, 0, antinu) if height > 0 else id3
     #evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(evolutor_atm , delta)), r23.transpose())
-    evolutor = ExponentialEvolutor(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime, height), 0)
+    if massbasis:
+      initialstate = np.dot(pmns.transpose(),nustate)
+    else:
+      initialstate = nustate
+    evolutor = ExponentialEvolutor(initialstate, DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime, height), 0)
     print(evolutor)
     exit()
 

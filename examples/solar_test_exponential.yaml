@@ -20,3 +20,4 @@ Solar:
   flux: true
   spectrum: "distorted"
   spectra: {"8B": "Data/8B_shape_Winter_et_al.csv"}
+  density_profile: "exponential"

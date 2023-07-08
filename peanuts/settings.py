@@ -193,6 +193,19 @@ class Settings:
         self.densitycol = settings["Solar"]["densitycol"] if "densitycol" in settings["Solar"] else None
         self.fractioncols = settings["Solar"]["fractioncols"] if "fractioncols" in settings["Solar"] else None
 
+        self.adiabatic = True
+        self.exponential = False
+        if "density_profile" in settings["Solar"]:
+          if settings["Solar"]["density_profile"] == "adiabatic":
+            self.adiabatic = True
+            self.exponential = False
+          elif settings["Solar"]["density_profile"] == "exponential":
+            self.exponential = True
+            self.adiabatic = False
+          else:
+            print("Error: unknown density profile for the Sun")
+            exit()
+
         self.spectra = settings["Solar"]["spectra"] if "spectra" in settings["Solar"] else None
 
         self.solar_probabilities = settings["Solar"]["probabilities"] if "probabilities" in settings["Solar"] else True
@@ -210,6 +223,7 @@ class Settings:
           else:
             print("Error: unknown option for spectrum, select undistorted or distorted")
             exit()
+
 
       # Extract atmosphere parameters
       if self.atmosphere:
@@ -278,7 +292,7 @@ class Settings:
           self.nustate = np.array(settings["Earth"]["state"],dtype=complex)
           self.antinu = settings["Earth"]["antinu"] if "antinu" in settings["Earth"] else False
           self.basis = settings["Earth"]["basis"]
-        else:
+        elif "state" in settings["Earth"] or "basis" in settings["Earth"]:
           print("Warning: earth input neutrino state and basis will be ignored, as these are fixed for " + ("solar" if self.solar else "atmospheric") + " neutrinos.")
 
         if "depth" not in settings["Earth"]:
@@ -349,6 +363,8 @@ class Settings:
       self.solar_probabilities = True
       self.undistorted_spectrum = False
       self.distorted_spectrum =  False
+      self.adiabatic = True
+      self.exponential = False
 
     # If there are exactly 7 arguments, we are in earth mode
     # args = (pmns, dm21, dm3l, E, eta, depth, options)

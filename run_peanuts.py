@@ -87,18 +87,24 @@ for param in settings.scan:
 
     # Compute probability for the given sample fraction and energy
     if settings.solar_probabilities:
-      out["solar"] = Psolar(pmns, param.dm21, param.dm3l, param.energy, solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
+      out["solar"] = Psolar(pmns, param.dm21, param.dm3l, param.energy, solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction),
+                            adiabatic=settings.adiabatic, exponential=settings.exponential)
 
     # Add undistorted or distorted spectrum if requested
     if settings.undistorted_spectrum:
       out['spectrum'] = solar_model.spectrum(settings.fraction, energy=param.energy)
     elif settings.distorted_spectrum:
-      out['spectrum'] = solar_model.spectrum(settings.fraction, energy=param.energy) * Psolar(pmns, param.dm21, param.dm3l, param.energy, solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
+      if "solar" in out:
+        out["spectrum"] = solar_model.spectrum(settings.fraction, energy=param.energy) * out["solar"]
+      else:
+        out['spectrum'] = solar_model.spectrum(settings.fraction, energy=param.energy) * Psolar(pmns, param.dm21, param.dm3l, param.energy, solar_model.radius(), solar_model.density(),
+                                               solar_model.fraction(settings.fraction), adiabatic=settings.adiabatic, exponential=settings.exponential)
 
     # If the earth or atmospheric propbabilities are to be computed, or the solar weights are requested, compute the solar weights
     if settings.earth or settings.atmosphere or settings.solar_weights:
-      mass_weights = solar_flux_mass(pmns.theta12, pmns.theta13, param.dm21, param.dm3l, param.energy,
-                                     solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction))
+      mass_weights = solar_flux_mass(pmns, param.dm21, param.dm3l, param.energy,
+                                     solar_model.radius(), solar_model.density(), solar_model.fraction(settings.fraction),
+                                     adiabatic=settings.adiabatic, exponential=settings.exponential)
       if settings.solar_weights:
         out["solar_weights"] = mass_weights
 

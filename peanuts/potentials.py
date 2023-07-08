@@ -26,24 +26,13 @@ def MatterPotential (n, antinu):
     """
     return (-1 if antinu else 1) * R_E * 3.868e-7 * n # dimensionless
 
-# Kinetic potential on Earth
+# Kinetic potential
 @nb.njit
-def k_E(mSq, E):
+def k(mSq, E):
     """
     k_E(mSq, E) computes the kinetic potential for an ultrarelativistic neutrino:
     - mSq: the squared mass (or mass difference) in units of eV^2;
     - E: the neutrino energy in MeV.
     See Eq. 4.18 in 1802.05781.
     """
-    return R_E * 2.533 * mSq / E # dimensionless
-
-# Kinetic potential on the Sun
-@nb.njit
-def k_S(mSq, E):
-    """
-    k_S(mSq, E) computes the kinetic potential for an ultrarelativistic neutrino:
-    - mSq: the squared mass (or mass difference) in units of eV^2;
-    - E: the neutrino energy in MeV.
-    See Eq. 4.18 in 1802.05781.
-    """
-    return R_S * 2.533 * mSq / E # dimensionless
+    return 2.533 * mSq / E # 1/m

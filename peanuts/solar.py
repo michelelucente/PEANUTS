@@ -15,9 +15,39 @@ from math import cos, sin
 from scipy import integrate
 from scipy.interpolate import interp1d
 from peanuts.matter_mixing import th13_M, th12_M
+from peanuts.potentials import R_S
+from peanuts.evolutor import ExponentialEvolution
 from peanuts.pmns import PMNS
 
 import peanuts.files as f
+
+class SolarDensity:
+    """
+    Class containing the solar density"
+    """
+
+    def __init__(self, density_table):
+
+      # Fill in the tabulated density from a Solar Model
+      self.adiabatic_density = density_table.to_numpy()
+
+      # Fill in the exponential profile of the density
+      self.V0 = 0.0458e-3 # 1/m
+      self.r0 = 0.1*R_S
+
+    def call(self, r):
+      """
+      Return the the exponential profile density at radius r
+      """
+
+      return self.V0*np.exp(-r/self.r0)
+
+    def table(self):
+      """
+      Return the adiabatic density table
+      """
+
+      return self.adiabatic_density
 
 class SolarModel:
     """"
@@ -126,7 +156,7 @@ class SolarModel:
 
         # Set useful variables
         self.rad = self.model['radius']
-        self.dens =  10**self.model['density_log_10']
+        self.dens = SolarDensity(10**self.model['density_log_10'])
         self.frac = {fr : self.model[fr + ' fraction'] for fr in fractioncols.keys()}
 
         # Import spectral shapes
@@ -152,8 +182,7 @@ class SolarModel:
         Returns the density column of the solar model
         """
 
-        return self.dens.to_numpy()
-
+        return self.dens
 
 
     def fraction(self, name):
@@ -218,8 +247,8 @@ def Tei (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
 
 
 # Compute flux of inchoerent mass eigenstates integrated over production point in the Sun
-@nb.njit
-def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction):
+#@nb.njit
+def solar_flux_mass (pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction, adiabatic=True, exponential=False):
     """
     solar_flux_mass(th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction) computes
     the weights of mass eigenstates composing the incoherent flux of solar neutrinos in the adiabatic
@@ -231,11 +260,24 @@ def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, dens
     - density: the list of electron densities at radii radius_samples, in units of mol/cm^3;
     - fraction: the relative fraction of neutrinos produced in the considered reaction,
     sampled at radius_samples.
+    - adiabatic: whether to use the adiabatic approximation or not (def. True)
+    - exponential: whether to use and exponential profile for the Sun density (def. False)
     """
 
     IntegratedFraction = np.trapz(y=fraction, x=radius_samples)
 
-    temp = Tei(th12, th13, DeltamSq21, DeltamSq3l, E, density)
+    # Use the adiabatic approximation for the neutrino evolution through the Sun
+    if adiabatic:
+      temp = Tei(pmns.theta12, pmns.theta13, DeltamSq21, DeltamSq3l, E, density.adiabatic_density)
+    # Use the exponential profile for the neutrino evolution through the Sun
+    elif exponential:
+      nustate = [1,0,0]
+      temp = ExponentialEvolution(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, radius_samples*R_S, R_S)
+      temp = np.array([np.array([np.square(np.abs(te)) for te in tem]) for tem in temp]).T
+    else:
+      print("Error: unknown solution for the evolution through the Sun, options are adiabatic or exponential")
+      exit()
+
     temp = [temp[i]*fraction for i in range(len(temp))]
 
     Te = [np.trapz(y=temp[i], x = radius_samples) / IntegratedFraction
@@ -244,7 +286,7 @@ def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, dens
     return np.array(Te)
 
 # Compute the flavour probabilities for the solar neutrino flux
-def Psolar (pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction):
+def Psolar (pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction, adiabatic=True, exponential=False):
     """
     Psolar(pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction) computes the
     flavour probabilities of observing a solar neutrino as a given flavour.
@@ -260,7 +302,7 @@ def Psolar (pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction):
     """
 
     # Compute the weights in the uncoherent solar flux of mass eigenstates
-    Tei = np.array(solar_flux_mass(pmns.theta12, pmns.theta13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction))
+    Tei = np.array(solar_flux_mass(pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction, adiabatic=adiabatic, exponential=exponential))
 
     # Compute the probabilities that a mass eigenstate is observed as a given flavour
     #P_i_to_a = np.square(np.abs(PMNS(th12, th13, th23, -d))) # TODO: Why negative -d? ANSWER: because the mass eigenstates are given by

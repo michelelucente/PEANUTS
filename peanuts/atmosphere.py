@@ -12,8 +12,8 @@ import numba as nb
 from numba.experimental import jitclass
 from math import sqrt, cos, sin, pi, asin
 
-from peanuts.evolutor import Upert, ExponentialEvolutor
-from peanuts.potentials import R_E
+from peanuts.evolutor import Upert, ExponentialEvolution
+from peanuts.potentials import R_E, R_S
 
 # Atmosphere maximum height
 Hmax = 2e4
@@ -70,11 +70,13 @@ class AtmosphereDensity:
 
     return self.rho0 * np.exp(- h / self.H)
 
+    # TODO: This is the atmospheric density, in principle we need the electron density
+
 
 @nb.njit
 def DL(eta, height):
     """
-    DL(eta, height) compute lenght DL of trajectory from production point to Earth surface, normalized to Earth radius
+    DL(eta, height) compute length DL of trajectory from production point to Earth surface, normalized to Earth radius
     - eta: the nadir angle
     - height: the altitude production point of neutrinos, in meters above the Earth surface
     """
@@ -82,12 +84,29 @@ def DL(eta, height):
     r_surface = (R_E)/(R_E + height) # Relative radius of Earth surface relative to production sphere
 
     if eta >= 0 and eta <= pi/2:
-        delta_relative = - r_surface * cos(eta) + sqrt(1 - r_surface**2 * sin(eta)**2) # lenght of path normalised to production radius
+        delta_relative = - r_surface * cos(eta) + sqrt(1 - r_surface**2 * sin(eta)**2) # length of path normalised to production radius
     elif eta > pi/2 and eta <= pi:
-        delta_relative = r_surface * cos(eta) + sqrt(1 - r_surface**2 * sin(eta)**2) # lenght of path normalised to production radius
+        delta_relative = r_surface * cos(eta) + sqrt(1 - r_surface**2 * sin(eta)**2) # length of path normalised to production radius
 
-    return delta_relative * (R_E + height) / R_E # Returns the lenght normlised to Earth radius
+    return delta_relative * (R_E + height) / R_E # Returns the length normlised to Earth radius
 
+class SolarDensityTemp:
+    """
+    Class containing the solar density"
+    """
+
+    def __init__(self):
+
+      # Fill in the exponential profile of the density
+      self.V0 = 0.0458e-3 # 1/m
+      self.r0 = 0.1*R_S
+
+    def call(self, r):
+      """
+      Return the the exponential profile density at radius r
+      """
+
+      return self.V0*np.exp(-r/self.r0)
 
 
 def evolved_state_atmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, eta, height, depth=0, massbasis=True, antinu=False):
@@ -113,23 +132,19 @@ def evolved_state_atmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, 
     else:
       eta_prime = eta
 
-    #evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime,height), 0, 0, 0, 0, antinu) if height > 0 else id3
-    #evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(evolutor_atm , delta)), r23.transpose())
+    # If initial state is given as a mass eigenstate, compute the flavour eigenstate
     if massbasis:
-      initialstate = np.dot(pmns.transpose(),nustate)
+      if not antinu:
+        initialstate = np.dot(pmns.transpose(),nustate)
+      else:
+        initialstate = np.dot(pmns.conjugatetranpose(),nustate)
     else:
       initialstate = nustate
-    evolutor = ExponentialEvolutor(initialstate, DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime, height), 0)
-    print(evolutor)
-    exit()
 
-    if not massbasis: # flavour
-      return np.dot(evolutor.transpose(), nustate)
-    else: # mass
-      if not antinu:
-        return np.dot(np.dot(evolutor.transpose(), pmns.pmns), nustate)
-      else:
-        return np.dot(np.dot(evolutor.transpose(), pmns.conjugate()), nustate.astype)
+    # Compute the evolved state in the flavour basis
+    evolved_state = ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E, R_E*DL(eta_prime, height), 0, antinu=False)
+
+    return evolved_state
 
 
 def Patmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, eta, height, depth=0, massbasis=True, antinu=False):
@@ -155,13 +170,16 @@ def Patmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, eta, height, 
     else:
       eta_prime = eta
 
-    evolutor_atm = Upert(DeltamSq21, DeltamSq3l, pmns, E, DL(eta_prime,height), 0, 0, 0, 0, antinu) if height > 0 else id3
-    evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(evolutor_atm , delta)), r23.transpose())
+    # If initial state is given as a mass eigenstate, compute the flavour eigenstate
+    if massbasis:
+      if not antinu:
+        initialstate = np.dot(pmns.transpose(),nustate)
+      else:
+        initialstate = np.dot(pmns.conjugatetranpose(),nustate)
+    else:
+      initialstate = nustate
 
-    if not massbasis:
-        return np.square(np.abs(np.dot(evolutor.transpose(), nustate)))
-    elif massbasis:
-        if not antinu:
-            return np.square(np.abs(np.dot(np.dot(evolutor.transpose(), pmns.pmns), nustate)))
-        else:
-            return np.square(np.abs(np.dot(np.dot(evolutor.transpose(), pmns.pmns.conjugate()), nustate)))
+    # Compute the evolved state in the flavour basis
+    evolved_state = ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E, R_E*DL(eta_prime, height), 0)
+
+    return np.square(np.abs(evolved_state))

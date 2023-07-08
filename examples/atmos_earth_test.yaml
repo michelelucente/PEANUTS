@@ -16,13 +16,14 @@ Neutrinos:
 
 Atmosphere:
 
-  state: [1,0,0]
+  state: [0,1,0]
   basis: "flavour"
   eta: 0.8
   #height: [1000,2000]
-  height: [0,20000]
-  probabilities: False
-  #evolved_state: True
+  #height: [0,20000]
+  height: 2000
+  probabilities: True
+  evolved_state: True
 
 
 Earth:

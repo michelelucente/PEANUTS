@@ -62,7 +62,7 @@ solar_model = SolarModel(solar_file)
 
 # Plot solar model
 
-plt.plot(solar_model.radius(), solar_model.density())
+plt.plot(solar_model.radius(), solar_model.density().table())
 plt.yscale("log")
 plt.xlabel("r")
 plt.ylabel("$n_e(r)$ [mol/cm${}^3$]")
@@ -306,7 +306,7 @@ density = solar_model.density()
 fraction = solar_model.fraction('8B')
 
 
-mass_weights = solar_flux_mass(th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction)
+mass_weights = solar_flux_mass(pmns, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction)
 
 flavour_probabilities = Pearth(mass_weights, earth_density, pmns, DeltamSq21, DeltamSq3l, E, eta, H, massbasis=True)
 
@@ -338,7 +338,7 @@ for lam in range(len(lat)):
     plt.plot(exposure[lam][:,0]/pi, exposure[lam][:,1], label="$\lambda$ = %.f°" % lat[lam])
 
 # SNO actual exposure
-SNO_exposure = NadirExposure(from_file=path+'/Data/SnoCosZenith.dat', angle="CosZenith", normalized=True, ns=480)
+SNO_exposure = NadirExposure(file=path+'/Data/SnoCosZenith.dat', angle="CosZenith", normalized=True, ns=480)
 plt.plot(exposure[lam][:,0]/pi, SNO_exposure[:,1], label="SNO exposure")
 
 plt.legend()

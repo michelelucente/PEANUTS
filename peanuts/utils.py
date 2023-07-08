@@ -61,7 +61,10 @@ def print_inputs(settings):
              "Energy                   : " + str(settings.energy) + " MeV\n"\
              "Neutrino fraction        : " + settings.fraction + "\n"
     if settings.solar_file is not None:
-      inputs += "Solar model              : " + settings.solar_file + "\n"
+      inputs += \
+             "Solar model              : " + settings.solar_file + "\n"
+    inputs += \
+             "Density profile          : " + ("adiabatic" if settings.adiabatic else "exponential") + "\n"
 
   if settings.atmosphere:
     inputs += "\n"\
@@ -102,7 +105,7 @@ def print_inputs(settings):
        inputs += \
              "Height (max)             : " + str(settings.height) + " m\n"
 
-    if not settings.earth and not settings.exposure:
+    if not settings.earth or not settings.exposure:
       inputs += \
              "Nadir angle              : " + str(settings.eta) + " rad\n"
 

@@ -77,3 +77,6 @@ class PMNS:
 
   def conjugate(self):
       return self.pmns.conjugate()
+
+  def H(self):
+      return self.pmns.conjugate().transpose()

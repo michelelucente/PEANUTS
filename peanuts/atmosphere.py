@@ -58,7 +58,10 @@ class AtmosphereDensity:
       NA = 6.02214076e23 # mol^-1
 
       # Atmospheric matter density on surface (1.2 kg/m^3)
-      self.rho0 = 1.2e-6 / Mmean # mol/cm^3
+      self.rho0 = 1.2e-6 # kg/cm^3
+
+      # Atomic mass unit
+      ma = 1.660539e-27 # kg
 
       # Fraction of elements in the atmosphere (US standard)
       # [N2, O2, Ar] (only elements with r > 0.1%)
@@ -66,11 +69,11 @@ class AtmosphereDensity:
 
       # Molecular mass and number
       # [N2, O2, Ar] (only elements with r > 0.1%)
-      AX = [14, 16, 18]
-      ZX = [28, 32, 40]
+      ZX = [14, 16, 18]
+      AX = [28, 32, 40]
 
       # Electron density, computed from matter density rho0
-      self.ne = np.sum([rX[i]*ZX[i]/AX[i] for i in range(len(rX))])*self.rho0
+      self.ne = np.sum([rX[i]*ZX[i]/AX[i] for i in range(len(rX))])*self.rho0/ma/NA
 
       # Scale height, in m
       self.H = NA * kB * Tmean / Mmean / g # m
@@ -148,7 +151,7 @@ def evolved_state_atmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, 
       if not antinu:
         initialstate = np.dot(pmns.transpose(),nustate)
       else:
-        initialstate = np.dot(pmns.conjugatetranpose(),nustate)
+        initialstate = np.dot(pmns.H(),nustate)
     else:
       initialstate = nustate
 

@@ -218,7 +218,7 @@ def ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E,
   r23 = pmns.R23(pmns.theta23)
   delta = pmns.Delta(pmns.delta)
 
-  # 0onjugate for antineutrinos
+  # Conjugate for antineutrinos
   if antinu:
     U = U.conjugate()
     r23 = r23.conjugate()

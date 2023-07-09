@@ -32,7 +32,7 @@ class SolarDensity:
       self.adiabatic_density = density_table.to_numpy()
 
       # Fill in the exponential profile of the density
-      self.V0 = 0.0458e-3 # 1/m
+      self.V0 = 0.0458e-3 / 3.868e-7 # mol/cm^3
       self.r0 = 0.1*R_S
 
     def call(self, r):

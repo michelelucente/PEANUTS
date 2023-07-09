@@ -333,8 +333,8 @@ def ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E,
     # Reintroduce the theta23 and delta matrices
     psiI = np.dot(r23,np.dot(delta.conjugate(), psiI))
 
-    #if len(uI) > 1 and not (i+1)*100/len(uI) % 1:
-    #  print("---- completed ", floor((i+1)/len(uI)*100), "%")
+    if len(uI) > 1 and not (i+1)*100/len(uI) % 1:
+      print("---- completed ", floor((i+1)/len(uI)*100), "%")
 
     # Fill solution array
     psi.append(psiI)

@@ -200,6 +200,17 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
 
 def ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E, xi, xf, antinu=False):
   """
+  ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E, xi, xf, antinu) computes the evolution of a neutrino
+  initial state through an exponential density profile
+  - initialstate: the input neutrino state
+  - density: the density profile, e.g. atmospheric or solar
+  - DeltamSq21: the solar mass splitting
+  - DeltamSq3l: the atmospheric mass splitting (l=1 for NO, l=2 for IO)
+  - pmns: the PMNS matrix
+  - E: the neutrino energy, in units of MeV;
+  - xi: initial coordinate location
+  - xf: final coordinate location
+  - antinu: False for neutrinos, True for antineutrinos
   """
 
   # Extract from pmns matrix
@@ -322,8 +333,8 @@ def ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E,
     # Reintroduce the theta23 and delta matrices
     psiI = np.dot(r23,np.dot(delta.conjugate(), psiI))
 
-    if len(uI) > 1 and not (i+1)*100/len(uI) % 1:
-      print("---- completed ", floor((i+1)/len(uI)*100), "%")
+    #if len(uI) > 1 and not (i+1)*100/len(uI) % 1:
+    #  print("---- completed ", floor((i+1)/len(uI)*100), "%")
 
     # Fill solution array
     psi.append(psiI)

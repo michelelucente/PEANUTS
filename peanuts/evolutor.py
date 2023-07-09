@@ -222,7 +222,10 @@ def ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E,
   # Change variables for simplicity
   V0 = MatterPotential(density.call(0), antinu) # 1/m
   r0 = -1./np.log(density.call(1)/density.call(0)) # m
-  u0 = -np.log(r0*V0)
+  if not antinu:
+    u0 = -np.log(r0*V0)
+  else:
+    u0 = -np.log(-r0*V0) + pi*1j
   # TODO: Should u be taken as the final coordinate in the path?
   u = xf/r0 + u0
   # TODO: I'm not 100% sure, but I think that this is the initial coordinate in u

@@ -223,7 +223,7 @@ from peanuts.earth import Pearth
 # Use SNO location for comparison
 H = 2e3 # meters
 
-# Sample neutrino state, muon flavour
+# Sample neutrino state, pure mass eigenstate
 state = pmns.pmns[:,1]
 
 # Case 1: 0 <= eta <= pi/2

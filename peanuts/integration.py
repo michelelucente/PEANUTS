@@ -13,7 +13,7 @@ from math import cos
 from cmath import exp
 from cmath import sqrt as csqrt
 
-from peanuts.potentials import MatterPotential
+from peanuts.potentials import MatterPotential, R_E
 
 
 # Computes coefficients of the characteristic equation for the matrix T = H - Tr(H)/3, cf. hep-ph/9910546
@@ -33,7 +33,7 @@ def c0 (ki, th12, th13, n, antinu):
     k1 = ki[0]
     k2 = ki[1]
     k3 = ki[2]
-    V = MatterPotential(n, antinu)
+    V = R_E*MatterPotential(n, antinu)
 
     return (-4*(k1 + k2 - 2*k3)*(2*k1 - k2 - k3)*(k1 - 2*k2 + k3) +
     3*(k1**2 - 4*k1*k2 + k2**2 + 2*(k1 + k2)*k3 - 2*k3**2)*V +
@@ -55,7 +55,7 @@ def c1(ki,th12, th13, n, antinu):
     """
 
     [k1, k2, k3] = ki
-    V = MatterPotential(n, antinu)
+    V = R_E*MatterPotential(n, antinu)
 
     return (-4*(k1**2 - k1*k2 + k2**2 - (k1 + k2)*k3 + k3**2) + (k1 + k2 - 2*k3)*V -
     4*V**2 + 6*(-k1 + k2)*V*cos(2*th12)*cos(th13)**2 -

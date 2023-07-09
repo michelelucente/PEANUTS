@@ -49,7 +49,7 @@ def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c, antinu):
     naverage = (a * (x2 - x1) + b * (x2**3 - x1**3)/3 + c * (x2**5 - x1**5)/5) / (x2 - x1)
 
     # Matter potential for the 0th order evolutor
-    V = MatterPotential(naverage, antinu)
+    V = R_E*MatterPotential(naverage, antinu)
 
     # Parameter for the density perturbation around the mean density value:
     atilde = a - naverage
@@ -91,7 +91,7 @@ def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c, antinu):
     if (b != 0) | (c != 0):
       for idx_a in range(3) :
         for idx_b in range(3) :
-          u1 += np.dot(np.dot(M[idx_a], np.diag(np.array([-1j * MatterPotential(Iab(lam[idx_a] + tr/3, lam[idx_b] + tr/3, atilde, b, c, x2, x1), antinu), 0, 0]))), M[idx_b])
+          u1 += np.dot(np.dot(M[idx_a], np.diag(np.array([-1j * R_E*MatterPotential(Iab(lam[idx_a] + tr/3, lam[idx_b] + tr/3, atilde, b, c, x2, x1), antinu), 0, 0]))), M[idx_b])
 
     u = u0 + u1
 
@@ -220,8 +220,8 @@ def ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E,
     ki = k(np.array([-DeltamSq21, 0, DeltamSq3l]), E)
 
   # Change variables for simplicity
-  V0 = density.call(0)
-  r0 = -1./np.log(density.call(1)/V0)
+  V0 = MatterPotential(density.call(0), antinu) # 1/m
+  r0 = -1./np.log(density.call(1)/density.call(0)) # m
   u0 = -np.log(r0*V0)
   # TODO: Should u be taken as the final coordinate in the path?
   u = xf/r0 + u0
@@ -313,8 +313,11 @@ def ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E,
     # Get final solution
     psiI = np.array([np.dot(C,psi1), np.dot(C,psi2), np.dot(C,psi3)],dtype=np.complex128)
 
+    # Undo rotation of 2-3 components
+    psiI = np.dot(r23a, psiI)
+
     # Reintroduce the theta23 and delta matrices
-    psiI = np.dot(r23,np.dot(delta.conjugate(), np.dot(r23a, psiI)))
+    psiI = np.dot(r23,np.dot(delta.conjugate(), psiI))
 
     if len(uI) > 1 and not (i+1)*100/len(uI) % 1:
       print("---- completed ", floor((i+1)/len(uI)*100), "%")

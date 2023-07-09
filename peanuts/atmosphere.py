@@ -18,13 +18,14 @@ from peanuts.potentials import R_E, R_S
 # Atmosphere maximum height
 Hmax = 2e4
 
-atmospheredensity = [
-   ('density_file', nb.types.string),
-   ('rho0', nb.float64),
-   ('H', nb.float64),
-]
+#atmospheredensity = [
+#   ('density_file', nb.types.string),
+#   ('rho0', nb.float64),
+#   ('H', nb.float64),
+#   ('ne', nb.float64)
+#]
 
-@jitclass(atmospheredensity)
+#@jitclass(atmospheredensity)
 class AtmosphereDensity:
   """
   Exponential profile of atmospheric density
@@ -56,8 +57,20 @@ class AtmosphereDensity:
       # Avogadro number
       NA = 6.02214076e23 # mol^-1
 
-      # Atmospheric density on surface (1.2 kg/m^3)
+      # Atmospheric matter density on surface (1.2 kg/m^3)
       self.rho0 = 1.2e-6 / Mmean # mol/cm^3
+
+      # Fraction of elements in the atmosphere (US standard)
+      # [N2, O2, Ar] (only elements with r > 0.1%)
+      rX = [0.781, 0.209, 0.009]
+
+      # Molecular mass and number
+      # [N2, O2, Ar] (only elements with r > 0.1%)
+      AX = [14, 16, 18]
+      ZX = [28, 32, 40]
+
+      # Electron density, computed from matter density rho0
+      self.ne = np.sum([rX[i]*ZX[i]/AX[i] for i in range(len(rX))])*self.rho0
 
       # Scale height, in m
       self.H = NA * kB * Tmean / Mmean / g # m
@@ -68,9 +81,7 @@ class AtmosphereDensity:
     for a value of h (in m), in units of mol/cm^3
     """
 
-    return self.rho0 * np.exp(- h / self.H)
-
-    # TODO: This is the atmospheric density, in principle we need the electron density
+    return self.ne * np.exp(- h / self.H)
 
 
 @nb.njit
@@ -142,7 +153,7 @@ def evolved_state_atmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, 
       initialstate = nustate
 
     # Compute the evolved state in the flavour basis
-    evolved_state = ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E, R_E*DL(eta_prime, height), 0, antinu=False)
+    evolved_state = ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E, R_E*DL(eta_prime, height), 0, antinu=antinu)
 
     return evolved_state
 
@@ -180,6 +191,6 @@ def Patmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, eta, height, 
       initialstate = nustate
 
     # Compute the evolved state in the flavour basis
-    evolved_state = ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E, R_E*DL(eta_prime, height), 0)
+    evolved_state = ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E, R_E*DL(eta_prime, height), 0, antinu=antinu)
 
     return np.square(np.abs(evolved_state))

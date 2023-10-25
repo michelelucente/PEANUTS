@@ -19,11 +19,12 @@ Atmosphere:
   state: [0,1,0]
   basis: "flavour"
   #basis: "mass"
-  eta: 0.8
+  #eta: 0.8
+  eta: 0.0
   #height: [1000,2000]
   #height: [0,20000]
-  height: 2000
-  #height: 1
+  #height: 22000
+  height: 20000
   probabilities: True
   evolved_state: True
 

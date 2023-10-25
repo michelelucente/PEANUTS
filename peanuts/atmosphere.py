@@ -12,7 +12,7 @@ import numba as nb
 from numba.experimental import jitclass
 from math import sqrt, cos, sin, pi, asin
 
-from peanuts.evolutor import Upert, ExponentialEvolution
+from peanuts.evolutor import Upert, ExponentialEvolution, VacuumEvolution
 from peanuts.potentials import R_E, R_S
 
 # Atmosphere maximum height
@@ -83,11 +83,10 @@ class AtmosphereDensity:
     Computes the value of the density from the exponential profile
     for a value of h (in m), in units of mol/cm^3
     """
-
     return self.ne * np.exp(- h / self.H)
 
 
-@nb.njit
+#@nb.njit
 def DL(eta, height):
     """
     DL(eta, height) compute length DL of trajectory from production point to Earth surface, normalized to Earth radius
@@ -102,7 +101,7 @@ def DL(eta, height):
     elif eta > pi/2 and eta <= pi:
         delta_relative = r_surface * cos(eta) + sqrt(1 - r_surface**2 * sin(eta)**2) # length of path normalised to production radius
 
-    return delta_relative * (R_E + height) / R_E # Returns the length normlised to Earth radius
+    return delta_relative * (R_E + height) / R_E # Returns the length normalised to Earth radius
 
 class SolarDensityTemp:
     """
@@ -157,6 +156,7 @@ def evolved_state_atmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, 
 
     # Compute the evolved state in the flavour basis
     evolved_state = ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E, R_E*DL(eta_prime, height), 0, antinu=antinu)
+    #evolved_state = VacuumEvolution(initialstate, DeltamSq21, DeltamSq3l, pmns, E, R_E*DL(eta_prime, height), 0, antinu=antinu)
 
     return evolved_state
 
@@ -195,5 +195,6 @@ def Patmosphere(nustate, density, DeltamSq21, DeltamSq3l, pmns, E, eta, height, 
 
     # Compute the evolved state in the flavour basis
     evolved_state = ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E, R_E*DL(eta_prime, height), 0, antinu=antinu)
+    #evolved_state = VacuumEvolution(initialstate, DeltamSq21, DeltamSq3l, pmns, E, R_E*DL(eta_prime, height), 0, antinu=antinu)
 
     return np.square(np.abs(evolved_state))

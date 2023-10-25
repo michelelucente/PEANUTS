@@ -197,6 +197,41 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
     else:
         raise ValueError('eta must be comprised between 0 and pi.')
 
+def VacuumEvolution(initialstate, DeltamSq21, DeltamSq3l, pmns, E, xi, xf, antinu=False):
+    """
+    VacuumEvolution(initialstate, DeltamSq21, DeltamSq3l, pmns, E, xi, xf, anitnu) computes the
+    evolution of a neutrino state in vacuum
+    - initialstate: the input neutrino state
+    - DeltamSq21: the solar mass splitting
+    - DeltamSq3l: the atmospheric mass splitting (l=1 for NO, l=2 for IO)
+    - pmns: the PMNS matrix
+    - E: the neutrino energy, in units of MeV;
+    - xi: initial coordinate location
+    - xf: final coordinate location
+    - antinu: False for neutrinos, True for antineutrinos
+    """
+
+    # Compute the factorised matrices R_{23} and \Delta
+    # (remember that U_{PMNS} = R_{23} \Delta R_{13} \Delta^* R_{12})
+    r23 = pmns.R23(pmns.theta23)
+    delta = pmns.Delta(pmns.delta)
+
+    # Conjugate for antineutrinos
+    if antinu:
+      r23 = r23.conjugate()
+      delta = delta.conjugate()
+
+    # Deltax is the lenght of the crossed path
+    Deltax = xf - xi
+
+    # Compute the evolutor in vacuum for traveled distance Deltax,
+    # and include the factorised dependence on th23 and d to obtain the full evolutor
+    evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, Deltax, 0, 0, 0, 0, antinu) , delta)), r23.transpose())
+
+    # Return the vacuum evolved state
+    return np.dot(evolutor, initialstate)
+
+
 
 def ExponentialEvolution(initialstate, density, DeltamSq21, DeltamSq3l, pmns, E, xi, xf, antinu=False):
   """

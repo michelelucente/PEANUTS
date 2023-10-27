@@ -26,7 +26,8 @@ earthdensity =  [
   ('rj', nb.float64[:]),
   ('alpha', nb.float64[:]),
   ('beta', nb.float64[:]),
-  ('gamma', nb.float64[:])
+  ('gamma', nb.float64[:]),
+  ('deltas', nb.float64[:,:])
 ]
 
 @jitclass(earthdensity)
@@ -41,21 +42,29 @@ class EarthDensity:
     """
 
     # TODO: This is specific for the example file, make general
-    with nb.objmode(density_file='string', rj='float64[:]', alpha='float64[:]', beta='float64[:]', gamma='float64[:]'):
+    with nb.objmode(density_file='string', rj='float64[:]', alpha='float64[:]', beta='float64[:]', gamma='float64[:]', deltas='float64[:,:]'):
       path = os.path.dirname(os.path.realpath( __file__ ))
       density_file = path + "/../Data/Earth_Density.csv" if density_file == None else density_file
-      earth_density = f.read_csv(density_file, names=["rj", "alpha", "beta", "gamma"], skiprows=3)
+
+      # Parse the density file to get starting row and columns
+      skiprows, columns = f.parse_csv(density_file)
+
+      earth_density = f.read_csv(density_file, names=columns, skiprows=skiprows)
 
       rj = earth_density.rj.to_numpy()
       alpha = earth_density.alpha.to_numpy()
       beta = earth_density.beta.to_numpy()
       gamma = earth_density.gamma.to_numpy()
+      deltas = np.empty((len(columns)-4,len(rj)))
+      for col in range(len(columns)-4):
+        deltas[col] = getattr(earth_density,"delta"+str(col+1)).to_numpy()
 
     self.density_file = density_file
     self.rj = rj
     self.alpha = alpha
     self.beta = beta
     self.gamma = gamma
+    self.deltas = deltas
 
   def parameters(self, eta):
     """

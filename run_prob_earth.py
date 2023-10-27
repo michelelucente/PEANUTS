@@ -121,7 +121,7 @@ elif options.mass != None:
   massbasis = True
 
 # Earth density
-earth_density = EarthDensity(density_file)
+earth_density = EarthDensity(density_file=density_file)
 
 # Print program banner and inputs
 print_banner()

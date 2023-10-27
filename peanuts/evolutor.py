@@ -176,7 +176,6 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
     # If pi/2 <= eta <= pi we approximate the density to the constant value taken at r = 1 - h/2
     elif pi/2 <= eta <= pi:
 
-        #n_1 = EarthDensity(x = 1 - h / 2) TODO: eta = 0?
         n_1 = density.call(1 - h/2, 0)
 
         # Deltax is the lenght of the crossed path

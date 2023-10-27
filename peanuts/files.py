@@ -28,11 +28,47 @@ from decimal import Decimal
 from peanuts.settings import Settings
 import os
 
+def parse_csv(filepath):
+  """
+  Function to parse CSV files to get the starting row and columns
+  """
+
+  if not os.path.isfile(filepath):
+    print("Error: CSV file", filepath, "does not exist")
+    exit()
+
+  with open(filepath) as file:
+    lines = file.readlines()
+    line = lines[0]
+    row = 0
+    while line.startswith("#"):
+      line = lines[row]
+      row += 1
+
+    # Get number of columns
+    ncols = len(lines[row].split(','))
+    if ncols < 2:
+      print("Error: density file must have at least two columns, radius and constant density")
+      exit()
+    cols = ["rj", "alpha"]
+    if ncols > 2:
+      cols.append("beta")
+    if ncols > 3:
+      cols.append("gamma")
+    for c in range(ncols-4):
+      cols.append("delta"+str(c+1))
+
+  return row-1, cols
 
 def read_csv(*args, **kwargs):
   """
   Function to read csv. Just a wrapper around the pandas version
   """
+
+  if not os.path.isfile(args[0]):
+    print("Error: CSV file", args[0], "does not exist")
+    exit()
+
   return pd.read_csv(*args, **kwargs)
 
 def read_yaml(filepath):
@@ -42,6 +78,10 @@ def read_yaml(filepath):
 
   if not with_yaml:
     print("Error!: Tried to read a yaml file, but module pyyaml is not installed")
+    exit()
+
+  if not os.path.isfile(filepath):
+    print("Error: YAML file", filepath, "does not exist")
     exit()
 
   settings = Settings(yaml.safe_load(open(filepath)))
@@ -57,6 +97,9 @@ def read_slha(filepath):
     print("Error!: Tried to use pyslha but module is not installed")
     exit()
 
+  if not os.path.isfile(filepath):
+    print("Error: SLHA file", filepath, "does not exist")
+    exit()
 
   slha = pyslha.read(filepath)
   blocks = [''.join(k) for k in slha.blocks.keys()]

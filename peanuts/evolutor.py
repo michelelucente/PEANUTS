@@ -149,8 +149,12 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
         params = density.parameters(eta_prime)
         params2 = np.flipud(params)
 
+        # xshells contains the end coordinate x == x_i for each crossed earth density shell
+        xshells = density.shells_x(eta_prime)
+        xshells2 = np.flipud(xshells)
+
         # Compute the evolutors for the path from Earth entry point to trajectory mid-point at x == 0
-        evolutors_full_path = [Upert(DeltamSq21, DeltamSq3l,pmns, E, params2[i][3], params2[i+1][3] if i < len(params2)-1 else 0, params2[i][0], params2[i][1], params2[i][2], antinu) for i in range(len(params))]
+        evolutors_full_path = [Upert(DeltamSq21, DeltamSq3l,pmns, E, xshells2[i], xshells2[i+1] if i < len(xshells2)-1 else 0, params2[i][0], params2[i][1], params2[i][2], antinu) for i in range(len(params))]
 
         # Multiply the single evolutors
         evolutor_half_full = evolutors_full_path[0]
@@ -161,7 +165,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
         # Only the evolutor for the most external shell needs to be computed
         evolutors_to_detectors = evolutors_full_path.copy()
 
-        evolutors_to_detectors[0] = Upert(DeltamSq21, DeltamSq3l, pmns, E, x_d, params[-2][3] if len(params) > 1 else 0, params[-1][0], params[-1][1], params[-1][2], antinu)
+        evolutors_to_detectors[0] = Upert(DeltamSq21, DeltamSq3l, pmns, E, x_d, xshells2[-2] if len(xshells2) > 1 else 0, params[-1][0], params[-1][1], params[-1][2], antinu)
 
         # Multiply the single evolutors
         evolutor_half_detector = evolutors_to_detectors[0]

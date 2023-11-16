@@ -34,6 +34,7 @@ def binom(n, k):
 
 earthdensity =  [
   ('density_file', nb.types.string),
+  ('use_custom_density', nb.boolean),
   ('rj', nb.float64[:]),
   ('alpha', nb.float64[:]),
   ('beta', nb.float64[:]),
@@ -47,7 +48,7 @@ class EarthDensity:
   See hep-ph/9702343 for the definition of trajectory coordinate and Earth density parametrisation.
   """
 
-  def __init__(self, density_file=None):
+  def __init__(self, density_file=None, custom_density=False):
     """
     Read the Earth density parametrisation, in units of mol/cm^3, following hep-ph/9702343, if
     provided in a file (density_file), where it must consist of a table for each layer with the
@@ -57,29 +58,36 @@ class EarthDensity:
     function and the parameters extracted from a polynomial expansion
     """
 
-    with nb.objmode(density_file='string', rj='float64[:]', alpha='float64[:]', beta='float64[:]', gamma='float64[:]', deltas='float64[:,:]'):
-      path = os.path.dirname(os.path.realpath( __file__ ))
-      density_file = path + "/../Data/Earth_Density.csv" if density_file == None else density_file
+    if custom_density:
+      self.use_custom_density = True
 
-      # Parse the density file to get starting row and columns
-      skiprows, columns = f.parse_csv(density_file)
+      # For simplicity create just one shell
+      self.rj = np.ones(1)
 
-      earth_density = f.read_csv(density_file, names=columns, skiprows=skiprows)
+    else:
+      with nb.objmode(density_file='string', rj='float64[:]', alpha='float64[:]', beta='float64[:]', gamma='float64[:]', deltas='float64[:,:]'):
+        path = os.path.dirname(os.path.realpath( __file__ ))
+        density_file = path + "/../Data/Earth_Density.csv" if density_file == None else density_file
 
-      rj = earth_density.rj.to_numpy()
-      alpha = earth_density.alpha.to_numpy()
-      beta = earth_density.beta.to_numpy()
-      gamma = earth_density.gamma.to_numpy()
-      deltas = np.empty((len(columns)-4,len(rj)))
-      for col in range(len(columns)-4):
-        deltas[col] = getattr(earth_density,"delta"+str(col+1)).to_numpy()
+        # Parse the density file to get starting row and columns
+        skiprows, columns = f.parse_csv(density_file)
 
-    self.density_file = density_file
-    self.rj = rj
-    self.alpha = alpha
-    self.beta = beta
-    self.gamma = gamma
-    self.deltas = deltas
+        earth_density = f.read_csv(density_file, names=columns, skiprows=skiprows)
+
+        rj = earth_density.rj.to_numpy()
+        alpha = earth_density.alpha.to_numpy()
+        beta = earth_density.beta.to_numpy()
+        gamma = earth_density.gamma.to_numpy()
+        deltas = np.empty((len(columns)-4,len(rj)))
+        for col in range(len(columns)-4):
+          deltas[col] = getattr(earth_density,"delta"+str(col+1)).to_numpy()
+
+      self.density_file = density_file
+      self.rj = rj
+      self.alpha = alpha
+      self.beta = beta
+      self.gamma = gamma
+      self.deltas = deltas
 
   def parameters(self, eta):
     """
@@ -90,11 +98,22 @@ class EarthDensity:
     with shell external boundary at x == x_i.
     """
 
-    # Make copy of class parameters to make sure no memory is touched
-    alpha = self.alpha.copy()
-    beta = self.beta.copy()
-    gamma = self.gamma.copy()
-    deltas = self.deltas.copy()
+    if not self.use_custom_density:
+
+      # Make copy of class parameters to make sure no memory is touched
+      alpha = self.alpha.copy()
+      beta = self.beta.copy()
+      gamma = self.gamma.copy()
+      deltas = self.deltas.copy()
+
+    else:
+      # If using a custom density profile, we still need alpha, beta and gamma for the analytical computation
+      # So approximate them using a Taylor expansion. We do not need the deltas.
+      h = 0.001
+      alpha = np.array([self.custom_density(0)])
+      beta  = np.array([(self.custom_density(2*h) + self.custom_density(0) - 2*self.custom_density(h))/(2*h**2)])
+      gamma = np.array([(self.custom_density(4*h) + self.custom_density(0) + 6*self.custom_density(2*h) - 4*self.custom_density(3*h) - 4*self.custom_density(h))/(24*h**4)])
+      deltas = np.empty((0,1))
 
     # Select the index "idx_shells" in rj such that for i >= idx_shells => rj[i] > sin(eta)
     # The shells having rj[i] > sin(eta) are the ones crossed by a path with nadir angle = eta
@@ -128,11 +147,28 @@ class EarthDensity:
 
     return result
 
+
+
   def shells(self):
     """
     Returns the value of the radius for each shell
     """
     return self.rj
+
+  def shells_x(self, eta):
+    """
+    Returns the value of the path coordinate for each shell
+    crossed by the neutrino path
+    """
+
+    # Select the index "idx_shells" in rj such that for i >= idx_shells => rj[i] > sin(eta)
+    # The shells having rj[i] > sin(eta) are the ones crossed by a path with nadir angle = eta
+    idx_shells = np.searchsorted(self.rj, sin(eta))
+
+    # Compute the value of the trajectory coordinates xj at each shell crossing
+    xj = np.sqrt( (self.rj[idx_shells::])**2 - sin(eta)**2 )
+
+    return xj
 
   def shells_eta(self):
     """
@@ -140,6 +176,16 @@ class EarthDensity:
     """
     return np.arcsin(self.rj)/pi
 
+  def custom_density(self, r):
+    """
+    Placeholder function to implement custom density functions
+    """
+
+    # Replace this example with a custom density function
+    a = 6.1
+    b = -1.7
+    c = 2.6
+    return a + b * r**2 + c * r**4
 
   def call(self, x, eta):
     """
@@ -153,6 +199,12 @@ class EarthDensity:
     # If x > cos(eta) the trajectory coordinate is beyond Earth surface, thus density is zero.
     if x > cos(eta):
       return 0
+
+    # Use custom density profile
+    if self.use_custom_density:
+      # Switch to radial coordinate to evaluate density
+      r = np.sqrt(x**2 + np.sin(eta)**2)
+      return self.custom_density(r)
 
     # Get the parameters
     param = self.parameters(eta)
@@ -205,8 +257,7 @@ def numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, ant
   n_1 = density.call(1-h/2,0)
   eta_prime = asin(r_d * sin(eta))
 
-  params = density.parameters(eta_prime)
-  x1, x2 = (-params[-1][3], x_d) if 0 <= eta < pi/2 else (0, Deltax)
+  x1, x2 = (-density.shells_x(eta_prime)[-1], x_d) if 0 <= eta < pi/2 else (0, Deltax)
 
   def model(t, y):
     nue, numu, nutau = y

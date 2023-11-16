@@ -66,7 +66,7 @@ if settings.earth:
     massbasis = True if settings.basis=="mass" else False
 
   # Earth density
-  earth_density = EarthDensity(density_file=settings.density_file)
+  earth_density = EarthDensity(density_file=settings.density_file,custom_density=settings.custom_density)
 
 
 # Loop over energy values

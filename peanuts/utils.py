@@ -105,7 +105,8 @@ def print_inputs(settings):
              "Depth                    : " + str(settings.depth) + " m\n"\
              "Evolution method         : " + settings.evolution + "\n"
     if settings.density_file is not None:
-      inputs += "Earth density         : " + settings.density_file + "\n"
+      inputs += \
+             "Earth density            : " + settings.density_file + "\n"
 
 
   if not settings.solar and not settings.earth:

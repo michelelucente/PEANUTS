@@ -21,6 +21,17 @@ from peanuts.potentials import k, MatterPotential, R_E
 from peanuts.evolutor import FullEvolutor
 from peanuts.time_average import NadirExposure
 
+@nb.njit
+def binom(n, k):
+  """
+  Returns the binomial number (n, k)
+  """
+
+  if k==0 or k==n:
+    return 1
+
+  return np.prod(np.array([(n + 1 - i)/i for i in range(1,k+1)]))
+
 earthdensity =  [
   ('density_file', nb.types.string),
   ('rj', nb.float64[:]),
@@ -38,10 +49,14 @@ class EarthDensity:
 
   def __init__(self, density_file=None):
     """
-    Read the Earth density parametrisation, in units of mol/cm^3, following hep-ph/9702343
+    Read the Earth density parametrisation, in units of mol/cm^3, following hep-ph/9702343, if
+    provided in a file (density_file), where it must consist of a table for each layer with the
+    radius as the first entry and the rest the coefficients of the density as
+    n_e(r) = alpha + beta r^2 + gamma r^4 + delta_n r^2n, with n>3
+    If instead, the numerical flag is on, the density value will be taken from some user-provided
+    function and the parameters extracted from a polynomial expansion
     """
 
-    # TODO: This is specific for the example file, make general
     with nb.objmode(density_file='string', rj='float64[:]', alpha='float64[:]', beta='float64[:]', gamma='float64[:]', deltas='float64[:,:]'):
       path = os.path.dirname(os.path.realpath( __file__ ))
       density_file = path + "/../Data/Earth_Density.csv" if density_file == None else density_file
@@ -70,23 +85,48 @@ class EarthDensity:
     """
     Returns the values of the density parameters for the shells crossed by the path
     with nadir angle = eta as a list of lists, where each element [a, b, c, x_i] refers to a
-    Earth shell  (from inner to outer layers) having density profile n_e(x) = a + b x^2 + c x^4,
+    Earth shell  (from inner to outer layers) having density profile
+    n_e(x) = alpha' + beta' x^2 + gamma' x^4 + delta_n' x^2n, with n>3
     with shell external boundary at x == x_i.
     """
+
+    # Make copy of class parameters to make sure no memory is touched
+    alpha = self.alpha.copy()
+    beta = self.beta.copy()
+    gamma = self.gamma.copy()
+    deltas = self.deltas.copy()
 
     # Select the index "idx_shells" in rj such that for i >= idx_shells => rj[i] > sin(eta)
     # The shells having rj[i] > sin(eta) are the ones crossed by a path with nadir angle = eta
     idx_shells = np.searchsorted(self.rj, sin(eta))
 
     # Keep only the parameters for the shells crossed by the path with nadir angle eta
-    alpha_prime = self.alpha[idx_shells::] + self.beta[idx_shells::] * sin(eta)**2 + self.gamma[idx_shells::] * np.sin(eta)**4
-    beta_prime = self.beta[idx_shells::] + 2 * self.gamma[idx_shells::] * sin(eta)**2
-    gamma_prime = self.gamma[idx_shells::]
+    alpha_prime = alpha[idx_shells::] + beta[idx_shells::] * np.sin(eta)**2 + gamma[idx_shells::] * np.sin(eta)**4
+    beta_prime = beta[idx_shells::] + 2 * gamma[idx_shells::] * np.sin(eta)**2
+    gamma_prime = gamma[idx_shells::]
+
+    # Add contribution from deltas
+    deltas_prime = deltas[:,idx_shells::]
+    for n in range(len(deltas)):
+      alpha_prime += deltas[n,idx_shells::] * np.sin(eta)**(2*(n+3))
+      beta_prime += (n+3) * deltas[n,idx_shells::] * np.sin(eta)**(2*(n+3-1))
+      gamma_prime += binom(n+3, 2) * deltas[n,idx_shells::] * np.sin(eta)**(2*(n+3-2))
+      for k in range(n+1,len(self.deltas)):
+        deltas_prime[n] += binom(k+3,n+3) * deltas[k,idx_shells::] * np.sin(eta)**(2*(k-n))
 
     # Compute the value of the trajectory coordinates xj at each shell crossing
     xj = np.sqrt( (self.rj[idx_shells::])**2 - sin(eta)**2 )
 
-    return np.stack((alpha_prime, beta_prime, gamma_prime, xj), axis=1)
+    result = np.zeros((len(deltas_prime)+4,len(xj)))
+    result[0] = alpha_prime
+    result[1] = beta_prime
+    result[2] = gamma_prime
+    for i in range(len(deltas_prime)):
+      result[3+i] = deltas_prime[i]
+    result[-1] = xj
+    result = result.transpose()
+
+    return result
 
   def shells(self):
     """
@@ -116,15 +156,16 @@ class EarthDensity:
 
     # Get the parameters
     param = self.parameters(eta)
-    alpha_prime = [y[0] for y in param]
-    beta_prime = [y[1] for y in param]
-    gamma_prime = [y[2] for y in param]
-    xj = [y[3] for y in param]
+    alpha_prime = param[:,0]
+    beta_prime = param[:,1]
+    gamma_prime = param[:,2]
+    deltas_prime = np.transpose(param[:,3:-1])
+    xj = param[:,-1]
 
     # The index "idx" determines within which shell xj[idx] the point x is
     idx = np.searchsorted(xj, x)
 
-    return alpha_prime[idx] + beta_prime[idx] * x**2 + gamma_prime[idx] * x**4
+    return alpha_prime[idx] + beta_prime[idx] * x**2 + gamma_prime[idx] * x**4 + np.sum(np.array([deltas_prime[i][idx] * x**(6+2*i) for i in range(len(deltas_prime))]))
 
 
 def numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, antinu):

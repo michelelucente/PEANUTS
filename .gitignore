@@ -131,3 +131,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+peanuts/pmns.py
+working_notebook.ipynb
+referee.ipynb

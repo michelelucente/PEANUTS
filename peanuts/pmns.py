@@ -69,7 +69,7 @@ class PMNS:
       delta[2][2] = exp(1j*d)
       return delta
 
-  def __get_item__(self, i):
+  def __getitem__(self, i):
       return self.pmns[i]
 
   def transpose(self):

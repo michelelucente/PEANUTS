@@ -290,7 +290,7 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, dep
   num_solution, x = numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, antinu)
 
   if not massbasis:
-      evolution = [np.array(np.square(np.abs(np.dot(num_solution[i]), nustate))) ) for i in range(len(x))]
+      evolution = [np.array(np.square(np.abs(np.dot(num_solution[i], nustate))) ) for i in range(len(x))]
   elif massbasis:
       if not antinu:
         evolution = [np.array(np.real(np.dot(np.square(np.abs(np.dot(num_solution[i], pmns.pmns))), nustate))) for i in range(len(x))]

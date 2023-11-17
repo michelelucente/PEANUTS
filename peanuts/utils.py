@@ -76,11 +76,11 @@ def print_inputs(settings):
              "theta_{23}               : " + str(settings.theta23) + "\n"\
              "delta_CP                 : " + str(settings.delta) + "\n"\
              "Delta m_{21}^2           : " + str(settings.dm21) + " eV^2\n"
-    if settings.dm3l > 0:
-      inputs += \
+      if settings.dm3l > 0:
+        inputs += \
              "Delta m_{31}^2           : " + str(settings.dm3l) + " eV^2\n"
-    else:
-      inputs += \
+      else:
+        inputs += \
              "Delta m_{32}^2           : " + str(settings.dm3l) + " eV^2\n"
     inputs += \
              "Energy                   : " + str(settings.energy) + " MeV\n"

@@ -57,23 +57,37 @@ class Scan:
   def add(self, label, param):
 
     if isinstance(param, list):
-      # Assume it is given as [min, max] or [min, max, step]
-      if len(param) < 2 or len(param) > 3:
-        print("Error: Parameter", label, "should be given as single number or as range [min, max, (step)].")
+      # Assume it is given as [min, max], [min, max, step] or [min, max, step, mode]
+      if len(param) < 2 or len(param) > 4:
+        print("Error: Parameter", label, "should be given as single number or as range [min, max, (step), (mode)].")
         exit()
 
       self.labels.append(label)
 
       parammin = float(param[0])
       parammax = float(param[1])
-      if len(param) == 3:
+
+      if len(param) > 2:
         step = float(param[2])
         N = int( (parammax-parammin)/step)+1
       else:
         # If step is not given, assume 10 iterations
         N = 10
         step = (parammax-parammin)/(N-1)
-      values = [parammin + i*step for i in range(0,N)]
+
+      # Set scan mode
+      mode = "linear"
+      if len(param) == 4:
+        if param[3] == "log":
+          mode = "log"
+        elif not param[3] == "linear":
+          print("Error: Unknown scan mode `"+param[3]+"`. It should be \"linear\" or \"log\".")
+
+      # Set values, depdending on whether we are in linear or log mode
+      if mode == "linear":
+        values = [parammin + i*step for i in range(0,N)]
+      elif mode == "log":
+        values = [10**(parammin + i*step) for i in range(0,N)]
 
       if len(self.params):
         newparams = list()

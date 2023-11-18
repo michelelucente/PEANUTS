@@ -163,6 +163,13 @@ def output(settings, outs):
     if "dm3l" in settings.scan.labels:
       towrite += "Dm3l^2 [eV^2]\t"
 
+    if settings.vacuum:
+      if not settings.antinu:
+        towrite += "Pvac (e) \t Psolar (mu) \t Psolar (tau)\t"
+      else:
+        towrite += "Pvac (~e) \t Psolar (~mu) \t Psolar (~tau)\t"
+      if settings.evolved_state:
+        towrite += "Evolved " + ("anti" if settings.antinu else "") + "neutrino state\t"
     if settings.solar:
       if not settings.antinu:
         towrite += "Psolar (e) \t Psolar (mu) \t Psolar (tau)\t"
@@ -195,8 +202,13 @@ def output(settings, outs):
       if "dm3l" in settings.scan.labels:
         towrite += str(dec(param.dm3l)) + "\t"
 
-      if settings.solar:
+      if settings.vacuum:
+       for out in outs[i]["vacuum"]:
+         towrite += str(dec(out)) + "\t"
+       if settings.evolved_state:
+         towrite += str([np.around(out,5) for out in outs[i]["evolved_state"]]) + "\t"
 
+      if settings.solar:
         for out in outs[i]["solar"]:
           towrite += str(dec(out)) + "\t"
 

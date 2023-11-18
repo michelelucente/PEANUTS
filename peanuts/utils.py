@@ -30,6 +30,32 @@ def print_inputs(settings):
 
   inputs = ""
 
+  if settings.vacuum:
+    inputs += "\n"\
+              "Computing vacuum oscillation probabilities with values\n\n"
+    if not settings.antinu:
+        inputs += \
+             "Neutrino state           : " + str(settings.nustate) + "\n"
+    else:
+      inputs += \
+             "Antineutrino state       : " + str(settings.nustate) + "\n"
+      inputs += \
+             "Basis                    : " + settings.basis + "\n"\
+             "theta_{12}               : " + str(settings.theta12) + "\n"\
+             "theta_{13}               : " + str(settings.theta13) + "\n"\
+             "theta_{23}               : " + str(settings.theta23) + "\n"\
+             "delta_CP                 : " + str(settings.delta) + "\n"\
+             "Delta m_{21}^2           : " + str(settings.dm21) + " eV^2\n"
+      if settings.dm3l > 0:
+        inputs += \
+             "Delta m_{31}^2           : " + str(settings.dm3l) + " eV^2\n"
+      else:
+        inputs += \
+             "Delta m_{32}^2           : " + str(settings.dm3l) + " eV^2\n"
+    inputs += \
+             "Energy                   : " + str(settings.energy) + " MeV\n"\
+             "Baseline                 : " + str(settings.baseline) + " km\n"
+
   if settings.solar:
     inputs += "\n"\
               "Computing the "
@@ -109,7 +135,7 @@ def print_inputs(settings):
              "Earth density            : " + settings.density_file + "\n"
 
 
-  if not settings.solar and not settings.earth:
+  if not settings.vacuum and not settings.solar and not settings.earth:
     print("Error: Unknown mode.")
     exit()
 

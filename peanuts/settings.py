@@ -122,12 +122,14 @@ class Settings:
       settings = args[0]
 
       # Select mode first
+      if "Vacuum" in settings:
+        self.vacuum = True
       if "Solar" in settings:
         self.solar = True
       if "Earth" in settings:
         self.earth = True
-      if not self.solar and not self.earth:
-        print("Error: unkown mode, please provide a running mode, \"Solar\", \"Earth\" or both")
+      if not self.vacuum and not self.solar and not self.earth:
+        print("Error: unkown mode, please provide a running mode, \"Vacuum\", \"Solar\", \"Earth\" or a combination of them")
         exit()
 
       # Extract neutrino parameters
@@ -175,7 +177,22 @@ class Settings:
           print("Error: slha file " + slha_file + " not found.")
           exit()
 
-
+      # Extract vacuum parameters
+      if "Vacuum" in settings:
+        if "Solar" in settings or "Earth" in settings:
+          print("Error: Vacuum mode can only be used on its own")
+          exit()
+        elif "state" not in settings["Vacuum"] or "basis" not in settings["Vacuum"] or "baseline" not in settings["Vacuum"]:
+          print("Error: Vacuum oscillations require an input state, its basis and the baseline")
+          exit()
+        else:
+          self.nustate = np.array(settings["Vacuum"]["state"],dtype=complex)
+          self.antinu = settings["Vacuum"]["antinu"] if "antinu" in settings["Vacuum"] else False
+          self.basis = settings["Vacuum"]["basis"]
+          self.baseline = settings["Vacuum"]["baseline"]
+          self.scan.add("baseline", self.baseline)
+          self.probabilities = settings["Vacuum"]["probabilities"] if "probabilities" in settings["Vacuum"] else True
+          self.evolved_state = settings["Vacuum"]["evolved_state"] if "evolved_state" in settings["Vacuum"] else False
 
       # Extract solar parameters
       if "Solar" in settings:

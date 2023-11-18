@@ -1,0 +1,23 @@
+# Test file for earth regeneration probabilities
+
+# @author: Michele Lucente <lucente@physik.rwth-aachen.de>
+# @author Tomas Gonzalo <tomas.gonzalo@kit.edu>
+
+Energy: 20
+
+Neutrinos:
+
+  dm21: 7.42e-05
+  dm3l: 2.51e-03
+  theta12: 5.83638e-01
+  theta23: 8.5521e-01
+  theta13: 1.49575e-01
+  delta: 3.40339
+
+Vacuum:
+
+  state: [0.4, 0.2, 0.6]
+  antinu: True
+  basis: "flavour"
+  baseline: 500
+  evolved_state: true

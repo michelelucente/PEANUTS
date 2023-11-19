@@ -261,9 +261,9 @@ def numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, ant
 
   def model(t, y):
     nue, numu, nutau = y
-    dnudt = - 1j * np.dot(multi_dot([r23, delta.conjugate(), Hk + np.diag([
+    dnudt = - 1j * np.dot(multi_dot([r23, delta, Hk + np.diag([
         MatterPotential(density.call(t, eta_prime) if 0 <= eta < pi/2 else n_1, antinu)
-        ,0,0]), delta, r23.transpose()]), [nue, numu, nutau])
+        ,0,0]), delta.conjugate(), r23.transpose()]), [nue, numu, nutau])
     return dnudt
 
   num_evol = []

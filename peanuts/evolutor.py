@@ -174,7 +174,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
 
         # Combine the two half-paths evolutors and include the factorised dependence on th23 and d to
         # obtain the full evolutor
-        evolutor =  np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(evolutor_half_detector, evolutor_half_full.transpose())), np.dot(delta, r23.transpose()))
+        evolutor =  np.dot(np.dot(np.dot(r23, delta), np.dot(evolutor_half_detector, evolutor_half_full.transpose())), np.dot(delta.conjugate(), r23.transpose()))
         return evolutor
 
     # If pi/2 <= eta <= pi we approximate the density to the constant value taken at r = 1 - h/2
@@ -187,7 +187,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
 
         # Compute the evolutor for constant density n_1 and traveled distance Deltax,
         # and include the factorised dependence on th23 and d to obtain the full evolutor
-        evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, Deltax, 0, n_1, 0, 0, antinu), delta)), r23.transpose())
+        evolutor = np.dot(np.dot(np.dot(r23, delta), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, Deltax, 0, n_1, 0, 0, antinu), delta.conjugate())), r23.transpose())
         return evolutor
 
     else:

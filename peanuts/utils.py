@@ -54,7 +54,7 @@ def print_inputs(settings):
              "Delta m_{32}^2           : " + str(settings.dm3l) + " eV^2\n"
     inputs += \
              "Energy                   : " + str(settings.energy) + " MeV\n"\
-             "Baseline                 : " + str(settings.baseline) + " m\n"
+             "Baseline                 : " + str(settings.baseline) + " km\n"
 
   if settings.solar:
     inputs += "\n"\

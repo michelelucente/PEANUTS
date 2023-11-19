@@ -165,7 +165,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
         # Only the evolutor for the most external shell needs to be computed
         evolutors_to_detectors = evolutors_full_path.copy()
 
-        evolutors_to_detectors[0] = Upert(DeltamSq21, DeltamSq3l, pmns, E, x_d, xshells2[-2] if len(xshells2) > 1 else 0, params[-1][0], params[-1][1], params[-1][2], antinu)
+        evolutors_to_detectors[0] = Upert(DeltamSq21, DeltamSq3l, pmns, E, x_d, xshells[-2] if len(xshells) > 1 else 0, params[-1][0], params[-1][1], params[-1][2], antinu)
 
         # Multiply the single evolutors
         evolutor_half_detector = evolutors_to_detectors[0]

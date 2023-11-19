@@ -113,6 +113,7 @@ class Settings:
 
   def __init__(self, *args):
 
+    self.vacuum = False
     self.solar = False
     self.earth = False
     self.scan = Scan()

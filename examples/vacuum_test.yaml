@@ -17,7 +17,6 @@ Neutrinos:
 Vacuum:
 
   state: [0.4, 0.2, 0.6]
-  antinu: True
   basis: "flavour"
-  baseline: 500
+  baseline: 500000
   evolved_state: true

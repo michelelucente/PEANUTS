@@ -18,7 +18,7 @@ def vacuum_evolved_state(nustate, pmns, DeltamSq21, DeltamSq3l, E, L, antinu=Fal
     - density: the Earth density object
     - pmns: the PMNS matrix
     - DeltamSq21, Deltamq3l: the mass squared differences
-    - L: baseline, in km
+    - L: baseline, in m
     - antinu: False for neutrinos, True for antineutrinos
     """
 
@@ -44,7 +44,7 @@ def Pvacuum(nustate, pmns, DeltamSq21, DeltamSq3l, E, L, antinu=False, massbasis
     - DeltamSq21: the solar mass splitting
     - DeltamSq3l: the atmospheric mass splitting (l=1 for NO, l=2 for IO)
     - E: the neutrino energy, in units of MeV
-    - L: baseline, in km
+    - L: baseline, in m
     - antinu: False for neutrinos, True for antineutrinos
     - massbasis: True for mass basis, False for flavour basis
     """

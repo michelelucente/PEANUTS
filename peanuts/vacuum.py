@@ -9,6 +9,7 @@ Created on Nov 18 2023
 
 import numpy as np
 from peanuts.evolutor import Upert
+from peanuts.potentials import R_E
 
 def vacuum_evolved_state(nustate, pmns, DeltamSq21, DeltamSq3l, E, L, antinu=False):
     """
@@ -22,6 +23,9 @@ def vacuum_evolved_state(nustate, pmns, DeltamSq21, DeltamSq3l, E, L, antinu=Fal
     - antinu: False for neutrinos, True for antineutrinos
     """
 
+    # Use dimensionless distances
+    l = L / R_E
+
     # Compute the factorised matrices R_{23} and \Delta
     # (remember that U_{PMNS} = R_{23} \Delta R_{13} \Delta^* R_{12})
     r23 = pmns.R23(pmns.theta23)
@@ -33,7 +37,7 @@ def vacuum_evolved_state(nustate, pmns, DeltamSq21, DeltamSq3l, E, L, antinu=Fal
       delta = delta.conjugate()
 
     # Compute the vacuum evolutor
-    evol = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, 0, L, 0, 0, 0, antinu), delta)), r23.transpose())
+    evol = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, 0, l, 0, 0, 0, antinu), delta)), r23.transpose())
 
     return np.dot(evol, nustate)
 
@@ -49,6 +53,9 @@ def Pvacuum(nustate, pmns, DeltamSq21, DeltamSq3l, E, L, antinu=False, massbasis
     - massbasis: True for mass basis, False for flavour basis
     """
 
+    # Use dimensionless distances
+    l = L / R_E
+
     # Compute the factorised matrices R_{23} and \Delta
     # (remember that U_{PMNS} = R_{23} \Delta R_{13} \Delta^* R_{12})
     r23 = pmns.R23(pmns.theta23)
@@ -60,7 +67,7 @@ def Pvacuum(nustate, pmns, DeltamSq21, DeltamSq3l, E, L, antinu=False, massbasis
       delta = delta.conjugate()
 
     # Compute the vacuum evolutor
-    evol = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, L, 0, 0, 0, 0, antinu), delta)), r23.transpose())
+    evol = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, l, 0, 0, 0, 0, antinu), delta)), r23.transpose())
 
     if not massbasis:
       return np.square(np.abs(np.dot(evol, nustate)))

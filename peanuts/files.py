@@ -165,9 +165,9 @@ def output(settings, outs):
 
     if settings.vacuum:
       if not settings.antinu:
-        towrite += "Pvac (e) \t Psolar (mu) \t Psolar (tau)\t"
+        towrite += "Pvac (e) \t Pvac (mu) \t Pvac (tau)\t"
       else:
-        towrite += "Pvac (~e) \t Psolar (~mu) \t Psolar (~tau)\t"
+        towrite += "Pvac (~e) \t Pvac (~mu) \t Pvac (~tau)\t"
       if settings.evolved_state:
         towrite += "Evolved " + ("anti" if settings.antinu else "") + "neutrino state\t"
     if settings.solar:

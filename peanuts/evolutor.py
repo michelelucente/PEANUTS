@@ -182,7 +182,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
 
         n_1 = density.call(1 - h/2, 0)
 
-        # Deltax is the lenght of the crossed path
+        # Deltax is the length of the crossed path
         Deltax = r_d * cos(eta) + sqrt(1 - r_d**2 * sin(eta)**2)
 
         # Compute the evolutor for constant density n_1 and traveled distance Deltax,

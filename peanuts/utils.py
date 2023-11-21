@@ -6,7 +6,26 @@ Created on Mar 30 2022
 @author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
+import os
+
+def get_git_tag():
+  """
+  Get the git tag
+  """
+
+  try:
+    import git
+  except:
+    print("Warning! Package `gitpython` missing, so could not get git tag. The version displayed might be incorrect.")
+    return "v1.2"
+
+  repo = git.Repo(os. getcwd())
+  tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
+  latest_tag = tags[-1]
+  return str(latest_tag)
+
 def print_banner():
+
   """
   Print banner for the program
   """
@@ -16,7 +35,7 @@ def print_banner():
             "Created by:\n"\
             "   Michele Lucente (michele.lucente@unibo.it)\n"\
             "   Tomas Gonzalo   (tomas.gonzalo@kit.edu)\n\n"\
-            "PEANUTS 1.0 is open source and under the terms of the GPL-3 license.\n\n"\
+            "PEANUTS "+get_git_tag()+" is open source and under the terms of the GPL-3 license.\n\n"\
             "Documentation and details for PEANUTS can be found at\n"\
             "T. Gonzalo and M. Lucente, arXiv:2303.15527\n\n"\
             "==========================================\n"

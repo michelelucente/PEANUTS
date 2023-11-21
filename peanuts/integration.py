@@ -103,7 +103,7 @@ def Iab (la, lb, atilde, b, c, x2, x1):
     # The analytic solution depends on la, lb only via Dl = la - lb, except for a common phase factor.
     Dl = la - lb
 
-    # If la == la the integral is identically zero.
+    # If la == lb the integral is identically zero.
     if Dl == 0:
         return 0
 

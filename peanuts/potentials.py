@@ -32,4 +32,5 @@ def k(mSq, E):
     - E: the neutrino energy in MeV.
     See Eq. 4.18 in 1802.05781.
     """
-    return R_E * 2.533 * mSq / E # dimensionless
+    hbarc = 197.3269804e-15
+    return R_E * 0.5 * 1e-12 * mSq / E / hbarc # dimensionless

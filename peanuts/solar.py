@@ -54,22 +54,22 @@ class SolarModel:
           fractioncols = {'pp':4, 'pep':5, 'hep':6, '7Be':7, '8B':8, '13N':9, '15O':10, '17F':11}
         elif "bs2005" in self.solar_model_file:
           self.flux_file = self.solar_model_file
-          fluxcols = {'hep':2, '8B':4}
+          fluxcols = {'pp':0, 'pep':1, 'hep':2, '7Be':3, '8B':4, '13N':5, '15O':6, '17F':7}
           fluxrows = 6
           fluxscale = 1e10
           distrow = 27
           radiuscol = 0
           densitycol = 2
-          fractioncols = {'8B':6, 'hep':12}
+          fractioncols = {'pp':5, '8B':6, '13N':7, '15O':8, '17F':9, '7Be':10, 'pep':11, 'hep':12}
         elif "bp00" in self.solar_model_file:
           self.flux_file = self.solar_model_file
-          fluxcols = {'hep':2, '8B':4}
+          fluxcols = {'pp':0, 'pep':1, 'hep':2, '7Be':3, '8B':4, '13N':5, '15O':6, '17F':7}
           fluxrows = 25
           fluxscale = 1e10
           distrow = 29
           radiuscol = 0
           densitycol = 2
-          fractioncols = {'8B':6, 'hep':12}
+          fractioncols = {'pp':5, '8B':6, '13N':7, '15O':8, '17F':9, '7Be':10, 'pep':11, 'hep':12}
         elif fluxcols is None or fractioncols is None or fluxrows is None or distrow is None or radiuscol is None or densitycol is None:
           print("Error: Solar model not known to PEANUTS, you must provide the rows and columns for the fluxes and fractions")
           exit()

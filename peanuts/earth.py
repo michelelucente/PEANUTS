@@ -315,7 +315,7 @@ def evolved_state_numerical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, e
 
   num_solution, x = numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, antinu)
 
-  state = [np.array(np.dot(num_solution[i], nustate)) for i in range(len(x))]
+  state = [np.array(np.dot(num_solution[i].transpose(), nustate)) for i in range(len(x))]
 
   if full_oscillation:
     return state, x
@@ -341,12 +341,12 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, dep
   num_solution, x = numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, antinu)
 
   if not massbasis:
-      evolution = [np.array(np.square(np.abs(np.dot(num_solution[i], nustate))) ) for i in range(len(x))]
+      evolution = [np.array(np.square(np.abs(np.dot(num_solution[i].transpose(), nustate))) ) for i in range(len(x))]
   elif massbasis:
       if not antinu:
-        evolution = [np.array(np.real(np.dot(np.square(np.abs(np.dot(num_solution[i], pmns.pmns))), nustate))) for i in range(len(x))]
+        evolution = [np.array(np.real(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns))), nustate))) for i in range(len(x))]
       else:
-        evolution = [np.array(np.real(np.dot(np.square(np.abs(np.dot(num_solution[i], pmns.pmns.conjugate()))), nustate))) for i in range(len(x))]
+        evolution = [np.array(np.real(np.dot(np.square(np.abs(np.dot(num_solution[i].transpose(), pmns.pmns.conjugate()))), nustate))) for i in range(len(x))]
   else:
       print("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")
       exit()
@@ -373,7 +373,7 @@ def evolved_state_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, 
   """
 
   evol = FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu)
-  return np.dot(evol, nustate.astype(nb.complex128))
+  return np.dot(evol.transpose(), nustate.astype(nb.complex128))
 
 
 @nb.njit
@@ -394,12 +394,12 @@ def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, de
 
   evol = FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu)
   if not massbasis:
-      return np.square(np.abs(np.dot(evol, nustate.astype(nb.complex128))))
+      return np.square(np.abs(np.dot(evol.transpose(), nustate.astype(nb.complex128))))
   elif massbasis:
       if not antinu:
-        return np.real(np.dot(np.square(np.abs(np.dot(evol, pmns.pmns)).astype(nb.complex128)), nustate.astype(nb.complex128)))
+        return np.real(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns)).astype(nb.complex128)), nustate.astype(nb.complex128)))
       else:
-        return np.real(np.dot(np.square(np.abs(np.dot(evol, pmns.pmns.conjugate())).astype(nb.complex128)), nustate.astype(nb.complex128)))
+        return np.real(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns.conjugate())).astype(nb.complex128)), nustate.astype(nb.complex128)))
 
   else:
       raise Exception("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")

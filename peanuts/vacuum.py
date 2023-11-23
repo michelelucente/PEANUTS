@@ -39,7 +39,7 @@ def vacuum_evolved_state(nustate, pmns, DeltamSq21, DeltamSq3l, E, L, antinu=Fal
     # Compute the vacuum evolutor
     evol = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, 0, l, 0, 0, 0, antinu), delta)), r23.transpose())
 
-    return np.dot(evol, nustate)
+    return np.dot(evol.transpose(), nustate)
 
 def Pvacuum(nustate, pmns, DeltamSq21, DeltamSq3l, E, L, antinu=False, massbasis=True):
     """
@@ -70,9 +70,9 @@ def Pvacuum(nustate, pmns, DeltamSq21, DeltamSq3l, E, L, antinu=False, massbasis
     evol = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, l, 0, 0, 0, 0, antinu), delta)), r23.transpose())
 
     if not massbasis:
-      return np.square(np.abs(np.dot(evol, nustate)))
+      return np.square(np.abs(np.dot(evol.transpose(), nustate)))
     elif massbasis:
       if not antinu:
-        return np.real(np.dot(np.square(np.abs(np.dot(evol, pmns.pmns))), nustate))
+        return np.real(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns))), nustate))
       else:
-        return np.real(np.dot(np.square(np.abs(np.dot(evol, pmns.pmns.conjugate())).astype(nb.complex128)), nustate.astype(nb.complex128)))
+        return np.real(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns.conjugate())).astype(nb.complex128)), nustate.astype(nb.complex128)))

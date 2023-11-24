@@ -150,7 +150,7 @@ def IntegralDay (eta, lam, d1=0, d2=365):
     return weight1 + weight2
 
 
-def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir"):
+def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir", daynight="day"):
     """
     NadirExposure(lam, d1, d2, ns) computes the exposure for ns nadir angle samples
     for an experiment located at latitude lam (in radians), taking data from day d1 to day d2.
@@ -164,7 +164,10 @@ def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=Non
     """
 
     # Generate ns samples of the nadir angle between 0 and pi
-    eta_samples = np.linspace(0, pi, ns)
+    if daynight == "day":
+      eta_samples = np.linspace(pi/2, pi, ceil(ns/2))
+    elif daynight == "night":
+      eta_samples = np.linspace(0, pi/2, floor(ns/2))
     deta = eta_samples[1]-eta_samples[0]
 
     # Get exposure from file
@@ -186,7 +189,7 @@ def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=Non
         cz_samples = np.linspace(-1,1,ns)
         dcz = cz_samples[1]-cz_samples[0]
         exposure_interp = interp1d(cz_samples, raw_exposure["Exposure"], kind='cubic')
-        exposure = [exposure_interp(-cos(eta_samples[i]))*sin(eta_samples[i])*deta/dcz for i in range(ns)]
+        exposure = [exposure_interp(-cos(eta_samples[i]))*sin(eta_samples[i])*deta/dcz for i in range(len(eta_samples))]
         exposure = [exp if exp > 0 else 0 for exp in exposure]
 
     elif lam >= 0:

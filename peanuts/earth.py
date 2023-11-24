@@ -499,7 +499,7 @@ def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, depth, 
   - angle: angle of samples is exposure file
   """
 
-  exposure = NadirExposure(lam=lam, normalized=normalized, d1=d1, d2=d2, ns=ns, from_file=from_file, angle=angle)
+  exposure = NadirExposure(lam=lam, normalized=normalized, d1=d1, d2=d2, ns=ns, from_file=from_file, angle=angle, daynight=daynight)
 
   day = True if daynight != "night" else False
   night = True if daynight != "day" else False
@@ -508,10 +508,7 @@ def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, depth, 
   prob = 0
   deta = pi/ns
   for eta, exp in exposure:
-    if eta < pi/2 and night:
-      prob += Pearth(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode=mode, massbasis=True, full_oscillation=full_oscillation, antinu=antinu) * exp * deta
-    elif eta >= pi/2 and day:
-      prob += Pearth(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode=mode, massbasis=True, full_oscillation=full_oscillation, antinu=antinu) * exp * deta
+    prob += Pearth(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, mode=mode, massbasis=True, full_oscillation=full_oscillation, antinu=antinu) * exp * deta
 
 
   return prob

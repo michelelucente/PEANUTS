@@ -150,7 +150,7 @@ def IntegralDay (eta, lam, d1=0, d2=365):
     return weight1 + weight2
 
 
-def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir", daynight="day"):
+def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir", daynight=None):
     """
     NadirExposure(lam, d1, d2, ns) computes the exposure for ns nadir angle samples
     for an experiment located at latitude lam (in radians), taking data from day d1 to day d2.
@@ -167,7 +167,9 @@ def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=Non
     if daynight == "day":
       eta_samples = np.linspace(pi/2, pi, ceil(ns/2))
     elif daynight == "night":
-      eta_samples = np.linspace(0, pi/2, floor(ns/2))
+      eta_samples = np.linspace(0, pi/2, floor(ns/2)+1)[:-1]
+    else:
+      eta_samples = np.linspace(0, pi, ns)
     deta = eta_samples[1]-eta_samples[0]
 
     # Get exposure from file

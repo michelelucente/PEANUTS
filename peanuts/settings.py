@@ -276,6 +276,7 @@ class Settings:
 
         self.density_file = settings["Earth"]["density"] if "density" in settings["Earth"] else None
         self.custom_density = settings["Earth"]["custom_density"] if "custom_density" in settings["Earth"] else False
+        self.tabulated_density = settings["Earth"]["tabulated_density"] if "tabulated_density" in settings["Earth"] else False
         self.evolution = settings["Earth"]["evolution"] if "evolution" in settings["Earth"] else "analytical"
         self.evolved_state = settings["Earth"]["evolved_state"] if "evolved_state" in settings["Earth"] else False
 

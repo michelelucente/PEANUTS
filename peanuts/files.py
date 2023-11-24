@@ -6,6 +6,7 @@ Created on Mar 3 2022
 @author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
+import re
 import numpy as np
 
 with_slha = True
@@ -46,9 +47,10 @@ def parse_csv(filepath):
       row += 1
 
     # Get number of columns
-    ncols = len(lines[row].split(','))
+    sep = re.split('(,|;|\t|\n| )', lines[row])[1]
+    ncols = len(lines[row].split(sep))
     if ncols < 2:
-      print("Error: density file must have at least two columns, radius and constant density")
+      print("Error: density file must have at least two columns, radius and density")
       exit()
     cols = ["rj", "alpha"]
     if ncols > 2:
@@ -58,7 +60,7 @@ def parse_csv(filepath):
     for c in range(ncols-4):
       cols.append("delta"+str(c+1))
 
-  return row-1, cols
+  return row-1, cols, sep
 
 def read_csv(*args, **kwargs):
   """

@@ -35,6 +35,7 @@ def binom(n, k):
 earthdensity =  [
   ('density_file', nb.types.string),
   ('use_custom_density', nb.boolean),
+  ('use_tabulated_density', nb.boolean),
   ('rj', nb.float64[:]),
   ('alpha', nb.float64[:]),
   ('beta', nb.float64[:]),
@@ -48,7 +49,7 @@ class EarthDensity:
   See hep-ph/9702343 for the definition of trajectory coordinate and Earth density parametrisation.
   """
 
-  def __init__(self, density_file=None, custom_density=False):
+  def __init__(self, density_file=None, tabulated_density=False, custom_density=False):
     """
     Read the Earth density parametrisation, in units of mol/cm^3, following hep-ph/9702343, if
     provided in a file (density_file), where it must consist of a table for each layer with the
@@ -58,6 +59,8 @@ class EarthDensity:
     function and the parameters extracted from a polynomial expansion
     """
 
+    self.use_tabulated_density = tabulated_density
+
     if custom_density:
       self.use_custom_density = True
 
@@ -65,22 +68,37 @@ class EarthDensity:
       self.rj = np.ones(1)
 
     else:
+
       with nb.objmode(density_file='string', rj='float64[:]', alpha='float64[:]', beta='float64[:]', gamma='float64[:]', deltas='float64[:,:]'):
         path = os.path.dirname(os.path.realpath( __file__ ))
+
+        # The default density file is for parametric density, not tabulated
+        if density_file == None and tabulated_density:
+          print("Error: tabulated density was selected, but no density file was provided.")
+          exit()
+
         density_file = path + "/../Data/Earth_Density.csv" if density_file == None else density_file
 
         # Parse the density file to get starting row and columns
-        skiprows, columns = f.parse_csv(density_file)
+        skiprows, columns, sep  = f.parse_csv(density_file)
 
-        earth_density = f.read_csv(density_file, names=columns, skiprows=skiprows)
+        earth_density = f.read_csv(density_file, names=columns, skiprows=skiprows, sep=sep)
 
         rj = earth_density.rj.to_numpy()
         alpha = earth_density.alpha.to_numpy()
-        beta = earth_density.beta.to_numpy()
-        gamma = earth_density.gamma.to_numpy()
-        deltas = np.empty((len(columns)-4,len(rj)))
-        for col in range(len(columns)-4):
-          deltas[col] = getattr(earth_density,"delta"+str(col+1)).to_numpy()
+
+        # If the density is tabulated we treat it as multiple layers with constant density alpha
+        # So higher order coefficients are zero
+        if tabulated_density:
+          beta = np.zeros((len(rj)))
+          gamma = np.zeros((len(rj)))
+          deltas = np.zeros((0,len(rj)))
+        else:
+          beta = earth_density.beta.to_numpy() if "beta" in columns else np.zeros((len(rj)))
+          gamma = earth_density.gamma.to_numpy() if "gamma" in columns else np.zeros((len(rj)))
+          deltas = np.empty((len(columns)-4,len(rj)))
+          for col in range(len(columns)-4):
+            deltas[col] = getattr(earth_density,"delta"+str(col+1)).to_numpy()
 
       self.density_file = density_file
       self.rj = rj

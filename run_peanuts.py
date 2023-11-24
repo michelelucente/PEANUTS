@@ -68,7 +68,7 @@ if settings.earth or settings.vacuum:
 
   if settings.earth:
     # Earth density
-    earth_density = EarthDensity(density_file=settings.density_file,custom_density=settings.custom_density)
+    earth_density = EarthDensity(density_file=settings.density_file,custom_density=settings.custom_density,tabulated_density=settings.tabulated_density)
 
 
 # Loop over energy values

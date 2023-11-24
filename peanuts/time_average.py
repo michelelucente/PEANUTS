@@ -8,7 +8,7 @@ Created on Thu Mar 10 14:39:40 2022
 """
 
 import numpy as np
-from math import sin, cos, pi
+from math import sin, cos, pi, ceil, floor
 from cmath import asin as casin
 from cmath import tan as ctan
 from cmath import sin as csin

@@ -73,6 +73,6 @@ def Pvacuum(nustate, pmns, DeltamSq21, DeltamSq3l, E, L, antinu=False, massbasis
       return np.square(np.abs(np.dot(evol, nustate)))
     elif massbasis:
       if not antinu:
-        return np.real(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns))), nustate))
+        return np.real(np.dot(np.square(np.abs(np.dot(evol, pmns.pmns))), nustate))
       else:
-        return np.real(np.dot(np.square(np.abs(np.dot(evol.transpose(), pmns.pmns.conjugate())).astype(nb.complex128)), nustate.astype(nb.complex128)))
+        return np.real(np.dot(np.square(np.abs(np.dot(evol, pmns.pmns.conjugate())).astype(nb.complex128)), nustate.astype(nb.complex128)))

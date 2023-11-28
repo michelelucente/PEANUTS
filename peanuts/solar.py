@@ -134,11 +134,11 @@ class SolarModel:
         spectrum_files["8B"] = path + "/../Data/8B_shape_Ortiz_et_al.csv" if "8B" not in spectrum_files else spectrum_files['8B']
         spectrum_files["hep"] = path + "/../Data/hep_shape.csv" if "hep" not in spectrum_files else spectrum_files['hep']
         spectrum_files["pp"] = path + "/../Data/pp_shape.csv" if "pp" not in spectrum_files else spectrum_files['pp']
-        spectrum_files["f17"] = path + "/../Data/f17_shape.csv" if "f17" not in spectrum_files else spectrum_files['f17']
-        spectrum_files["be7ground"] = path + "/../Data/be7ground_shape.csv" if "be7ground" not in spectrum_files else spectrum_files['be7ground']
-        spectrum_files["be7excited"] = path + "/../Data/be7excited_shape.csv" if "be7excited" not in spectrum_files else spectrum_files['be7excited']
-        spectrum_files["n13"] = path + "/../Data/n13_shape.csv" if "n13" not in spectrum_files else spectrum_files['n13']
-        spectrum_files["o15"] = path + "/../Data/o15_shape.csv" if "o15" not in spectrum_files else spectrum_files['o15']
+        spectrum_files["17F"] = path + "/../Data/f17_shape.csv" if "17F" not in spectrum_files else spectrum_files['17F']
+        spectrum_files["7Be"] = spectrum_files["7Beground"] = path + "/../Data/be7ground_shape.csv" if "7Beground" not in spectrum_files else spectrum_files['7Beground']
+        spectrum_files["7Beexcited"] = path + "/../Data/be7excited_shape.csv" if "7Beexcited" not in spectrum_files else spectrum_files['7Beexcited']
+        spectrum_files["13N"] = path + "/../Data/n13_shape.csv" if "13N" not in spectrum_files else spectrum_files['13N']
+        spectrum_files["15O"] = path + "/../Data/o15_shape.csv" if "15O" not in spectrum_files else spectrum_files['15O']
 
         self.spectra = {}
         for fraction, spectrum_file in spectrum_files.items():

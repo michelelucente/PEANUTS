@@ -13,7 +13,7 @@ import numpy as np
 import numba as nb
 from numba.experimental import jitclass
 from numpy.linalg import multi_dot
-from math import sin, cos, sqrt, pi, asin
+from math import sin, cos, sqrt, pi, asin, floor
 from scipy.integrate import complex_ode
 
 import peanuts.files as f
@@ -286,7 +286,10 @@ def numerical_solution(density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, ant
 
   num_evol = []
 
-  x = np.linspace(x1, x2, 10**3)
+  if E<10:
+    x = np.linspace(x1, x2, floor(10**(3+np.log10(10/E))))
+  else:
+   x = np.linspace(x1, x2, 10**3)
 
   successful_integration = True
 

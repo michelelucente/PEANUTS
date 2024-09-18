@@ -15,10 +15,11 @@ from cmath import sin as csin
 from cmath import cos as ccos
 from cmath import sqrt as csqrt
 from mpmath import fp, ellipf, sec, csc
-from interval import interval
 from scipy import integrate
 from scipy.interpolate import interp1d
+
 import peanuts.files as f
+from peanuts.utils import intersection
 
 
 # Sometimes the function cmath.sqrt takes the "wrong" side of the branch cut, if its argument has vanishing
@@ -85,20 +86,21 @@ def IntegralAngle (eta, lam, a1=0, a2=pi, eps=1e-5):
         raise ValueError('a1 and a2 must be comprised between 0 and pi, and a2 must be greater than a1')
 
     # Define intervals of valid integration
-    int1 = interval[-1 + eps, 1 - eps] # Where the function T = cos(ai) is defined
-    int2 = interval[sin(lam - eta)/sin(i) + eps, sin(lam + eta)/sin(i) - eps] # Range where T = cos(ai) ctan take values for fixed values of lam, eta, i
-    int3 = interval[cos(a2), cos(a1)] # Interval of detector time exposure
+    int1 = [-1 + eps, 1 - eps] # Where the function T = cos(ai) is defined
+    int2 = [sin(lam - eta)/sin(i) + eps, sin(lam + eta)/sin(i) - eps] # Range where T = cos(ai) ctan take values for fixed values of lam, eta, i
+    int3 = [cos(a2), cos(a1)] # Interval of detector time exposure
 
     # The integration interval is given by the intersection of int1, int2, int3
-    int_full = int1 & int2 & int3
+    int_full = intersection(int1, int2, int3)
 
     # If no intersection then the integral is zero
     if len(int_full) == 0:
         return 0
 
     # If non-empty intersection then define the lower and upper limits of integration
-    elif len(int_full) == 1:
-        low, up = int_full[0].inf, int_full[0].sup
+    elif len(int_full) == 2:
+
+        low, up = int_full[0], int_full[1]
 
         # If the integration interval is larger than 2 * eps then compute the definite integral
         # Discard the small imaginary part due to numerics
@@ -136,15 +138,15 @@ def IntegralDay (eta, lam, d1=0, d2=365):
     [a1, a2] = 2 * pi * np.array([d1, d2]) / 365
 
     # The calculation is performed separately for first and second half of the year
-    int1 = interval[a1, a2] & interval[0, pi] # Between winter and summer solstices
-    int2 = interval[a1, a2] & interval[pi, 2 * pi] # Between summer and winter solstices
+    int1 = intersection([a1, a2], [0, pi]) # Between winter and summer solstices
+    int2 = intersection([a1, a2], [pi, 2 * pi]) # Between summer and winter solstices
 
     # Compute the exposure for each half-year
-    weight1 = IntegralAngle(eta, lam, int1[0].inf, int1[0].sup) if len(int1) == 1 else 0
+    weight1 = IntegralAngle(eta, lam, int1[0], int1[1]) if len(int1) == 2 else 0
 
     # For the second half we use the symmetry of the orbit to recast the trajectory into an equivalent one
     # in the range of days between 0 and 365/2.
-    weight2 = IntegralAngle(eta, lam, 2*pi - int2[0].sup, 2*pi - int2[0].inf) if len(int2) == 1 else 0
+    weight2 = IntegralAngle(eta, lam, 2*pi - int2[1], 2*pi - int2[0]) if len(int2) == 2 else 0
 
     # Return the sum of the exposures
     return weight1 + weight2

@@ -7,6 +7,7 @@ Created on Mar 30 2022
 """
 
 import os
+import numpy as np
 
 def get_git_tag():
   """
@@ -172,3 +173,33 @@ def get_comma_separated_floats(option, opt, value, parser):
   except ValueError:
     print("Error: Wrong format for neutrino state")
     exit()
+
+
+def intersection(i1,*intervals):
+  """
+  Compute the intersection of some intervals
+  """
+
+  if len(intervals) == 0:
+    return i1
+
+  elif len(intervals) == 1:
+
+    if len(i1) == 0 or len(intervals[0]) == 0:
+      return []
+
+    minimum = np.max([intervals[0][0], i1[0]])
+    maximum = np.min([intervals[0][1], i1[1]])
+
+    if minimum > maximum:
+      return []
+    else:
+      return [minimum, maximum]
+
+  else:
+
+    temp_int = i1
+    for interval in intervals:
+      temp_int = intersection(temp_int, interval)
+
+    return temp_int

@@ -6,9 +6,26 @@ Created on Mar 30 2022
 @author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
-VERSION = "2.0"
+import os
+
+def get_git_tag():
+  """
+  Get the git tag
+  """
+
+  try:
+    import git
+  except:
+    print("Warning! Package `gitpython` missing, so could not get git tag. The version displayed might be incorrect.")
+    return "v1.2"
+
+  repo = git.Repo(os. getcwd())
+  tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
+  latest_tag = tags[-1]
+  return str(latest_tag)
 
 def print_banner():
+
   """
   Print banner for the program
   """
@@ -18,7 +35,7 @@ def print_banner():
             "Created by:\n"\
             "   Michele Lucente (michele.lucente@unibo.it)\n"\
             "   Tomas Gonzalo   (tomas.gonzalo@kit.edu)\n\n"\
-            "PEANUTS " + VERSION + " is open source and under the terms of the GPL-3 license.\n\n"\
+            "PEANUTS "+get_git_tag()+" is open source and under the terms of the GPL-3 license.\n\n"\
             "Documentation and details for PEANUTS can be found at\n"\
             "T. Gonzalo and M. Lucente, arXiv:2303.15527\n\n"\
             "==========================================\n"
@@ -31,6 +48,32 @@ def print_inputs(settings):
   """
 
   inputs = ""
+
+  if settings.vacuum:
+    inputs += "\n"\
+              "Computing vacuum oscillation probabilities with values\n\n"
+    if not settings.antinu:
+        inputs += \
+             "Neutrino state           : " + str(settings.nustate) + "\n"
+    else:
+      inputs += \
+             "Antineutrino state       : " + str(settings.nustate) + "\n"
+    inputs += \
+             "Basis                    : " + settings.basis + "\n"\
+             "theta_{12}               : " + str(settings.theta12) + "\n"\
+             "theta_{13}               : " + str(settings.theta13) + "\n"\
+             "theta_{23}               : " + str(settings.theta23) + "\n"\
+             "delta_CP                 : " + str(settings.delta) + "\n"\
+             "Delta m_{21}^2           : " + str(settings.dm21) + " eV^2\n"
+    if settings.dm3l > 0:
+      inputs += \
+             "Delta m_{31}^2           : " + str(settings.dm3l) + " eV^2\n"
+    else:
+      inputs += \
+             "Delta m_{32}^2           : " + str(settings.dm3l) + " eV^2\n"
+    inputs += \
+             "Energy                   : " + str(settings.energy) + " MeV\n"\
+             "Baseline                 : " + str(settings.baseline) + " km\n"
 
   if settings.solar:
     inputs += "\n"\
@@ -159,10 +202,11 @@ def print_inputs(settings):
     inputs += \
              "Evolution method         : " + settings.evolution + "\n"
     if settings.density_file is not None:
-      inputs += "Earth density         : " + settings.density_file + "\n"
+      inputs += \
+             "Earth density            : " + settings.density_file + "\n"
 
 
-  if not settings.solar and not settings.atmosphere and not settings.earth:
+  if not settings.vacuum and not settings.solar and not settings.atmosphere and not settings.earth:
     print("Error: Unknown mode.")
     exit()
 

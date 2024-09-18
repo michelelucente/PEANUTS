@@ -6,6 +6,7 @@ Created on Mar 3 2022
 @author Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
+import re
 import numpy as np
 
 with_slha = True
@@ -28,11 +29,48 @@ from decimal import Decimal
 from peanuts.settings import Settings
 import os
 
+def parse_csv(filepath):
+  """
+  Function to parse CSV files to get the starting row and columns
+  """
+
+  if not os.path.isfile(filepath):
+    print("Error: CSV file", filepath, "does not exist")
+    exit()
+
+  with open(filepath) as file:
+    lines = file.readlines()
+    line = lines[0]
+    row = 0
+    while line.startswith("#"):
+      line = lines[row]
+      row += 1
+
+    # Get number of columns
+    sep = re.split('(,|;|\t|\n| )', lines[row])[1]
+    ncols = len(lines[row].split(sep))
+    if ncols < 2:
+      print("Error: density file must have at least two columns, radius and density")
+      exit()
+    cols = ["rj", "alpha"]
+    if ncols > 2:
+      cols.append("beta")
+    if ncols > 3:
+      cols.append("gamma")
+    for c in range(ncols-4):
+      cols.append("delta"+str(c+1))
+
+  return row-1, cols, sep
 
 def read_csv(*args, **kwargs):
   """
   Function to read csv. Just a wrapper around the pandas version
   """
+
+  if not os.path.isfile(args[0]):
+    print("Error: CSV file", args[0], "does not exist")
+    exit()
+
   return pd.read_csv(*args, **kwargs)
 
 def read_yaml(filepath):
@@ -42,6 +80,10 @@ def read_yaml(filepath):
 
   if not with_yaml:
     print("Error!: Tried to read a yaml file, but module pyyaml is not installed")
+    exit()
+
+  if not os.path.isfile(filepath):
+    print("Error: YAML file", filepath, "does not exist")
     exit()
 
   settings = Settings(yaml.safe_load(open(filepath)))
@@ -57,6 +99,9 @@ def read_slha(filepath):
     print("Error!: Tried to use pyslha but module is not installed")
     exit()
 
+  if not os.path.isfile(filepath):
+    print("Error: SLHA file", filepath, "does not exist")
+    exit()
 
   slha = pyslha.read(filepath)
   blocks = [''.join(k) for k in slha.blocks.keys()]
@@ -125,6 +170,14 @@ def output(settings, outs):
       towrite += "Height (m)\t"
 
     nu = ['e','mu','tau'] if not settings.antinu else ['~e','~mu','~tau']
+
+    if settings.vacuum:
+      if not settings.antinu:
+        towrite += "Pvac (e) \t Pvac (mu) \t Pvac (tau)\t"
+      else:
+        towrite += "Pvac (~e) \t Pvac (~mu) \t Pvac (~tau)\t"
+      if settings.evolved_state:
+        towrite += "Evolved " + ("anti" if settings.antinu else "") + "neutrino state\t"
     if settings.solar:
       if settings.solar_probabilities:
         towrite += '\t'.join(["Psolar ("+nui+")  " for nui in nu]) + "\t"
@@ -159,6 +212,16 @@ def output(settings, outs):
             towrite += str(dec(out)) + "\t"
         if settings.atm_evolved_state:
           towrite += str([np.around(out,5) for out in outs[i]["atm_evolved_state"]]) + "\t"
+
+      if settings.vacuum:
+       for out in outs[i]["vacuum"]:
+         towrite += str(dec(out)) + "\t"
+       if settings.evolved_state:
+         towrite += str([np.around(out,5) for out in outs[i]["evolved_state"]]) + "\t"
+
+      if settings.solar:
+        for out in outs[i]["solar"]:
+          towrite += str(dec(out)) + "\t"
 
       if settings.earth:
         if settings.earth_probabilities:

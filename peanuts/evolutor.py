@@ -154,8 +154,12 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
         params = density.parameters(eta_prime)
         params2 = np.flipud(params)
 
+        # xshells contains the end coordinate x == x_i for each crossed earth density shell
+        xshells = density.shells_x(eta_prime)
+        xshells2 = np.flipud(xshells)
+
         # Compute the evolutors for the path from Earth entry point to trajectory mid-point at x == 0
-        evolutors_full_path = [Upert(DeltamSq21, DeltamSq3l,pmns, E, params2[i][3], params2[i+1][3] if i < len(params2)-1 else 0, params2[i][0], params2[i][1], params2[i][2], antinu) for i in range(len(params))]
+        evolutors_full_path = [Upert(DeltamSq21, DeltamSq3l,pmns, E, xshells2[i], xshells2[i+1] if i < len(xshells2)-1 else 0, params2[i][0], params2[i][1], params2[i][2], antinu) for i in range(len(params))]
 
         # Multiply the single evolutors
         evolutor_half_full = evolutors_full_path[0]
@@ -166,7 +170,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
         # Only the evolutor for the most external shell needs to be computed
         evolutors_to_detectors = evolutors_full_path.copy()
 
-        evolutors_to_detectors[0] = Upert(DeltamSq21, DeltamSq3l, pmns, E, x_d, params[-2][3] if len(params) > 1 else 0, params[-1][0], params[-1][1], params[-1][2], antinu)
+        evolutors_to_detectors[0] = Upert(DeltamSq21, DeltamSq3l, pmns, E, x_d, xshells[-2] if len(xshells) > 1 else 0, params[-1][0], params[-1][1], params[-1][2], antinu)
 
         # Multiply the single evolutors
         evolutor_half_detector = evolutors_to_detectors[-1]
@@ -175,7 +179,7 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
 
         # Combine the two half-paths evolutors and include the factorised dependence on th23 and d to
         # obtain the full evolutor
-        evolutor =  np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(evolutor_half_detector, evolutor_half_full.transpose()) ), np.dot(delta, r23.transpose()))
+        evolutor =  np.dot(np.dot(np.dot(r23, delta), np.dot(evolutor_half_detector, evolutor_half_full.transpose())), np.dot(delta.conjugate().transpose(), r23.transpose()))
         return evolutor
 
     # If pi/2 <= eta <= pi we approximate the density to the constant value taken at r = 1 - h/2
@@ -183,15 +187,14 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
         # Nadir angle if the detector was on surface
         eta_prime = pi -  asin(r_d * sin(eta))
 
-        #n_1 = EarthDensity(x = 1 - h / 2) TODO: eta = 0?
         n_1 = density.call(1 - h/2, 0)
 
-        # Deltax is the lenght of the crossed path
+        # Deltax is the length of the crossed path
         Deltax = r_d * cos(eta) + sqrt(1 - r_d**2 * sin(eta)**2)
 
         # Compute the evolutor for constant density n_1 and traveled distance Deltax,
         # and include the factorised dependence on th23 and d to obtain the full evolutor
-        evolutor = np.dot(np.dot(np.dot(r23, delta.conjugate()), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, Deltax, 0, n_1, 0, 0, antinu) , delta)), r23.transpose())
+        evolutor = np.dot(np.dot(np.dot(r23, delta), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, Deltax, 0, n_1, 0, 0, antinu), delta.conjugate().transpose())), r23.transpose())
         return evolutor
 
     else:

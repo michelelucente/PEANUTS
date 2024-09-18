@@ -203,7 +203,7 @@ x = np.arange(0,1,0.001)
 eta = [0, pi/6, pi/4, pi/3]
 labels = ["0", "$\pi$/6", "$\pi$/4", "$\pi$/3"]
 
-earth_density = EarthDensity(density_file)
+earth_density = EarthDensity(density_file=density_file)
 density = [ [earth_density.call(r, n) for r in x] for n in eta]
 
 plt.xlabel("x")

@@ -58,23 +58,37 @@ class Scan:
   def add(self, label, param):
 
     if isinstance(param, list):
-      # Assume it is given as [min, max] or [min, max, step]
-      if len(param) < 2 or len(param) > 3:
-        print("Error: Parameter", label, "should be given as single number or as range [min, max, (step)].")
+      # Assume it is given as [min, max], [min, max, step] or [min, max, step, mode]
+      if len(param) < 2 or len(param) > 4:
+        print("Error: Parameter", label, "should be given as single number or as range [min, max, (step), (mode)].")
         exit()
 
       self.labels.append(label)
 
       parammin = float(param[0])
       parammax = float(param[1])
-      if len(param) == 3:
+
+      if len(param) > 2:
         step = float(param[2])
         N = int( (parammax-parammin)/step)+1
       else:
         # If step is not given, assume 10 iterations
         N = 10
         step = (parammax-parammin)/(N-1)
-      values = [parammin + i*step for i in range(0,N)]
+
+      # Set scan mode
+      mode = "linear"
+      if len(param) == 4:
+        if param[3] == "log":
+          mode = "log"
+        elif not param[3] == "linear":
+          print("Error: Unknown scan mode `"+param[3]+"`. It should be \"linear\" or \"log\".")
+
+      # Set values, depdending on whether we are in linear or log mode
+      if mode == "linear":
+        values = [parammin + i*step for i in range(0,N)]
+      elif mode == "log":
+        values = [10**(parammin + i*step) for i in range(0,N)]
 
       if len(self.params):
         newparams = list()
@@ -100,6 +114,7 @@ class Settings:
 
   def __init__(self, *args):
 
+    self.vacuum = False
     self.solar = False
     self.atmosphere = False
     self.earth = False
@@ -110,14 +125,16 @@ class Settings:
       settings = args[0]
 
       # Select mode first
+      if "Vacuum" in settings:
+        self.vacuum = True
       if "Solar" in settings:
         self.solar = True
       if "Atmosphere" in settings:
         self.atmosphere = True
       if "Earth" in settings:
         self.earth = True
-      if not self.solar and not self.atmosphere and not self.earth:
-        print("Error: unkown mode, please provide a running mode, \"Solar\", \"Atmosphere\", \"Earth\" or a combination")
+      if not self.vacuum and not self.solar and not self.atmosphere and not self.earth:
+        print("Error: unkown mode, please provide a running mode, \"Vacuum\", \"Solar\", \"Atmosphere\", \"Earth\" or a combination of them")
         exit()
 
       # Extract neutrino parameters
@@ -165,6 +182,22 @@ class Settings:
           print("Error: slha file " + slha_file + " not found.")
           exit()
 
+      # Extract vacuum parameters
+      if "Vacuum" in settings:
+        if "Solar" in settings or "Earth" in settings:
+          print("Error: Vacuum mode can only be used on its own")
+          exit()
+        elif "state" not in settings["Vacuum"] or "basis" not in settings["Vacuum"] or "baseline" not in settings["Vacuum"]:
+          print("Error: Vacuum oscillations require an input state, its basis and the baseline")
+          exit()
+        else:
+          self.nustate = np.array(settings["Vacuum"]["state"],dtype=complex)
+          self.antinu = settings["Vacuum"]["antinu"] if "antinu" in settings["Vacuum"] else False
+          self.basis = settings["Vacuum"]["basis"]
+          self.baseline = settings["Vacuum"]["baseline"]
+          self.scan.add("baseline", self.baseline)
+          self.probabilities = settings["Vacuum"]["probabilities"] if "probabilities" in settings["Vacuum"] else True
+          self.evolved_state = settings["Vacuum"]["evolved_state"] if "evolved_state" in settings["Vacuum"] else False
 
       # Determine whether exposure is requested
       self.exposure = True if self.earth and ("latitude" in settings["Earth"] or "exposure_file" in settings["Earth"]) else False
@@ -327,6 +360,8 @@ class Settings:
 
 
         self.density_file = settings["Earth"]["density"] if "density" in settings["Earth"] else None
+        self.custom_density = settings["Earth"]["custom_density"] if "custom_density" in settings["Earth"] else False
+        self.tabulated_density = settings["Earth"]["tabulated_density"] if "tabulated_density" in settings["Earth"] else False
         self.evolution = settings["Earth"]["evolution"] if "evolution" in settings["Earth"] else "analytical"
         self.earth_evolved_state = settings["Earth"]["evolved_state"] if "evolved_state" in settings["Earth"] else False
         self.earth_probabilities = settings["Earth"]["probabilities"] if "probabilities" in settings["Earth"] else True

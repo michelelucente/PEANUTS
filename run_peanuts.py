@@ -15,6 +15,7 @@ from math import pi, radians
 import peanuts.files as f
 from peanuts.utils import get_comma_separated_floats, print_banner, print_inputs
 from peanuts.pmns import PMNS
+from peanuts.vacuum import Pvacuum, vacuum_evolved_state
 from peanuts.solar import SolarModel, solar_flux_mass, Psolar
 from peanuts.atmosphere import AtmosphereDensity, Patmosphere, evolved_state_atmosphere, Hmax
 from peanuts.earth import EarthDensity, Pearth, Pearth_integrated, evolved_state
@@ -69,7 +70,7 @@ if settings.atmosphere:
 
 # Import earth density
 if settings.earth:
-  earth_density = EarthDensity(settings.density_file)
+  earth_density = EarthDensity(density_file=settings.density_file,custom_density=settings.custom_density,tabulated_density=settings.tabulated_density)
 
 
 # Loop over energy values
@@ -78,6 +79,15 @@ for param in settings.scan:
   out = {}
 
   pmns = PMNS(param.theta12, param.theta13, param.theta23, param.delta)
+
+  if settings.vacuum:
+
+    if settings.probabilities:
+      # Calculate vacuum probabilities
+      out["vacuum"] = Pvacuum(nustate, pmns, param.dm21, param.dm3l, param.energy, param.baseline, antinu=settings.antinu, massbasis=massbasis)
+
+    if settings.evolved_state:
+      out["evolved_state"] = vacuum_evolved_state(nustate, pmns, param.dm21, param.dm3l, param.energy, settings.baseline, antinu=settings.antinu)
 
   if settings.solar:
 

@@ -8,7 +8,7 @@ Created on Thu Mar 10 14:39:40 2022
 """
 
 import numpy as np
-from math import sin, cos, pi
+from math import sin, cos, pi, ceil, floor
 from cmath import asin as casin
 from cmath import tan as ctan
 from cmath import sin as csin
@@ -151,7 +151,7 @@ def IntegralDay (eta, lam, d1=0, d2=365):
     return weight1 + weight2
 
 
-def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, file=None, angle="Nadir", solar=True):
+def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir", daynight=None, solar=True):
     """
     NadirExposure(lam, d1, d2, ns) computes the exposure for ns nadir angle samples
     for an experiment located at latitude lam (in radians), taking data from day d1 to day d2.
@@ -160,18 +160,24 @@ def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, file=None, an
     - d2: upper limit of day interval
     - ns: number of nadir angle samples
     - normalized: normalization of exposure
-    - file: file with experiments exposure
+    - from_file: file with experiments exposure
     - angle: angle of samples is exposure file
+    - daynight: whether the exposure is to be compute for day or night
     - solar: whether to use exposure based on solar neutrinos
     """
 
     # Generate ns samples of the nadir angle between 0 and pi
-    eta_samples = np.linspace(0, pi, ns)
+    if daynight == "day":
+      eta_samples = np.linspace(pi/2, pi, ceil(ns/2))
+    elif daynight == "night":
+      eta_samples = np.linspace(0, pi/2, floor(ns/2)+1)[:-1]
+    else:
+      eta_samples = np.linspace(0, pi, ns)
     deta = eta_samples[1]-eta_samples[0]
 
     # Get exposure from file
-    if file is not None:
-      raw_exposure=f.read_csv(file, skiprows=9, names=['Exposure'])
+    if from_file is not None:
+      raw_exposure=f.read_csv(from_file, skiprows=9, names=['Exposure'])
 
       if ns != len(raw_exposure['Exposure']):
         print("Error: number of samples must match that in the data file")
@@ -188,7 +194,7 @@ def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, file=None, an
         cz_samples = np.linspace(-1,1,ns)
         dcz = cz_samples[1]-cz_samples[0]
         exposure_interp = interp1d(cz_samples, raw_exposure["Exposure"], kind='cubic')
-        exposure = [exposure_interp(-cos(eta_samples[i]))*sin(eta_samples[i])*deta/dcz for i in range(ns)]
+        exposure = [exposure_interp(-cos(eta_samples[i]))*sin(eta_samples[i])*deta/dcz for i in range(len(eta_samples))]
         exposure = [exp if exp > 0 else 0 for exp in exposure]
 
     elif lam >= 0 and solar:

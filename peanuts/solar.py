@@ -84,22 +84,22 @@ class SolarModel:
           fractioncols = {'pp':4, 'pep':5, 'hep':6, '7Be':7, '8B':8, '13N':9, '15O':10, '17F':11}
         elif "bs2005" in self.solar_model_file:
           self.flux_file = self.solar_model_file
-          fluxcols = {'hep':2, '8B':4}
+          fluxcols = {'pp':0, 'pep':1, 'hep':2, '7Be':3, '8B':4, '13N':5, '15O':6, '17F':7}
           fluxrows = 6
           fluxscale = 1e10
           distrow = 27
           radiuscol = 0
           densitycol = 2
-          fractioncols = {'8B':6, 'hep':12}
+          fractioncols = {'pp':5, '8B':6, '13N':7, '15O':8, '17F':9, '7Be':10, 'pep':11, 'hep':12}
         elif "bp00" in self.solar_model_file:
           self.flux_file = self.solar_model_file
-          fluxcols = {'hep':2, '8B':4}
+          fluxcols = {'pp':0, 'pep':1, 'hep':2, '7Be':3, '8B':4, '13N':5, '15O':6, '17F':7}
           fluxrows = 25
           fluxscale = 1e10
           distrow = 29
           radiuscol = 0
           densitycol = 2
-          fractioncols = {'8B':6, 'hep':12}
+          fractioncols = {'pp':5, '8B':6, '13N':7, '15O':8, '17F':9, '7Be':10, 'pep':11, 'hep':12}
         elif fluxcols is None or fractioncols is None or fluxrows is None or distrow is None or radiuscol is None or densitycol is None:
           print("Error: Solar model not known to PEANUTS, you must provide the rows and columns for the fluxes and fractions")
           exit()
@@ -163,6 +163,13 @@ class SolarModel:
         spectrum_files = {} if spectrum_files is None else spectrum_files
         spectrum_files["8B"] = path + "/../Data/8B_shape_Ortiz_et_al.csv" if "8B" not in spectrum_files else spectrum_files['8B']
         spectrum_files["hep"] = path + "/../Data/hep_shape.csv" if "hep" not in spectrum_files else spectrum_files['hep']
+        spectrum_files["pp"] = path + "/../Data/pp_shape.csv" if "pp" not in spectrum_files else spectrum_files['pp']
+        spectrum_files["17F"] = path + "/../Data/f17_shape.csv" if "17F" not in spectrum_files else spectrum_files['17F']
+        spectrum_files["7Be"] = spectrum_files["7Beground"] = path + "/../Data/be7ground_shape.csv" if "7Beground" not in spectrum_files else spectrum_files['7Beground']
+        spectrum_files["7Beexcited"] = path + "/../Data/be7excited_shape.csv" if "7Beexcited" not in spectrum_files else spectrum_files['7Beexcited']
+        spectrum_files["13N"] = path + "/../Data/n13_shape.csv" if "13N" not in spectrum_files else spectrum_files['13N']
+        spectrum_files["15O"] = path + "/../Data/o15_shape.csv" if "15O" not in spectrum_files else spectrum_files['15O']
+
         self.spectra = {}
         for fraction, spectrum_file in spectrum_files.items():
           self.spectra[fraction] = f.read_csv(spectrum_file, usecols=[0, 1], names = ["Energy", "Spectrum"], skiprows=3, header=None)

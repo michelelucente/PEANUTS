@@ -166,12 +166,11 @@ def NadirExposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=Non
     """
 
     # Generate ns samples of the nadir angle between 0 and pi
+    eta_samples = np.linspace(0, pi, ns)
     if daynight == "day":
-      eta_samples = np.linspace(pi/2, pi, ceil(ns/2))
+      eta_samples = eta_samples[ceil(ns/2):]
     elif daynight == "night":
-      eta_samples = np.linspace(0, pi/2, floor(ns/2)+1)[:-1]
-    else:
-      eta_samples = np.linspace(0, pi, ns)
+      eta_samples = eta_samples[:floor(ns/2)]
     deta = eta_samples[1]-eta_samples[0]
 
     # Get exposure from file

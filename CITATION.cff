@@ -1,0 +1,73 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: PEANUTS
+message: >-
+  Please cite the following paper when using PEANUTS: T. E.
+  Gonzalo and M. Lucente, PEANUTS: a software for the
+  automatic computation of solar neutrino flux and its
+  propagation within Earth, Eur. Phys. J. C 84 (2024) no.2,
+  119, doi:10.1140/epjc/s10052-024-12423-3 [arXiv:2303.15527
+  [hep-ph]]
+type: software
+authors:
+  - given-names: Tomás
+    name-particle: E.
+    family-names: Gonzalo
+    email: tomas.gonzalo@kit.edu
+    affiliation: >-
+      Institute for Theoretical Particle Physics (TTP),
+      Karlsruhe Institute of Technology (KIT), 76128
+      Karlsruhe, Germany
+    orcid: 'https://orcid.org/0000-0003-2207-1005'
+  - given-names: Michele
+    family-names: Lucente
+    email: michele.lucente@unibo.it
+    affiliation: >-
+      Dipartimento di Fisica e Astronomia, Università di
+      Bologna, via Irnerio 46, 40126 Bologna, Italy
+    orcid: 'https://orcid.org/0000-0002-5778-6425'
+identifiers:
+  - type: url
+    value: 'https://github.com/michelelucente/PEANUTS'
+    description: The GitHub repository
+  - type: doi
+    value: 10.1140/epjc/s10052-024-12423-3
+    description: The journal print of the paper
+  - type: other
+    value: 'arXiv:2303.15527'
+    description: The ArXiv preprint of the paper
+repository-code: 'https://github.com/michelelucente/PEANUTS'
+abstract: >-
+  PEANUTS is a software for the automatic computation of
+  solar neutrino flux and its propagation within Earth. It
+  is designed to be fast, so that it can be efficiently used
+  in global scans, and flexible, so it allows the input of
+  custom solar models, Earth density profiles, etc.
+
+
+  Please cite the following paper when using PEANUTS:
+
+
+  T. E. Gonzalo and M. Lucente, "PEANUTS: a software for the
+  automatic computation of solar neutrino flux and its
+  propagation within Earth", Eur. Phys. J. C 84 (2024) no.2,
+  119, doi:10.1140/epjc/s10052-024-12423-3 [arXiv:2303.15527
+  [hep-ph]]
+
+
+  PEANUTS is distributed under the GPL-3.0 license, which
+  permits the free use and modification of the software for
+  any use. Please read the accompanying LICENSE document for
+  more details of the GPL-3.0 license.
+keywords:
+  - neutrino
+  - oscillation
+  - solar
+  - matter
+  - analytic
+license: GPL-3.0
+commit: f56f78a
+version: '1.5'
+date-released: '2025-04-24'

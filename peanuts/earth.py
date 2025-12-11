@@ -11,7 +11,6 @@ import os
 import time
 import numpy as np
 import numba as nb
-from numba.experimental import jitclass
 from numpy.linalg import multi_dot
 from math import sin, cos, sqrt, pi, asin, floor
 from scipy.integrate import complex_ode
@@ -21,7 +20,7 @@ from peanuts.potentials import k, MatterPotential, R_E
 from peanuts.evolutor import FullEvolutor
 from peanuts.time_average import NadirExposure
 
-@nb.njit
+@nb.njit(cache=True)
 def binom(n, k):
   """
   Returns the binomial number (n, k)
@@ -32,18 +31,6 @@ def binom(n, k):
 
   return np.prod(np.array([(n + 1 - i)/i for i in range(1,k+1)]))
 
-earthdensity =  [
-  ('density_file', nb.types.string),
-  ('use_custom_density', nb.boolean),
-  ('use_tabulated_density', nb.boolean),
-  ('rj', nb.float64[:]),
-  ('alpha', nb.float64[:]),
-  ('beta', nb.float64[:]),
-  ('gamma', nb.float64[:]),
-  ('deltas', nb.float64[:,:])
-]
-
-@jitclass(earthdensity)
 class EarthDensity:
   """
   See hep-ph/9702343 for the definition of trajectory coordinate and Earth density parametrisation.
@@ -60,45 +47,46 @@ class EarthDensity:
     """
 
     self.use_tabulated_density = tabulated_density
+    self.use_custom_density = custom_density
 
     if custom_density:
-      self.use_custom_density = True
-
       # For simplicity create just one shell
       self.rj = np.ones(1)
+      self.alpha = np.zeros(1)
+      self.beta = np.zeros(1)
+      self.gamma = np.zeros(1)
+      self.deltas = np.zeros((0,1))
 
     else:
+      path = os.path.dirname(os.path.realpath( __file__ ))
 
-      with nb.objmode(density_file='string', rj='float64[:]', alpha='float64[:]', beta='float64[:]', gamma='float64[:]', deltas='float64[:,:]'):
-        path = os.path.dirname(os.path.realpath( __file__ ))
+      # The default density file is for parametric density, not tabulated
+      if density_file == None and tabulated_density:
+        print("Error: tabulated density was selected, but no density file was provided.")
+        exit()
 
-        # The default density file is for parametric density, not tabulated
-        if density_file == None and tabulated_density:
-          print("Error: tabulated density was selected, but no density file was provided.")
-          exit()
+      density_file = path + "/../Data/Earth_Density.csv" if density_file == None else density_file
 
-        density_file = path + "/../Data/Earth_Density.csv" if density_file == None else density_file
+      # Parse the density file to get starting row and columns
+      skiprows, columns, sep  = f.parse_csv(density_file)
 
-        # Parse the density file to get starting row and columns
-        skiprows, columns, sep  = f.parse_csv(density_file)
+      earth_density = f.read_csv(density_file, names=columns, skiprows=skiprows, sep=sep)
 
-        earth_density = f.read_csv(density_file, names=columns, skiprows=skiprows, sep=sep)
+      rj = earth_density.rj.to_numpy()
+      alpha = earth_density.alpha.to_numpy()
 
-        rj = earth_density.rj.to_numpy()
-        alpha = earth_density.alpha.to_numpy()
-
-        # If the density is tabulated we treat it as multiple layers with constant density alpha
-        # So higher order coefficients are zero
-        if tabulated_density:
-          beta = np.zeros((len(rj)))
-          gamma = np.zeros((len(rj)))
-          deltas = np.zeros((0,len(rj)))
-        else:
-          beta = earth_density.beta.to_numpy() if "beta" in columns else np.zeros((len(rj)))
-          gamma = earth_density.gamma.to_numpy() if "gamma" in columns else np.zeros((len(rj)))
-          deltas = np.empty((len(columns)-4,len(rj)))
-          for col in range(len(columns)-4):
-            deltas[col] = getattr(earth_density,"delta"+str(col+1)).to_numpy()
+      # If the density is tabulated we treat it as multiple layers with constant density alpha
+      # So higher order coefficients are zero
+      if tabulated_density:
+        beta = np.zeros((len(rj)))
+        gamma = np.zeros((len(rj)))
+        deltas = np.zeros((0,len(rj)))
+      else:
+        beta = earth_density.beta.to_numpy() if "beta" in columns else np.zeros((len(rj)))
+        gamma = earth_density.gamma.to_numpy() if "gamma" in columns else np.zeros((len(rj)))
+        deltas = np.empty((len(columns)-4,len(rj)))
+        for col in range(len(columns)-4):
+          deltas[col] = getattr(earth_density,"delta"+str(col+1)).to_numpy()
 
       self.density_file = density_file
       self.rj = rj
@@ -378,7 +366,6 @@ def Pearth_numerical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, dep
     return evolution[-1]
 
 
-@nb.njit
 def evolved_state_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, antinu=False):
   """
   evolved_state_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, antinu) computes
@@ -394,10 +381,9 @@ def evolved_state_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, 
   """
 
   evol = FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu)
-  return np.dot(evol, nustate.astype(nb.complex128))
+  return np.dot(evol, nustate.astype(np.complex128))
 
 
-@nb.njit
 def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, massbasis=True, antinu=False):
   """
   Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, depth, massbasis, antinu) computes
@@ -415,12 +401,12 @@ def Pearth_analytical(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, eta, de
 
   evol = FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu)
   if not massbasis:
-      return np.square(np.abs(np.dot(evol, nustate.astype(nb.complex128))))
+      return np.square(np.abs(np.dot(evol, nustate.astype(np.complex128))))
   elif massbasis:
       if not antinu:
-        return np.real(np.dot(np.square(np.abs(np.dot(evol, pmns.pmns)).astype(nb.complex128)), nustate.astype(nb.complex128)))
+        return np.real(np.dot(np.square(np.abs(np.dot(evol, pmns.pmns)).astype(np.complex128)), nustate.astype(np.complex128)))
       else:
-        return np.real(np.dot(np.square(np.abs(np.dot(evol, pmns.pmns.conjugate())).astype(nb.complex128)), nustate.astype(nb.complex128)))
+        return np.real(np.dot(np.square(np.abs(np.dot(evol, pmns.pmns.conjugate())).astype(np.complex128)), nustate.astype(np.complex128)))
 
   else:
       raise Exception("Error: unrecognised neutrino basis, please choose either \"flavour\" or \"mass\".")

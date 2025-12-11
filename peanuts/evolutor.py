@@ -16,17 +16,18 @@ from cmath import exp
 from peanuts.potentials import k, MatterPotential, R_E
 from peanuts.integration import c0, c1, lambdas, Iab
 
-@nb.njit
-def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c, antinu):
+@nb.njit(cache=True)
+def Upert (DeltamSq21, DeltamSq3l, th12, th13, U, E, x2, x1, a, b, c, antinu):
     """
-    Upert(DeltamSq21, DeltamSq3l, pmns, E,  x2, x1, a, b, c, antinu) computes the evolutor
+    Upert(DeltamSq21, DeltamSq3l, th12, th13, U, E, x2, x1, a, b, c, antinu) computes the evolutor
     for an ultrarelativistic neutrino state in flavour basis, for a reduced mixing matrix U = R_{13} R_{12}
     (the dependence on th_{23} and CP-violating phase \delta_{CP} can be factorised) for a density profile
-    parametrised by a 4th degree even poliomial in the trajectory coordinate, to 1st order corrections around
+    parametrised by a 4th degree even polynomial in the trajectory coordinate, to 1st order corrections around
     the mean density value:
     - DeltamSq21: the solar mass splitting
     - DeltamSq3l: the atmospheric mass splitting (l=1 for NO, l=2 for IO)
-    - pmns is the PMNS matrix;
+    - th12, th13: mixing angles;
+    - U: reduced mixing matrix R_{13} R_{12};
     - E is the neutrino energy, in units of MeV;
     - x1 (x2) is the starting (ending) point in the path;
     - a, b, c parametrise the density profile on the path, n_e(x) = a + b x^2 + c x^4.
@@ -56,27 +57,27 @@ def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c, antinu):
     L = (x2 - x1)
 
     # Reduced mixing matrix U = R_{13} R_{12}
-    U = pmns.U
+    U_loc = U
     if antinu:
-      U = U.conjugate()
+      U_loc = U_loc.conjugate()
 
     # Hamiltonian in the reduced flavour basis
-    H = np.dot(np.dot(U, np.diag(ki)), U.transpose()) + np.diag(np.array([V, 0, 0]))
+    H = np.dot(np.dot(U_loc, np.diag(ki)), U_loc.transpose()) + np.diag(np.array([V, 0, 0]))
 
     # Traceless Hamiltonian T = H - Tr(H)/3
     tr = np.sum(ki) + V
     T = H - tr/3 * id3
 
     # Coefficients of the characteristic equation for T
-    c0_loc = c0(ki, pmns.theta12, pmns.theta13, naverage, antinu)
-    c1_loc = c1(ki, pmns.theta12, pmns.theta13, naverage, antinu)
+    c0_loc = c0(ki, th12, th13, naverage, antinu)
+    c1_loc = c1(ki, th12, th13, naverage, antinu)
 
     # Roots of the characteristic equation for T
     lam = lambdas(c0_loc, c1_loc)
 
     # Matrices M_a, not depending on x
     M = np.zeros((len(lam),3,3), dtype=nb.complex128)
-    for i in nb.prange(len(lam)):
+    for i in range(len(lam)):
       M[i] = (1 / (3*lam[i]**2 + c1_loc)) * ((lam[i]**2 + c1_loc) * id3 + lam[i] * T + np.dot(T,T))
 
     # 0th order evolutor (i.e. for constant matter density), following Eq. (46) in hep-ph/9910546
@@ -97,7 +98,6 @@ def Upert (DeltamSq21, DeltamSq3l, pmns, E, x2, x1, a, b, c, antinu):
     return u
 
 
-@nb.njit
 def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
     """
     FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu) computes the full evolutor for an ultrarelativistic
@@ -154,7 +154,23 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
         xshells2 = np.flipud(xshells)
 
         # Compute the evolutors for the path from Earth entry point to trajectory mid-point at x == 0
-        evolutors_full_path = [Upert(DeltamSq21, DeltamSq3l,pmns, E, xshells2[i], xshells2[i+1] if i < len(xshells2)-1 else 0, params2[i][0], params2[i][1], params2[i][2], antinu) for i in range(len(params))]
+        evolutors_full_path = [
+            Upert(
+                DeltamSq21,
+                DeltamSq3l,
+                pmns.theta12,
+                pmns.theta13,
+                pmns.U,
+                E,
+                xshells2[i],
+                xshells2[i + 1] if i < len(xshells2) - 1 else 0.0,
+                float(params2[i][0]),
+                float(params2[i][1]),
+                float(params2[i][2]),
+                antinu,
+            )
+            for i in range(len(params))
+        ]
 
         # Multiply the single evolutors
         evolutor_half_full = evolutors_full_path[0]
@@ -165,7 +181,20 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
         # Only the evolutor for the most external shell needs to be computed
         evolutors_to_detectors = evolutors_full_path.copy()
 
-        evolutors_to_detectors[0] = Upert(DeltamSq21, DeltamSq3l, pmns, E, x_d, xshells[-2] if len(xshells) > 1 else 0, params[-1][0], params[-1][1], params[-1][2], antinu)
+        evolutors_to_detectors[0] = Upert(
+            DeltamSq21,
+            DeltamSq3l,
+            pmns.theta12,
+            pmns.theta13,
+            pmns.U,
+            E,
+            x_d,
+            xshells[-2] if len(xshells) > 1 else 0.0,
+            float(params[-1][0]),
+            float(params[-1][1]),
+            float(params[-1][2]),
+            antinu,
+        )
 
         # Multiply the single evolutors
         evolutor_half_detector = evolutors_to_detectors[0]
@@ -187,7 +216,29 @@ def FullEvolutor(density, DeltamSq21, DeltamSq3l, pmns, E, eta, depth, antinu):
 
         # Compute the evolutor for constant density n_1 and traveled distance Deltax,
         # and include the factorised dependence on th23 and d to obtain the full evolutor
-        evolutor = np.dot(np.dot(np.dot(r23, delta), np.dot(Upert(DeltamSq21, DeltamSq3l, pmns, E, Deltax, 0, n_1, 0, 0, antinu), delta.conjugate().transpose())), r23.transpose())
+        evolutor = np.dot(
+            np.dot(
+                np.dot(r23, delta),
+                np.dot(
+                    Upert(
+                        DeltamSq21,
+                        DeltamSq3l,
+                        pmns.theta12,
+                        pmns.theta13,
+                        pmns.U,
+                        E,
+                        Deltax,
+                        0.0,
+                        float(n_1),
+                        0.0,
+                        0.0,
+                        antinu,
+                    ),
+                    delta.conjugate().transpose(),
+                ),
+            ),
+            r23.transpose(),
+        )
         return evolutor
 
     else:

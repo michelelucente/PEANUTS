@@ -199,7 +199,7 @@ class SolarModel:
          return float(spec(energy))
 
 # Compute flux of incoherent mass eigenstates for fixed density value
-@nb.njit
+@nb.njit(cache=True)
 def Tei (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
     """
     Tei(th12, th13, DeltamSq21, DeltamSq3l, E, ne) computes the weights composing an incoherent flux of
@@ -225,7 +225,7 @@ def Tei (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
 
 
 # Compute flux of inchoerent mass eigenstates integrated over production point in the Sun
-@nb.njit
+@nb.njit(cache=True)
 def solar_flux_mass (th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction):
     """
     solar_flux_mass(th12, th13, DeltamSq21, DeltamSq3l, E, radius_samples, density, fraction) computes

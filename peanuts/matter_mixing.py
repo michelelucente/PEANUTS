@@ -11,7 +11,7 @@ import numpy as np
 
 
 # Define function for the ratio between matter and vacuum terms in neutrino oscillations
-@nb.njit
+@nb.njit(cache=True)
 def Vk(Deltam2, E, ne):
     """
     Vk(Deltam2, E, ne) computes the ratio V/k between the matter and vacuum terms in neutrino oscillations.
@@ -23,7 +23,7 @@ def Vk(Deltam2, E, ne):
 
     return (3.868e-7)/(2.533) * (ne * E / Deltam2)
 
-@nb.njit
+@nb.njit(cache=True)
 def DeltamSqee(th12, DeltamSq21, DeltamSq3l):
     """
     DeltamSqee(th12, DeltamSq21, DeltamSq3l) computes the dielectron invariant mass
@@ -37,7 +37,7 @@ def DeltamSqee(th12, DeltamSq21, DeltamSq3l):
     return np.cos(th12)**2*DeltamSq31 + np.sin(th12)**2*DeltamSq32
 
 # Define mixing angles in matter
-@nb.njit
+@nb.njit(cache=True)
 def th13_M (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
     """
     th13_M(th13, DeltamSq31, E, ne) computes the mixing angle \theta_{13} in matter.
@@ -52,7 +52,7 @@ def th13_M (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
 
     return 0.5*np.arccos((np.cos(2*th13) - vk) / np.sqrt((np.cos(2*th13) - vk)**2 + np.sin(2*th13)**2)) % (np.pi/2)
 
-@nb.njit
+@nb.njit(cache=True)
 def th12_M (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
     """
     th12_M(th12, th13, DeltamSq21, E, ne) computes the mixing angle \theta_{12} in matter.

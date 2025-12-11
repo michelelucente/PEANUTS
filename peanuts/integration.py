@@ -17,7 +17,7 @@ from peanuts.potentials import k, MatterPotential
 
 
 # Computes coefficients of the characteristic equation for the matrix T = H - Tr(H)/3, cf. hep-ph/9910546
-@nb.njit
+@nb.njit(cache=True)
 def c0 (ki, th12, th13, n, antinu):
     """
     c0(ki, th12, th13, n) computes the coefficient c_0 defined in hep-ph/9910546, for the specific case
@@ -41,7 +41,7 @@ def c0 (ki, th12, th13, n, antinu):
     cos(2*th12)*cos(th13)**2 - 9*V*(k1**2 + k2**2 - 2*k3*(k3 + V) +
     k2*(2*k3 + V) + k1*(-4*k2 + 2*k3 + V))*cos(2*th13) )/108
 
-@nb.njit
+@nb.njit(cache=True)
 def c1(ki,th12, th13, n, antinu):
     """
     c1(ki, th12, th13, n) computes the coefficient c_1 defined in hep-ph/9910546, for the specific case
@@ -63,7 +63,7 @@ def c1(ki,th12, th13, n, antinu):
 
 
 # Computes the solutions of the characteristic equation for the matrix T = H - Tr(H)/3, cf. hep-ph/9910546
-@nb.njit
+@nb.njit(cache=True)
 def lambdas (c0, c1):
     """
     lambdas(c0, c1) computes the solutions (roots) of the characteristic equation for the matrix
@@ -84,7 +84,7 @@ def lambdas (c0, c1):
 
 
 # Compute the integrals required for the first order correction in the evolutor
-@nb.njit
+@nb.njit(cache=True)
 def Iab (la, lb, atilde, b, c, x2, x1):
     """
     Iab(la, lb, atilde, b, c, x2, x1) computes the definite integral:

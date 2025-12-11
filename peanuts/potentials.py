@@ -14,7 +14,7 @@ import numba as nb
 R_E = 6.371e6 # meters
 
 # Matter potential
-@nb.njit
+@nb.njit(cache=True)
 def MatterPotential (n, antinu):
     """
     MatterPotential(n) computes the matter potential due to an electron density n, expressed in mol/cm^3
@@ -24,7 +24,7 @@ def MatterPotential (n, antinu):
     return (-1 if antinu else 1) * R_E * 3.868e-7 * n # dimensionless
 
 # Kinetic potential
-@nb.njit
+@nb.njit(cache=True)
 def k(mSq, E):
     """
     k(mSq, E) computes the kinetic potential for an ultrarelativistic neutrino:

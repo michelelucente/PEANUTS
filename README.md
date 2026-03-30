@@ -64,7 +64,6 @@ Please contact Michele Lucente (michele.lucente@unibo.it) or Tomas Gonzalo (toma
 
 ## Acknowledgements
 During the development of part of this project, ML was funded by the European Union under the Horizon Europe's Marie Sklodowska-Curie project 101068791 — NuBridge.
-
 <img width="4125" height="919" alt="EN_FundedbytheEU_RGB_POS" src="https://github.com/user-attachments/assets/00accffd-9843-4f29-8c43-84dc5bd9cf95" />
 
 ML acknowledges as well financial support from the Alexander von Humboldt Foundation during the early stages of the work.

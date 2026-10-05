@@ -7,6 +7,7 @@ Created on Feb 23 2022
 @author: Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
+import os
 import time
 import numpy as np
 import numba as nb
@@ -15,6 +16,14 @@ from cmath import exp
 
 from peanuts.potentials import k, MatterPotential, R_E
 from peanuts.integration import c0, c1, lambdas, Iab
+
+# Evaluation of the first order correction u1 = sum_{a != b} M_a diag(d_ab, 0, 0) M_b.
+# False (default): two BLAS matrix products per term, as in PEANUTS 1.5.
+# True: the products of the rank-one structure, (M_a[i,0] d_ab) M_b[0,j], are evaluated directly.
+# The two coincide bit by bit whenever the BLAS zgemm rounds a single complex product like the
+# scalar complex multiplication; this depends on the BLAS library and must be verified with
+# tests/exactness before the option is used (environment variable PEANUTS_RANK1_U1=1).
+RANK1_U1 = os.environ.get("PEANUTS_RANK1_U1", "0") == "1"
 
 @nb.njit
 def kinetic_terms(DeltamSq21, DeltamSq3l, E):
@@ -57,18 +66,25 @@ def spectral_decomposition(ki, Hk, th12, th13, naverage, antinu):
     Eq. (46) in hep-ph/9910546 and the trace Tr(H). They depend on the path only through naverage.
     """
 
-    # 3d identity matrix of complex numbers
-    id3 = np.eye(3, dtype=nb.complex128)
+    # The element-wise matrix expressions below are written as loops over the matrix elements, with
+    # the same scalar operations on the same operands as the array expressions
+    #   H = Hk + diag(V, 0, 0),  T = H - Tr(H)/3 * 1,
+    #   M_a = (1 / (3 lam_a^2 + c1)) * ((lam_a^2 + c1) * 1 + lam_a T + T^2),
+    # so that no temporary arrays are allocated; the matrix product T^2 is left to BLAS.
 
     # Matter potential for the 0th order evolutor
     V = MatterPotential(naverage, antinu)
 
-    # Hamiltonian in the reduced flavour basis
-    H = Hk + np.diag(np.array([V, 0, 0]))
+    # Hamiltonian in the reduced flavour basis and its trace
+    tr = np.sum(ki) + V
+    tr3 = tr/3
 
     # Traceless Hamiltonian T = H - Tr(H)/3
-    tr = np.sum(ki) + V
-    T = H - tr/3 * id3
+    T = np.empty((3,3), dtype=nb.complex128)
+    for j in range(3):
+      for k in range(3):
+        Hjk = Hk[j,k] + (V if j == 0 and k == 0 else 0.)
+        T[j,k] = Hjk - tr3 * ((1.+0.j) if j == k else 0.j)
 
     # Coefficients of the characteristic equation for T
     c0_loc = c0(ki, th12, th13, naverage, antinu)
@@ -79,9 +95,13 @@ def spectral_decomposition(ki, Hk, th12, th13, naverage, antinu):
 
     # Matrices M_a, not depending on x (T^2 does not depend on a either, so it is computed once)
     TT = np.dot(T,T)
-    M = np.zeros((len(lam),3,3), dtype=nb.complex128)
+    M = np.empty((len(lam),3,3), dtype=nb.complex128)
     for i in range(len(lam)):
-      M[i] = (1 / (3*lam[i]**2 + c1_loc)) * ((lam[i]**2 + c1_loc) * id3 + lam[i] * T + TT)
+      s1 = (1 / (3*lam[i]**2 + c1_loc))
+      s2 = (lam[i]**2 + c1_loc)
+      for j in range(3):
+        for k in range(3):
+          M[i,j,k] = s1 * ((s2 * ((1.+0.j) if j == k else 0.j) + lam[i] * T[j,k]) + TT[j,k])
 
     return lam, M, tr
 
@@ -97,18 +117,32 @@ def evolutor_from_spectrum(lam, M, tr, x2, x1, atilde, b, c, antinu):
     L = (x2 - x1)
 
     # 0th order evolutor (i.e. for constant matter density), following Eq. (46) in hep-ph/9910546
+    # (u0 += exp(-i (lam_a + Tr(H)/3) L) M_a, element by element)
     u0 = np.zeros((3,3), dtype=nb.complex128)
     u1 = np.zeros((3,3), dtype=nb.complex128)
     for i in range(len(lam)):
-      u0 += np.exp(-1j * (lam[i] + tr/3) * L) * M[i]
+      phase = np.exp(-1j * (lam[i] + tr/3) * L)
+      for j in range(3):
+        for k in range(3):
+          u0[j,k] += phase * M[i,j,k]
 
     # Compute correction to evolutor, taking into account 1st order terms in \delta n_e(x)
     # The terms with idx_a == idx_b vanish identically (Iab returns 0 for la == lb) and are skipped
     if (b != 0) | (c != 0):
+      D = np.zeros((3,3), dtype=nb.complex128)
       for idx_a in range(3) :
         for idx_b in range(3) :
           if idx_a != idx_b:
-            u1 += np.dot(np.dot(M[idx_a], np.diag(np.array([-1j * MatterPotential(Iab(lam[idx_a] + tr/3, lam[idx_b] + tr/3, atilde, b, c, x2, x1), antinu), 0, 0]))), M[idx_b])
+            d = -1j * MatterPotential(Iab(lam[idx_a] + tr/3, lam[idx_b] + tr/3, atilde, b, c, x2, x1), antinu)
+            if RANK1_U1:
+              for i in range(3):
+                Mad = M[idx_a,i,0] * d
+                for j in range(3):
+                  u1[i,j] += Mad * M[idx_b,0,j]
+            else:
+              # u1 += M_a diag(d, 0, 0) M_b
+              D[0,0] = d
+              u1 += np.dot(np.dot(M[idx_a], D), M[idx_b])
 
     u = u0 + u1
 

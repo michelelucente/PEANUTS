@@ -129,7 +129,11 @@ def evolutor_from_spectrum(lam, M, tr, x2, x1, atilde, b, c, antinu):
     # Compute correction to evolutor, taking into account 1st order terms in \delta n_e(x)
     # The terms with idx_a == idx_b vanish identically (Iab returns 0 for la == lb) and are skipped
     if (b != 0) | (c != 0):
+      # np.dot(a, b) is np.dot(a, b, np.empty(...)) in numba: the products are written into
+      # preallocated buffers, with the same BLAS calls
       D = np.zeros((3,3), dtype=nb.complex128)
+      MD = np.empty((3,3), dtype=nb.complex128)
+      MDM = np.empty((3,3), dtype=nb.complex128)
       for idx_a in range(3) :
         for idx_b in range(3) :
           if idx_a != idx_b:
@@ -142,7 +146,9 @@ def evolutor_from_spectrum(lam, M, tr, x2, x1, atilde, b, c, antinu):
             else:
               # u1 += M_a diag(d, 0, 0) M_b
               D[0,0] = d
-              u1 += np.dot(np.dot(M[idx_a], D), M[idx_b])
+              np.dot(M[idx_a], D, MD)
+              np.dot(MD, M[idx_b], MDM)
+              u1 += MDM
 
     u = u0 + u1
 
@@ -243,21 +249,30 @@ def crossing_evolutor(ki, Hk, th12, th13, r23delta, right, x_d, a, b, c, xshells
 
     nsh = len(xshells)
 
+    # The matrix products are written into preallocated buffers (np.dot(a, b, out) is the BLAS
+    # call that np.dot(a, b) makes after allocating its result)
+    evolutors_full_path = np.empty((nsh,3,3), dtype=nb.complex128)
+    buf = np.empty((2,3,3), dtype=nb.complex128)
+
     # Compute the evolutors for the path from Earth entry point to trajectory mid-point at x == 0
-    evolutors_full_path = [Upert_kinetic(ki, Hk, th12, th13, xshells[nsh-1-i], xshells[nsh-2-i] if i < nsh-1 else 0, a[nsh-1-i], b[nsh-1-i], c[nsh-1-i], antinu) for i in range(nsh)]
+    for i in range(nsh):
+      evolutors_full_path[i] = Upert_kinetic(ki, Hk, th12, th13, xshells[nsh-1-i], xshells[nsh-2-i] if i < nsh-1 else 0, a[nsh-1-i], b[nsh-1-i], c[nsh-1-i], antinu)
 
     # Multiply the single evolutors
     evolutor_half_full = evolutors_full_path[0]
-    for i in range(len(evolutors_full_path)-1):
-      evolutor_half_full = np.dot(evolutor_half_full, evolutors_full_path[i+1])
+    for i in range(nsh-1):
+      np.dot(evolutor_half_full, evolutors_full_path[i+1], buf[i % 2])
+      evolutor_half_full = buf[i % 2]
+    evolutor_half_full = evolutor_half_full.copy()
 
     # Compute the evolutors for the path from the trajectory mid-point at x == 0 to the detector point x_d
     # Only the evolutor for the most external shell needs to be computed
     evolutor_half_detector = Upert_kinetic(ki, Hk, th12, th13, x_d, xshells[-2] if nsh > 1 else 0, a[-1], b[-1], c[-1], antinu)
 
     # Multiply the single evolutors
-    for i in range(len(evolutors_full_path)-1):
-      evolutor_half_detector = np.dot(evolutor_half_detector, evolutors_full_path[i+1])
+    for i in range(nsh-1):
+      np.dot(evolutor_half_detector, evolutors_full_path[i+1], buf[i % 2])
+      evolutor_half_detector = buf[i % 2]
 
     # Combine the two half-paths evolutors and include the factorised dependence on th23 and d to
     # obtain the full evolutor

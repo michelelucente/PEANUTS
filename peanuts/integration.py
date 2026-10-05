@@ -76,9 +76,15 @@ def lambdas (c0, c1):
     See hep-ph/9910546 for the full context of the definition.
     """
 
-    l1 = (-2*3**(1/3)*c1 + 2**(1/3)*(-9*c0 + csqrt(81*c0**2 + 12*c1**3))**(2/3))/(6**(2/3)*(-9*c0 + csqrt(81*c0**2 + 12*c1**3))**(1/3))
-    l2 = ((-1)**(1/3)*(2*3**(1/3)*c1 + (-2)**(1/3)*(-9*c0 + csqrt(81*c0**2 + 12*c1**3))**(2/3)))/(6**(2/3)*(-9*c0 + csqrt(81*c0**2 + 12*c1**3))**(1/3))
-    l3 = -(((-1)**(1/3)*(2*(-3)**(1/3)*c1 + 2**(1/3)*(-9*c0 + csqrt(81*c0**2 + 12*c1**3))**(2/3)))/(6**(2/3)*(-9*c0 + csqrt(81*c0**2 + 12*c1**3))**(1/3)))
+    # The radicand, its square root and the two powers of (-9 c0 + sqrt) are common to the three
+    # roots; they are evaluated once (same expressions, same operands, hence the same values)
+    w = -9*c0 + csqrt(81*c0**2 + 12*c1**3)
+    w23 = w**(2/3)
+    w13 = w**(1/3)
+
+    l1 = (-2*3**(1/3)*c1 + 2**(1/3)*w23)/(6**(2/3)*w13)
+    l2 = ((-1)**(1/3)*(2*3**(1/3)*c1 + (-2)**(1/3)*w23))/(6**(2/3)*w13)
+    l3 = -(((-1)**(1/3)*(2*(-3)**(1/3)*c1 + 2**(1/3)*w23))/(6**(2/3)*w13))
 
     return np.array([l1, l2, l3])
 
@@ -118,9 +124,11 @@ def Iab (la, lb, atilde, b, c, x2, x1):
 
     # In the other regions we compute the full analytic solution.
     else:
-        return exp(1j*lb*(-x2 + x1))*((atilde*(-1j + 1j/exp(1j*Dl*(x2 - x1))))/Dl +
+        # exp(i Dl (x2 - x1)) appears three times; it is evaluated once
+        eDl = exp(1j*Dl*(x2 - x1))
+        return exp(1j*lb*(-x2 + x1))*((atilde*(-1j + 1j/eDl))/Dl +
                 (b*(2*1j + 2*Dl*x2 - 1j*Dl**2*x2**2 + (1j*(-2 + (2*1j)*Dl*x1 + Dl**2*x1**2))/
-          exp(1j*Dl*(x2 - x1))))/Dl**3 -
+          eDl))/Dl**3 -
           (1j*c*(24 + Dl*x2*(-24*1j + Dl*x2*(-12 + Dl*x2*(4*1j + Dl*x2))) -
              (24 + Dl*x1*(-24*1j + Dl*x1*(-12 + Dl*x1*(4*1j + Dl*x1))))/
-          exp(1j*Dl*(x2 - x1))))/Dl**5)
+          eDl))/Dl**5)

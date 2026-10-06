@@ -91,8 +91,8 @@ calls, excluding the first point (JIT compilation, about 10 s per process, uncha
 | SNO, Apple M2, one core, 10 % of the energies | 0.254 s | 0.061 s | 4.2 |
 | Borexino, Apple M2, one core, 10 % of the energies and nodes | 1.077 s | 0.105 s | 10.3 |
 
-The cost is linear in the number of energies. The JIT compilation of a process takes about 24 s on
-MareNostrum 5 with this branch, measured as the first point minus a steady-state point; it is paid
+The cost is linear in the number of energies. The JIT compilation of a process takes about 23 s on
+MareNostrum 5 with this branch (27 s with v1.5), measured as the first point minus a steady-state point; it is paid
 once per process.
 In a Borexino point the remaining time is, estimated from the cost of the components, ~85 % paths
 that cross the Earth (~15 µs per nadir angle, ~3 µs per `Upert` call), ~7 % paths from above the

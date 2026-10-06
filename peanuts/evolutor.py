@@ -7,7 +7,6 @@ Created on Feb 23 2022
 @author: Tomas Gonzalo <tomas.gonzalo@kit.edu>
 """
 
-import os
 import time
 import numpy as np
 import numba as nb
@@ -17,13 +16,6 @@ from cmath import exp
 from peanuts.potentials import k, MatterPotential, R_E
 from peanuts.integration import c0, c1, lambdas, Iab
 
-# Evaluation of the first order correction u1 = sum_{a != b} M_a diag(d_ab, 0, 0) M_b.
-# False (default): two BLAS matrix products per term, as in PEANUTS 1.5.
-# True: the products of the rank-one structure, (M_a[i,0] d_ab) M_b[0,j], are evaluated directly.
-# The two coincide bit by bit whenever the BLAS zgemm rounds a single complex product like the
-# scalar complex multiplication; this depends on the BLAS library and must be verified with
-# tests/exactness before the option is used (environment variable PEANUTS_RANK1_U1=1).
-RANK1_U1 = os.environ.get("PEANUTS_RANK1_U1", "0") == "1"
 
 @nb.njit
 def kinetic_terms(DeltamSq21, DeltamSq3l, E):
@@ -126,29 +118,19 @@ def evolutor_from_spectrum(lam, M, tr, x2, x1, atilde, b, c, antinu):
         for k in range(3):
           u0[j,k] += phase * M[i,j,k]
 
-    # Compute correction to evolutor, taking into account 1st order terms in \delta n_e(x)
-    # The terms with idx_a == idx_b vanish identically (Iab returns 0 for la == lb) and are skipped
+    # Compute correction to evolutor, taking into account 1st order terms in \delta n_e(x):
+    # u1 = sum_{a != b} M_a diag(d_ab, 0, 0) M_b, with d_ab = -i V(I_ab). The matrix in the middle has
+    # rank one, so each term is the outer product of the first column of M_a, times d_ab, and the
+    # first row of M_b. The terms with a == b vanish identically (Iab returns 0 for la == lb).
     if (b != 0) | (c != 0):
-      # np.dot(a, b) is np.dot(a, b, np.empty(...)) in numba: the products are written into
-      # preallocated buffers, with the same BLAS calls
-      D = np.zeros((3,3), dtype=nb.complex128)
-      MD = np.empty((3,3), dtype=nb.complex128)
-      MDM = np.empty((3,3), dtype=nb.complex128)
       for idx_a in range(3) :
         for idx_b in range(3) :
           if idx_a != idx_b:
             d = -1j * MatterPotential(Iab(lam[idx_a] + tr/3, lam[idx_b] + tr/3, atilde, b, c, x2, x1), antinu)
-            if RANK1_U1:
-              for i in range(3):
-                Mad = M[idx_a,i,0] * d
-                for j in range(3):
-                  u1[i,j] += Mad * M[idx_b,0,j]
-            else:
-              # u1 += M_a diag(d, 0, 0) M_b
-              D[0,0] = d
-              np.dot(M[idx_a], D, MD)
-              np.dot(MD, M[idx_b], MDM)
-              u1 += MDM
+            for i in range(3):
+              Mad = M[idx_a,i,0] * d
+              for j in range(3):
+                u1[i,j] += Mad * M[idx_b,0,j]
 
     u = u0 + u1
 

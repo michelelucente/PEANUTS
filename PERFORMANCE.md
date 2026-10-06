@@ -52,14 +52,26 @@ In v1.5, besides the evaluations themselves, three kinds of work are repeated wi
 | `matter_mixing.py`, `solar.py: Tei` | `th12_M_given_th13_M` reuses the `th13_M` already computed | same function, same inputs |
 
 Option, off by default: `PEANUTS_RANK1_U1=1` evaluates each term of `u1 = Σ M_a diag(d,0,0) M_b`
-as the rank-one product `(M_a[i,0] d) M_b[0,j]` instead of two BLAS products. It removes 12 of the
-13 matrix products of each `Upert` call, but it equals the BLAS result only if the BLAS kernel
-rounds a single complex product like the scalar complex multiplication: it does not with
-OpenBLAS 0.3.30 on ARM (6 of 1 186 outputs differ, by at most 4.2e-16 relative on an O(1)
-probability), nor with the production OpenBLAS 0.3.27 on MareNostrum 5 (82 of 7 714 outputs differ,
-from 1e-16 relative on O(1) probabilities to 2e-2 relative on components that vanish at
-`theta13 = 0`). It is therefore outside the bit-for-bit criterion on both platforms tested; with it
-the full-scale point costs on MareNostrum 5 are 0.83 s (SNO) and 1.04 s (Borexino).
+as the rank-one product `(M_a[i,0] d) M_b[0,j]` with numba's scalar complex arithmetic instead of
+two BLAS products. It removes 12 of the 13 matrix products of each `Upert` call (MareNostrum 5,
+full scale: SNO 0.83 s, Borexino 1.04 s per point) but is not bit-for-bit identical. Each element
+of the BLAS product is the same single complex product `x y`, rounded differently
+(`tests/exactness/probe_complex_product.py`, 20 000 random products, `rn` = rounding to double):
+
+| arithmetic | real part | imaginary part |
+|---|---|---|
+| numba scalar | `rn(rn(xr yr) - rn(xi yi))` | `rn(rn(xr yi) + rn(xi yr))` |
+| OpenBLAS 0.3.27, Xeon 8480+ (MareNostrum 5) | `rn(xr yr - rn(xi yi))` | `rn(xr yi + rn(xi yr))` |
+| OpenBLAS 0.3.30, Apple M2 | `rn(rn(xr yr) - xi yi)` | `rn(xr yi + rn(xi yr))` |
+
+The kernels use a fused multiply-add, so one of the two partial products is not rounded; the result
+differs from the scalar product in 44 % of the cases, by at most 2.2e-16 relative. Over the full
+workload on MareNostrum 5, 82 of 7 696 numerical outputs differ: the largest difference is 6.2e-16
+of the output's scale (2.8e-16 on a probability), the median 2.3e-19. The largest relative
+differences, up to 1.8e-2, are on `P(nu_3 -> nu_e)` at `theta13 = 0`, which vanishes analytically
+and is evaluated as about 6e-34 (rounding residue). The table also shows that the BLAS libraries of
+the two platforms round the real part differently, so the last bits of the v1.5 results themselves
+depend on the platform.
 
 ## Exactness
 

@@ -56,7 +56,10 @@ as the rank-one product `(M_a[i,0] d) M_b[0,j]` instead of two BLAS products. It
 13 matrix products of each `Upert` call, but it equals the BLAS result only if the BLAS kernel
 rounds a single complex product like the scalar complex multiplication: it does not with
 OpenBLAS 0.3.30 on ARM (6 of 1 186 outputs differ, by at most 4.2e-16 relative on an O(1)
-probability). It must not be used on a platform where `tests/exactness` has not passed with it.
+probability), nor with the production OpenBLAS 0.3.27 on MareNostrum 5 (82 of 7 714 outputs differ,
+from 1e-16 relative on O(1) probabilities to 2e-2 relative on components that vanish at
+`theta13 = 0`). It is therefore outside the bit-for-bit criterion on both platforms tested; with it
+the full-scale point costs on MareNostrum 5 are 0.83 s (SNO) and 1.04 s (Borexino).
 
 ## Exactness
 
@@ -72,7 +75,7 @@ the exceptions v1.5 raises.
 | platform | outputs | bit-for-bit identical |
 |---|---|---|
 | Apple M2, numpy 2.2.6, numba 0.61.2, scipy 1.16.0, OpenBLAS 0.3.30 | 7 714 | 7 714 |
-| MareNostrum 5 GPP, production Python | pending | pending |
+| MareNostrum 5 GPP (Xeon Platinum 8480+), numpy 2.1.1, numba 0.62.1, scipy 1.14.1, scipy-openblas 0.3.27: the Python and BLAS of the GAMBIT runs, reference = the installed GAMBIT backend `peanuts/1.5` | 7 714 | 7 714 |
 
 `bench_point.py` (below) also compares its outputs: identical on every run.
 
@@ -81,12 +84,16 @@ the exceptions v1.5 raises.
 `tests/exactness/bench_point.py` reproduces one SNO and one Borexino point with the frontend's
 calls, excluding the first point (JIT compilation, about 10 s per process, unchanged).
 
-| case (Apple M2, one core) | v1.5 | this branch | ratio |
+| case | v1.5 | this branch | ratio |
 |---|---|---|---|
-| SNO, 10 % of the energies | 0.254 s | 0.061 s | 4.2 |
-| Borexino, 10 % of the energies and nodes | 1.077 s | 0.105 s | 10.3 |
+| SNO, MareNostrum 5, one core, full scale | 5.03 s | 1.11 s | 4.5 |
+| Borexino, MareNostrum 5, one core, full scale | 18.15 s | 1.41 s | 12.9 |
+| SNO, Apple M2, one core, 10 % of the energies | 0.254 s | 0.061 s | 4.2 |
+| Borexino, Apple M2, one core, 10 % of the energies and nodes | 1.077 s | 0.105 s | 10.3 |
 
-The cost is linear in the number of energies, so a full point is about ten times these figures.
+The cost is linear in the number of energies. The JIT compilation of a process takes about 24 s on
+MareNostrum 5 with this branch, measured as the first point minus a steady-state point; it is paid
+once per process.
 In a Borexino point the remaining time is, estimated from the cost of the components, ~85 % paths
 that cross the Earth (~15 µs per nadir angle, ~3 µs per `Upert` call), ~7 % paths from above the
 horizon (~1 µs per nadir angle) and ~6 % `solar_flux_mass` (0.052 ms per call, 0.087 ms in v1.5).

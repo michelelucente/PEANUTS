@@ -14,7 +14,7 @@ import numba as nb
 from math import cos, sin
 from scipy import integrate
 from scipy.interpolate import interp1d
-from peanuts.matter_mixing import th13_M, th12_M
+from peanuts.matter_mixing import th13_M, th12_M, th12_M_given_th13_M
 from peanuts.pmns import PMNS
 
 import peanuts.files as f
@@ -213,7 +213,7 @@ def Tei (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
 
     # Compute the mixing angles at neutrino production point
     th13m = th13_M(th12, th13, DeltamSq21, DeltamSq3l, E, ne)
-    th12m = th12_M(th12, th13, DeltamSq21, DeltamSq3l, E, ne)
+    th12m = th12_M_given_th13_M(th12, th13, th13m, DeltamSq21, DeltamSq3l, E, ne)
 
     # Compute and return the weights
     c13M = np.cos(th13m)

@@ -57,6 +57,17 @@ run_peanuts.py -f <yaml_file>
 
 where the given YAML file determines the specific computation to perform.
 
+Tests
+-----
+
+The test suite in `tests/` checks the physics against independent calculations (matrix exponential, numerical integration, vacuum formula) and the compiled evaluation of `Pearth_integrated`, with its caches, against the direct sum over nadir angles:
+
+```
+python3 tests/run_tests.py        # or: pytest tests
+```
+
+With `PEANUTS_REFERENCE=<path to another PEANUTS installation>` the command-line programs are also compared with that installation. The performance of the Earth-regeneration path and the regression tests against v1.5 are described in `PERFORMANCE.md`.
+
 Contact
 -------
 

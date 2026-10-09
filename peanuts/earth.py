@@ -13,12 +13,12 @@ import numpy as np
 import numba as nb
 from numba.experimental import jitclass
 from numpy.linalg import multi_dot
-from math import sin, cos, sqrt, pi, asin, floor
+from math import sin, cos, sqrt, pi, asin, floor, copysign
 from scipy.integrate import complex_ode
 
 import peanuts.files as f
 from peanuts.potentials import k, MatterPotential, R_E
-from peanuts.evolutor import FullEvolutor
+from peanuts.evolutor import FullEvolutor, evolutor_setup, crossing_evolutor, average_density, spectral_decomposition, evolutor_from_spectrum
 from peanuts.time_average import NadirExposure
 
 @nb.njit
@@ -518,6 +518,36 @@ def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, depth, 
   - normalized: normalization of exposure
   - from_file: file with experiments exposure
   - angle: angle of samples is exposure file
+
+  In analytical mode the sum over nadir angles is evaluated by compiled kernels, with the exposure,
+  the path geometry and the mass-state projectors cached (see integrated_projectors). The result is
+  identical to the sum of Pearth over the exposure samples computed by Pearth_integrated_reference.
+  """
+
+  if mode != "analytical" or full_oscillation or not isinstance(nustate, np.ndarray) or nustate.ndim != 1:
+    return Pearth_integrated_reference(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, depth, mode=mode, full_oscillation=full_oscillation, antinu=antinu, lam=lam, d1=d1, d2=d2, ns=ns, normalized=normalized, from_file=from_file, angle=angle, daynight=daynight)
+
+  exposure = cached_exposure(lam=lam, normalized=normalized, d1=d1, d2=d2, ns=ns, from_file=from_file, angle=angle, daynight=daynight)
+
+  if len(exposure.etas) == 0:
+    return 0
+
+  # Make sure nustate has the write format
+  if len(nustate) != 3:
+    print("Error: neutrino state provided has the wrong format, it must be a vector of size 3.")
+    exit()
+
+  deta = pi/ns
+  projectors = integrated_projectors(density, pmns, DeltamSq21, DeltamSq3l, E, depth, antinu, exposure)
+
+  return integrate_projectors(projectors, exposure.used, exposure.weights, nustate, deta)
+
+
+def Pearth_integrated_reference(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, depth, mode="analytical", full_oscillation=False, antinu=False, lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir",daynight=None):
+  """
+  Pearth_integrated_reference(...) is the direct sum of Pearth over the exposure samples, with the
+  same arguments as Pearth_integrated. It is used for the numerical mode and as the reference of
+  the compiled path.
   """
 
   exposure = NadirExposure(lam=lam, normalized=normalized, d1=d1, d2=d2, ns=ns, from_file=from_file, angle=angle, daynight=daynight)
@@ -533,3 +563,209 @@ def Pearth_integrated(nustate, density, pmns, DeltamSq21, DeltamSq3l, E, depth, 
 
 
   return prob
+
+
+class ExposureSamples:
+  """
+  Nadir exposure samples as returned by NadirExposure, split into angles and weights, with the
+  mask of the samples that carry a non-zero weight (a zero weight contributes exactly 0 to the
+  sum over nadir angles, so its probability is not computed).
+  """
+
+  def __init__(self, exposure):
+    exposure = np.asarray(exposure, dtype=np.float64)
+    self.etas = np.ascontiguousarray(exposure[:,0]) if len(exposure) else np.zeros(0)
+    self.weights = np.ascontiguousarray(exposure[:,1]) if len(exposure) else np.zeros(0)
+    self.used = self.weights != 0
+    self.geometry = {}
+
+
+_exposure_cache = {}
+
+def cached_exposure(lam=-1, d1=0, d2=365, ns=1000, normalized=False, from_file=None, angle="Nadir", daynight=None):
+  """
+  cached_exposure(...) returns the ExposureSamples of NadirExposure with the same arguments. The
+  exposure depends on the experiment only, so it is computed once; an exposure file is identified
+  by its path, size and modification time.
+  """
+
+  stamp = None
+  if from_file is not None and os.path.isfile(from_file):
+    st = os.stat(from_file)
+    stamp = (st.st_size, st.st_mtime_ns)
+  key = (lam, d1, d2, ns, normalized, from_file, stamp, angle, daynight)
+  if key not in _exposure_cache:
+    _exposure_cache[key] = ExposureSamples(NadirExposure(lam=lam, normalized=normalized, d1=d1, d2=d2, ns=ns, from_file=from_file, angle=angle, daynight=daynight))
+  return _exposure_cache[key]
+
+
+@nb.njit
+def path_geometry(density, etas, used, depth):
+  """
+  path_geometry(density, etas, used, depth) computes the energy-independent part of FullEvolutor
+  for every used nadir angle: the kind of path (0: detector on the surface and neutrino from above,
+  1: crossing the Earth, 2: from above the horizon, -1: invalid angle), the detector coordinate x_d
+  and the parameters (a, b, c, x_i) of the crossed shells for kind 1, the path length for kind 2,
+  and the density n_1 used for kind 2.
+  """
+
+  n = len(etas)
+  h = depth / R_E
+  r_d = 1 - h
+  maxsh = len(density.rj)
+
+  kind = np.zeros(n, dtype=nb.int64)
+  nsh = np.zeros(n, dtype=nb.int64)
+  xd = np.zeros(n)
+  dx = np.zeros(n)
+  a = np.zeros((n, maxsh))
+  b = np.zeros((n, maxsh))
+  c = np.zeros((n, maxsh))
+  xs = np.zeros((n, maxsh))
+  n_1 = 0.
+  above = False
+
+  for i in range(n):
+    if not used[i]:
+      continue
+    eta = etas[i]
+    if depth == 0 and (pi/2 <= eta <= pi):
+      kind[i] = 0
+    elif 0 <= eta < pi/2:
+      kind[i] = 1
+      eta_prime = asin(r_d * sin(eta))
+      xd[i] = r_d * cos(eta)
+      params = density.parameters(eta_prime)
+      xshells = density.shells_x(eta_prime)
+      nsh[i] = len(xshells)
+      for j in range(len(xshells)):
+        a[i,j] = params[j,0]
+        b[i,j] = params[j,1]
+        c[i,j] = params[j,2]
+        xs[i,j] = xshells[j]
+    elif pi/2 <= eta <= pi:
+      kind[i] = 2
+      dx[i] = r_d * cos(eta) + sqrt(1 - r_d**2 * sin(eta)**2)
+      above = True
+    else:
+      kind[i] = -1
+
+  if above:
+    n_1 = density.call(1 - h/2, 0)
+
+  return kind, nsh, xd, dx, a, b, c, xs, n_1
+
+
+@nb.njit
+def mass_projectors(pmns, DeltamSq21, DeltamSq3l, E, antinu, used, kind, nsh, xd, dx, a, b, c, xs, n_1):
+  """
+  mass_projectors(...) returns, for every used nadir angle, the matrix |S U_{PMNS}|^2 (as complex
+  numbers, the form used by Pearth_analytical) where S is the FullEvolutor at that angle; the
+  probability of a mass-state mixture nustate is real(|S U|^2 . nustate). Paths from above the
+  horizon at depth > 0 differ only by their length, so their spectral decomposition is shared by
+  all the angles with the same average density (compared bit by bit).
+  """
+
+  n = len(kind)
+  out = np.zeros((n,3,3), dtype=nb.complex128)
+
+  ki, Hk, r23, r23delta, deltac, right = evolutor_setup(pmns, DeltamSq21, DeltamSq3l, E, antinu)
+  th12 = pmns.theta12
+  th13 = pmns.theta13
+  pm = pmns.pmns
+  if antinu:
+    pm = pmns.pmns.conjugate()
+
+  # Spectral decompositions already computed for paths from above the horizon, by average density
+  ncache = 8
+  nc = 0
+  cache_nav = np.zeros(ncache)
+  cache_lam = np.zeros((ncache,3), dtype=nb.complex128)
+  cache_M = np.zeros((ncache,3,3,3), dtype=nb.complex128)
+  cache_tr = np.zeros(ncache, dtype=nb.complex128)
+
+  for i in range(n):
+    if not used[i]:
+      continue
+
+    if kind[i] == 0:
+      evol = (1+0.j)*np.identity(3)
+
+    elif kind[i] == 1:
+      m = nsh[i]
+      evol = crossing_evolutor(ki, Hk, th12, th13, r23delta, right, xd[i], a[i,:m], b[i,:m], c[i,:m], xs[i,:m], antinu)
+
+    elif kind[i] == 2:
+      naverage = average_density(dx[i], 0, n_1, 0, 0)
+      atilde = n_1 - naverage
+      j = -1
+      for q in range(nc):
+        if cache_nav[q] == naverage and copysign(1., cache_nav[q]) == copysign(1., naverage):
+          j = q
+          break
+      if j >= 0:
+        lam = cache_lam[j].copy()
+        M = cache_M[j].copy()
+        tr = cache_tr[j]
+      else:
+        lam, M, tr = spectral_decomposition(ki, Hk, th12, th13, naverage, antinu)
+        if nc < ncache:
+          cache_nav[nc] = naverage
+          cache_lam[nc] = lam
+          cache_M[nc] = M
+          cache_tr[nc] = tr
+          nc += 1
+      u = evolutor_from_spectrum(lam, M, tr, dx[i], 0, atilde, 0, 0, antinu)
+      evol = np.dot(np.dot(r23delta, np.dot(u, deltac.transpose())), r23.transpose())
+
+    else:
+      raise ValueError('eta must be comprised between 0 and pi.')
+
+    out[i] = np.square(np.abs(np.dot(evol, pm)).astype(nb.complex128))
+
+  return out
+
+
+@nb.njit
+def integrate_projectors(projectors, used, weights, nustate, deta):
+  """
+  integrate_projectors(projectors, used, weights, nustate, deta) returns the sum over the used
+  nadir angles of real(projector . nustate) * weight * deta, in the order of the angles.
+  """
+
+  prob = np.zeros(3)
+  nus = nustate.astype(nb.complex128)
+  for i in range(len(used)):
+    if used[i]:
+      prob += np.real(np.dot(projectors[i], nus)) * weights[i] * deta
+  return prob
+
+
+_projector_cache = [None, None]
+
+def integrated_projectors(density, pmns, DeltamSq21, DeltamSq3l, E, depth, antinu, exposure):
+  """
+  integrated_projectors(...) returns mass_projectors for the exposure samples. The path geometry
+  is cached per density profile and depth; the projectors of the last call are kept, so that
+  several neutrino states at the same energy and parameters (e.g. the three mass states) share
+  one evaluation of the evolutors.
+  """
+
+  pmns_mat = pmns.pmns
+  U = pmns.U
+  key = (pmns.theta12, pmns.theta13, pmns.theta23, pmns.delta, pmns_mat.tobytes(), U.tobytes(),
+         DeltamSq21, DeltamSq3l, E, depth, antinu)
+  last_key, last = _projector_cache
+  if last is not None and last_key == key and last[0] is density and last[1] is exposure:
+    return last[2]
+
+  geometry = exposure.geometry.get(depth)
+  if geometry is None or geometry[0] is not density:
+    geometry = (density, path_geometry(density, exposure.etas, exposure.used, depth))
+    exposure.geometry[depth] = geometry
+  kind, nsh, xd, dx, a, b, c, xs, n_1 = geometry[1]
+
+  projectors = mass_projectors(pmns, DeltamSq21, DeltamSq3l, E, antinu, exposure.used, kind, nsh, xd, dx, a, b, c, xs, n_1)
+  _projector_cache[0] = key
+  _projector_cache[1] = (density, exposure, projectors)
+  return projectors

@@ -64,6 +64,16 @@ def th12_M (th12, th13, DeltamSq21, DeltamSq3l, E, ne):
     """
 
     th13m = th13_M(th12, th13, DeltamSq21, DeltamSq3l, E, ne)
+
+    return th12_M_given_th13_M(th12, th13, th13m, DeltamSq21, DeltamSq3l, E, ne)
+
+@nb.njit
+def th12_M_given_th13_M (th12, th13, th13m, DeltamSq21, DeltamSq3l, E, ne):
+    """
+    th12_M_given_th13_M(th12, th13, th13m, DeltamSq21, DeltamSq3l, E, ne) is th12_M with the matter
+    mixing angle th13m = th13_M(th12, th13, DeltamSq21, DeltamSq3l, E, ne) supplied by the caller.
+    """
+
     Vkprime = Vk(DeltamSq21, E, ne)*np.cos(th13m)**2 + DeltamSqee(th12, DeltamSq21, DeltamSq3l)/DeltamSq21*np.sin(th13m-th13)**2
 
     return 0.5*np.arccos((np.cos(2*th12) - Vkprime) / np.sqrt((np.cos(2*th12) - Vkprime)**2 + np.sin(2*th12)**2*np.cos(th13m-th13)**2)) % (np.pi/2)

@@ -35,7 +35,9 @@ radius 0 to 1 R_sun in steps of 5e-4 R_sun. Columns used: `R_sun` (0, radius in 
 `nu_pp nu_pep nu_hep nu_7Be nu_8B nu_13N nu_15O nu_17F` (9-16, production fractions per unit R_sun,
 normalised to unit integral), `log_ne` (17, log10 of the electron density in N_A cm^-3 = mol/cm^3).
 The column numbers are taken from the header line. The fractions contain entries of order -1e-11 at
-r = 0 and in the outer tail (interpolation noise of the table); they are read as published.
+r = 0 and in the outer tail (interpolation noise of the table). The table is read as published over
+the whole radius, with no cut-off: the 2001 radii make one `solar_flux_mass` evaluation about 1.6 times
+as expensive as with BS05.
 
 `fluxes_SF3_<composition>.dat`: title line, line of source names, line of fluxes in cm^-2 s^-1
 (label `Flux`), fractional errors, 8 x 8 correlation matrix. `SolarModel.flux()` returns the third line.

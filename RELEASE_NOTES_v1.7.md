@@ -23,9 +23,13 @@ All six compositions of the release are supported: GS98, AGSS09, C11, AAG21, MB2
 - The grid has 2001 radii from 0 to 1 R_sun (B16: 1000 radii up to 0.5 R_sun). The cost of one
   `solar_flux_mass` evaluation is proportional to the number of radii: 94 µs for B23 against 49 µs
   for B16 and 60 µs for BS05 (one core of an Apple M2 laptop). The cost of the B16, BS05 and
-  BP00 models is unchanged.
+  BP00 models is unchanged. The table is read as published, over the whole radius: a cut at
+  r <= 0.6 R_sun would restore the BS05 cost and change P_ee by at most 1.6e-9, and is not applied.
+  One point of the PEANUTS benchmark costs 5 % more than with BS05 for SNO (201 energies, day and
+  night) and 10 % more for Borexino.
 - `Data/B23_SF3/` ships the GS98 and AGSS09 files, unmodified, with their source, SHA-256 and
-  licence in `Data/B23_SF3/README.md`. The other four compositions are read from the extracted
+  licence in `Data/B23_SF3/README.md`: the high-metallicity reference and its low-metallicity
+  counterpart. The other four compositions (C11, AAG21, MB22m, MB22p) are read from the extracted
   Zenodo archive.
 
 Survival probability of electron neutrinos at Δm²₂₁ = 7.5e-5 eV², sin²θ₁₂ = 0.307,

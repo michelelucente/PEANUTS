@@ -19,15 +19,120 @@ from peanuts.pmns import PMNS
 
 import peanuts.files as f
 
+# Column layouts known to SolarModel
+SOLAR_MODEL_LAYOUTS = ("b16", "bs2005", "bp00", "sf3")
+
+# Compositions of the B23 / SF-III standard solar models (Zenodo 10.5281/zenodo.10822316)
+SF3_COMPOSITIONS = ("GS98", "AGSS09", "C11", "AAG21", "MB22m", "MB22p")
+
+# Neutrino sources in the order of the SF3 columns nu_<source> and of the SF3 flux table
+SF3_SOURCES = ("pp", "pep", "hep", "7Be", "8B", "13N", "15O", "17F")
+
+
+def detect_layout(solar_model_file):
+    """
+    Returns the column layout of a solar model file from its name, or None if it is not known.
+    The B23 / SF-III profiles are recognised by their file name, struct+nu_SF3_<composition>.dat;
+    the other layouts by the substrings "b16", "bs2005", "bp00" of the path, in this order.
+    """
+
+    if os.path.basename(solar_model_file).lower().startswith("struct+nu_sf3_"):
+      return "sf3"
+    for layout in ("b16", "bs2005", "bp00"):
+      if layout in solar_model_file:
+        return layout
+    return None
+
+
+def sf3_flux_file(solar_model_file):
+    """
+    Returns the flux file fluxes_SF3_<composition>.dat that accompanies the SF3 profile file
+    struct+nu_SF3_<composition>.dat in the same directory, or None if the name does not follow
+    this convention or the file does not exist.
+    """
+
+    base = os.path.basename(solar_model_file)
+    if not base.lower().startswith("struct+nu_"):
+      return None
+    candidate = os.path.join(os.path.dirname(solar_model_file), "fluxes_" + base[len("struct+nu_"):])
+    return candidate if os.path.isfile(candidate) else None
+
+
+def _header_tokens(filename, row):
+    """
+    Returns the whitespace-separated tokens of line number `row` (from 0) of a text file.
+    """
+
+    with open(filename) as fh:
+      for i, line in enumerate(fh):
+        if i == row:
+          return line.split()
+    return []
+
+
+def sf3_columns(solar_model_file, flux_file):
+    """
+    Returns (fluxcols, fluxrows, fluxscale, distrow, radiuscol, densitycol, fractioncols) of the
+    B23 / SF-III layout, with the column numbers read from the headers of the files:
+    - struct+nu_SF3_<comp>.dat: one header line starting with "#", then one row per radius;
+      columns R_sun (radius in solar units), nu_<source> (production fraction per unit R_sun,
+      normalised to unit integral), log_ne (log10 of the electron density in N_A cm^-3, i.e. mol/cm^3);
+    - fluxes_SF3_<comp>.dat: title line, line of source names, line of fluxes in cm^-2 s^-1.
+    Exits with an error if a column is missing.
+    """
+
+    if not os.path.isfile(solar_model_file) or not os.path.isfile(flux_file):
+      print("Error! The solar model file provided does not exist or it is corrupted")
+      exit()
+    if not os.path.basename(flux_file).lower().startswith("fluxes_sf3_"):
+      print("Error: Flux file for SF3 solar model should also be from SF3 (fluxes_SF3_<composition>.dat)")
+      exit()
+    comp_model = os.path.basename(solar_model_file)[len("struct+nu_SF3_"):].rsplit(".", 1)[0]
+    comp_flux = os.path.basename(flux_file)[len("fluxes_SF3_"):].rsplit(".", 1)[0]
+    if comp_model.lower() != comp_flux.lower():
+      print("Warning: SF3 solar model", os.path.basename(solar_model_file), "is used with the fluxes of", os.path.basename(flux_file))
+
+    # Profile header: "#" followed by one name per column
+    header = _header_tokens(solar_model_file, 0)
+    if not header or header[0] != "#":
+      print("Error: the SF3 solar model file", solar_model_file, "does not start with its header line")
+      exit()
+    names = header[1:]
+    needed = ["R_sun", "log_ne"] + ["nu_" + s for s in SF3_SOURCES]
+    missing = [n for n in needed if n not in names]
+    if missing:
+      print("Error: the SF3 solar model file", solar_model_file, "lacks the columns", ", ".join(missing))
+      exit()
+
+    # Flux table: the source names on line 1, the fluxes on line 2 (followed by the label "Flux")
+    flux_names = _header_tokens(flux_file, 1)
+    flux_values = _header_tokens(flux_file, 2)
+    if flux_values[-1:] != ["Flux"] or any(s not in flux_names for s in SF3_SOURCES):
+      print("Error: the SF3 flux file", flux_file, "does not have the expected layout")
+      exit()
+
+    fluxcols = {s: flux_names.index(s) for s in SF3_SOURCES}
+    fluxrows = 2
+    fluxscale = None
+    distrow = 1
+    radiuscol = names.index("R_sun")
+    densitycol = names.index("log_ne")
+    fractioncols = {s: names.index("nu_" + s) for s in SF3_SOURCES}
+    return fluxcols, fluxrows, fluxscale, distrow, radiuscol, densitycol, fractioncols
+
+
 class SolarModel:
     """"
     Class containing the info of the solar model
     """
 
-    def __init__(self, solar_model_file=None, flux_file=None, spectrum_files=None, fluxrows=None, fluxcols=None, fluxscale=None, distrow=None, radiuscol=None, densitycol=None, fractioncols=None):
+    def __init__(self, solar_model_file=None, flux_file=None, spectrum_files=None, fluxrows=None, fluxcols=None, fluxscale=None, distrow=None, radiuscol=None, densitycol=None, fractioncols=None, layout=None):
         """
         Constructor of the solar model.
-        Reads the solar model file and fills useful variables
+        Reads the solar model file and fills useful variables.
+        The column layout of the file is detected from its name ("b16", "bs2005", "bp00", and the
+        B23/SF-III "struct+nu_SF3_<composition>.dat") or selected with layout = "b16", "bs2005",
+        "bp00" or "sf3"; any other file needs the explicit rows and columns.
         """
 
         # Set file name
@@ -37,8 +142,26 @@ class SolarModel:
         # Default flux file is the B16 from Vinyoles et al 2016, https://www.ice.csic.es/personal/aldos/Solar_Data.html
         self.flux_file = path + "/../Data/fluxes_b16.dat" if (flux_file == None and "b16" in self.solar_model_file) else (solar_model_file if flux_file == None else flux_file)
 
+        # Column layout: explicit, or detected from the file name
+        if layout is not None and layout not in SOLAR_MODEL_LAYOUTS:
+          print("Error: unknown solar model layout", layout, "- known layouts:", ", ".join(SOLAR_MODEL_LAYOUTS))
+          exit()
+        self.layout = detect_layout(self.solar_model_file) if layout is None else layout
+        if self.layout == "b16" and flux_file == None:
+          # Explicit B16 layout for a file whose name does not contain "b16": default B16 fluxes as well
+          self.flux_file = path + "/../Data/fluxes_b16.dat"
+
         # Format for the various spectra are layered differently
-        if "b16" in self.solar_model_file:
+        if self.layout == "sf3":
+          # B23 / SF-III standard solar models (Herrera & Serenelli, ICE-CSIC), Zenodo 10.5281/zenodo.10822316:
+          # struct+nu_SF3_<comp>.dat (radial profiles) and fluxes_SF3_<comp>.dat (fluxes) in the same directory
+          if flux_file == None:
+            self.flux_file = sf3_flux_file(self.solar_model_file)
+            if self.flux_file is None:
+              print("Error: the flux file of an SF3 solar model cannot be inferred from the name", self.solar_model_file, "- provide flux_file")
+              exit()
+          fluxcols, fluxrows, fluxscale, distrow, radiuscol, densitycol, fractioncols = sf3_columns(self.solar_model_file, self.flux_file)
+        elif self.layout == "b16":
           if not "b16" in self.flux_file:
             print("Error: Flux file for B16 solar model should also be from B16")
             exit()
@@ -52,7 +175,7 @@ class SolarModel:
           radiuscol = 0
           densitycol = 2
           fractioncols = {'pp':4, 'pep':5, 'hep':6, '7Be':7, '8B':8, '13N':9, '15O':10, '17F':11}
-        elif "bs2005" in self.solar_model_file:
+        elif self.layout == "bs2005":
           self.flux_file = self.solar_model_file
           fluxcols = {'pp':0, 'pep':1, 'hep':2, '7Be':3, '8B':4, '13N':5, '15O':6, '17F':7}
           fluxrows = 6
@@ -61,7 +184,7 @@ class SolarModel:
           radiuscol = 0
           densitycol = 2
           fractioncols = {'pp':5, '8B':6, '13N':7, '15O':8, '17F':9, '7Be':10, 'pep':11, 'hep':12}
-        elif "bp00" in self.solar_model_file:
+        elif self.layout == "bp00":
           self.flux_file = self.solar_model_file
           fluxcols = {'pp':0, 'pep':1, 'hep':2, '7Be':3, '8B':4, '13N':5, '15O':6, '17F':7}
           fluxrows = 25
@@ -100,6 +223,9 @@ class SolarModel:
 
         distcols = [radiuscol, densitycol] + list(fractioncols.values())
         distnames = ['radius', 'density_log_10'] + [fr + ' fraction' for fr in fractioncols.keys()]
+        # pandas assigns the names to the selected columns in file order, so both lists are put in that order
+        # (the B16, BS05 and BP00 layouts already are; the SF3 layout has the density after the fractions)
+        distcols, distnames = map(list, zip(*sorted(zip(distcols, distnames))))
 
         try:
           # Import fluxes

@@ -214,6 +214,7 @@ class Settings:
         self.radiuscol = settings["Solar"]["radiuscol"] if "radiuscol" in settings["Solar"] else None
         self.densitycol = settings["Solar"]["densitycol"] if "densitycol" in settings["Solar"] else None
         self.fractioncols = settings["Solar"]["fractioncols"] if "fractioncols" in settings["Solar"] else None
+        self.layout = settings["Solar"]["layout"] if "layout" in settings["Solar"] else None
 
         self.spectra = settings["Solar"]["spectra"] if "spectra" in settings["Solar"] else None
 

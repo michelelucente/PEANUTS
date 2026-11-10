@@ -57,6 +57,20 @@ run_peanuts.py -f <yaml_file>
 
 where the given YAML file determines the specific computation to perform.
 
+Solar models
+------------
+
+`SolarModel(solar_model_file, flux_file=None, ..., layout=None)` reads the radial profiles (production fractions of each neutrino source and electron density) and the total fluxes of a standard solar model. The column layout is detected from the file name or selected with `layout`:
+
+| layout | files | shipped in `Data/` |
+|---|---|---|
+| `"sf3"` | B23 / SF-III (Herrera & Serenelli, [10.5281/zenodo.10822316](https://doi.org/10.5281/zenodo.10822316)): `struct+nu_SF3_<composition>.dat`, fluxes from `fluxes_SF3_<composition>.dat` in the same directory; compositions GS98, AGSS09, C11, AAG21, MB22m, MB22p | `B23_SF3/`: GS98, AGSS09 (source, hashes and licence in `Data/B23_SF3/README.md`) |
+| `"b16"` | B16 (Vinyoles et al. 2017): `nudistr_b16_<composition>.dat` with `fluxes_b16.dat` | GS98, AGSS09met (default model: AGSS09met) |
+| `"bs2005"` | BS05 (Bahcall, Serenelli & Basu 2005): `bs2005<...>flux.dat` | OP, AGS-OP |
+| `"bp00"` | BP00 (Bahcall, Pinsonneault & Basu 2001): `bp00flux.dat` | yes |
+
+For example, `SolarModel("Data/B23_SF3/struct+nu_SF3_GS98.dat")`, or in a YAML file `Solar: {solar_model: Data/B23_SF3/struct+nu_SF3_GS98.dat}` (optionally `layout: sf3`). A file of any other layout is read with the explicit `fluxrows`, `fluxcols`, `fluxscale`, `distrow`, `radiuscol`, `densitycol` and `fractioncols`.
+
 Tests
 -----
 

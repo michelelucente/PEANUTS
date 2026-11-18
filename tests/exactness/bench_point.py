@@ -12,7 +12,9 @@ Pearth_integrated call, the solar model columns fetched per solar_weights call.
               each of the six continuous sources and the three line energies (Oscillations_Borexino.cpp)
 
 Usage: bench_point.py <peanuts root> <sno|borexino> [--scale F] [--exposure-dir DIR] [--points N] [--out file.npz]
+                      [--solar-model FILE]
 --scale F multiplies the number of energies and nodes (F < 1 for a quick local estimate).
+--solar-model FILE reads that solar model (default: the SolarModel() default, B16-AGSS09met).
 """
 
 import argparse, os, sys, time
@@ -25,13 +27,14 @@ ap.add_argument("--scale", type=float, default=1.0)
 ap.add_argument("--exposure-dir", default=None)
 ap.add_argument("--points", type=int, default=2)
 ap.add_argument("--out", default=None)
+ap.add_argument("--solar-model", default=None)
 args = ap.parse_args()
 
 sys.path.insert(0, os.path.abspath(args.root))
 import peanuts
 from peanuts.solar import solar_flux_mass
 
-sm = peanuts.SolarModel()
+sm = peanuts.SolarModel(solar_model_file=args.solar_model)
 ed = peanuts.EarthDensity()
 
 def solar_weights(th12, th13, dm21, dm3l, E, frac):

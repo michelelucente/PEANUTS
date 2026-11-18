@@ -56,8 +56,9 @@ if settings.solar:
 
   # Import data from solar model and spectrum files
   solar_model = SolarModel(solar_model_file=settings.solar_file, flux_file=settings.flux_file, spectrum_files=settings.spectra,
-                           fluxrows=settings.fluxrows, fluxcols=settings.fluxcols, distrow=settings.distrow,
-                           radiuscol=settings.radiuscol, densitycol=settings.densitycol, fractioncols=settings.fractioncols)
+                           fluxrows=settings.fluxrows, fluxcols=settings.fluxcols, fluxscale=settings.fluxscale, distrow=settings.distrow,
+                           radiuscol=settings.radiuscol, densitycol=settings.densitycol, fractioncols=settings.fractioncols,
+                           layout=settings.layout)
 
 if settings.earth or settings.vacuum:
 
